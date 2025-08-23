@@ -1,0 +1,144 @@
+INFO:     Will watch for changes in these directories: ['/Users/yukwanwu/Desktop/try/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [10768] using StatReload
+INFO:     Started server process [10771]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'core/config.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [10771]
+INFO:     Started server process [18301]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "PUT /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "PUT /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "PUT /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     113.252.117.215:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     14.0.156.95:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     14.0.156.95:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     14.0.156.95:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     14.0.156.95:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK
+INFO:     14.0.156.95:0 - "GET /api/v1/profiles/me HTTP/1.1" 200 OK

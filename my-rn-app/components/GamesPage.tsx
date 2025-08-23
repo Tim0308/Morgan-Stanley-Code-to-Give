@@ -1,0 +1,315 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+export default function GamesPage() {
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.pageTitle}>Games</Text>
+        <Ionicons name="game-controller" size={24} color="#666" />
+      </View>
+
+      {/* Weekly Challenge */}
+      <View style={styles.weeklyChallenge}>
+        <View style={styles.challengeHeader}>
+          <Text style={styles.challengeTitle}>Weekly Challenge</Text>
+          <View style={styles.completedGames}>
+            <Text style={styles.completedNumber}>5</Text>
+            <Text style={styles.completedText}>games completed</Text>
+          </View>
+        </View>
+
+        <View style={styles.challengeCard}>
+          <View style={styles.challengeCardHeader}>
+            <Text style={styles.challengeName}>Family Reading Marathon</Text>
+            <View style={styles.difficultyBadge}>
+              <Text style={styles.difficultyText}>Medium</Text>
+            </View>
+          </View>
+
+          <Text style={styles.challengeDescription}>
+            Read together for 30 minutes every day this week.{'\n'}
+            Parent and child take turns reading paragraphs.
+          </Text>
+
+          <View style={styles.progressSection}>
+            <Text style={styles.progressLabel}>Progress</Text>
+            <Text style={styles.progressText}>4/7 days</Text>
+          </View>
+
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: '57%' }]} />
+          </View>
+
+          <View style={styles.challengeFooter}>
+            <View style={styles.challengeStats}>
+              <View style={styles.statItem}>
+                <Ionicons name="people" size={16} color="#666" />
+                <Text style={styles.statText}>23 families</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Ionicons name="time" size={16} color="#666" />
+                <Text style={styles.statText}>3 days left</Text>
+              </View>
+            </View>
+            
+            <TouchableOpacity style={styles.playButton}>
+              <Ionicons name="play" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      {/* Extra Games */}
+      <View style={styles.extraGames}>
+        <Text style={styles.sectionTitle}>Extra Games</Text>
+
+        <View style={styles.gameCard}>
+          <View style={styles.gameIcon}>
+            <Ionicons name="search" size={24} color="#666" />
+          </View>
+          <View style={styles.gameInfo}>
+            <Text style={styles.gameName}>Word Detective</Text>
+            <Text style={styles.gameDescription}>
+              Find hidden words in picture scenes together
+            </Text>
+            <View style={styles.gameTime}>
+              <Ionicons name="time" size={14} color="#666" />
+              <Text style={styles.timeText}>10 mins</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.gamePlayButton}>
+            <Ionicons name="play" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.gameCard}>
+          <View style={styles.gameIcon}>
+            <Text style={styles.gameEmoji}>🏃‍♂️</Text>
+          </View>
+          <View style={styles.gameInfo}>
+            <Text style={styles.gameName}>Alphabet Race</Text>
+            <Text style={styles.gameDescription}>
+              Race to find objects starting with each letter
+            </Text>
+            <View style={styles.gameTime}>
+              <Ionicons name="time" size={14} color="#666" />
+              <Text style={styles.timeText}>15 mins</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.gamePlayButton}>
+            <Ionicons name="play" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.spacer} />
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+  },
+  pageTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  weeklyChallenge: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  challengeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  challengeTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  completedGames: {
+    alignItems: 'flex-end',
+  },
+  completedNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#22c55e',
+  },
+  completedText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  challengeCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  challengeCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  challengeName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  difficultyBadge: {
+    backgroundColor: '#1a1a2e',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  difficultyText: {
+    fontSize: 12,
+    color: 'white',
+    fontWeight: '500',
+  },
+  challengeDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  progressSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressLabel: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 4,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#1a1a2e',
+    borderRadius: 4,
+  },
+  challengeFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  challengeStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  statText: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 4,
+  },
+  playButton: {
+    backgroundColor: '#1a1a2e',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  extraGames: {
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  gameCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderStyle: 'dashed',
+  },
+  gameIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f3f4f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  gameEmoji: {
+    fontSize: 24,
+  },
+  gameInfo: {
+    flex: 1,
+  },
+  gameName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  gameDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  gameTime: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 4,
+  },
+  gamePlayButton: {
+    backgroundColor: '#1a1a2e',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  spacer: {
+    height: 20,
+  },
+}); 
