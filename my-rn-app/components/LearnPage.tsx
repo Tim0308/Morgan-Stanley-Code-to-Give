@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { api, BookletWithModules, UserProfile } from '../lib/api';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { api, BookletWithModules, UserProfile } from "../lib/api";
 
 interface Task {
-  type: 'pen-paper' | 'app';
+  type: "pen-paper" | "app";
   label: string;
   icon: string;
   actionIcon?: string;
-  status: 'not_started' | 'in_progress' | 'completed';
+  status: "not_started" | "in_progress" | "completed";
 }
 
 interface WorkItem {
@@ -18,11 +25,11 @@ interface WorkItem {
   date: string;
   tasks: Task[];
   backgroundColor: string;
-  status: 'current' | 'completed';
+  status: "current" | "completed";
 }
 
 export default function LearnPage() {
-  const [selectedTab, setSelectedTab] = useState('Homework');
+  const [selectedTab, setSelectedTab] = useState("Homework");
   const [booklets, setBooklets] = useState<BookletWithModules[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +46,7 @@ export default function LearnPage() {
 
       // Get user profile to get children
       const userProfile: UserProfile = await api.getUserProfile();
-      
+
       if (!userProfile.children || userProfile.children.length === 0) {
         // No children found, show empty state
         setBooklets([]);
@@ -54,10 +61,9 @@ export default function LearnPage() {
       // Get booklets with activities
       const bookletsData = await api.getBooklets(firstChild.id);
       setBooklets(bookletsData || []);
-
     } catch (err) {
-      console.error('Error loading learn data:', err);
-      setError('Failed to load learning materials');
+      console.error("Error loading learn data:", err);
+      setError("Failed to load learning materials");
       setBooklets([]);
     } finally {
       setLoading(false);
@@ -67,37 +73,42 @@ export default function LearnPage() {
   // Transform booklets into work items
   const generateWorkItems = (): WorkItem[] => {
     const workItems: WorkItem[] = [];
-    
+
     booklets.forEach((booklet) => {
       booklet.modules.forEach((module) => {
         module.activities.forEach((activity) => {
           // Convert activity to work item
           const tasks: Task[] = [
             {
-              type: activity.type === 'pen_paper' ? 'pen-paper' : 'app',
-              label: activity.type === 'pen_paper' ? 'Pen & Paper Work' : 'In-App Task',
-              icon: activity.type === 'pen_paper' ? 'camera' : 'play-circle',
-              actionIcon: activity.type === 'pen_paper' ? 'camera' : 'play',
-              status: activity.status
-            }
+              type: activity.type === "pen_paper" ? "pen-paper" : "app",
+              label:
+                activity.type === "pen_paper"
+                  ? "Pen & Paper Work"
+                  : "In-App Task",
+              icon: activity.type === "pen_paper" ? "camera" : "play-circle",
+              actionIcon: activity.type === "pen_paper" ? "camera" : "play",
+              status: activity.status,
+            },
           ];
 
           const subjectColors: { [key: string]: string } = {
-            'Reading': '#f0f9ff',
-            'Math': '#fef3c7',
-            'Science': '#f0fdf4',
-            'Writing': '#faf5ff',
-            'default': '#f9fafb'
+            Reading: "#f0f9ff",
+            Math: "#fef3c7",
+            Science: "#f0fdf4",
+            Writing: "#faf5ff",
+            default: "#f9fafb",
           };
 
           workItems.push({
             id: activity.id,
-            subject: booklet.subject || 'Learning',
-            title: activity.title,
-            date: new Date().toLocaleDateString('en-GB'),
+            subject: booklet.subject || "Learning",
+            title: activity.title || `${booklet.title} - ${module.title}`,
+            date: new Date().toLocaleDateString("en-GB"),
             tasks,
-            backgroundColor: subjectColors[booklet.subject || 'default'] || subjectColors.default,
-            status: activity.status === 'completed' ? 'completed' : 'current'
+            backgroundColor:
+              subjectColors[booklet.subject || "default"] ||
+              subjectColors.default,
+            status: activity.status === "completed" ? "completed" : "current",
           });
         });
       });
@@ -107,8 +118,23 @@ export default function LearnPage() {
   };
 
   const workItems = generateWorkItems();
-  const currentWork = workItems.filter(item => item.status === 'current');
-  const completedWork = workItems.filter(item => item.status === 'completed');
+
+  // Limit current work to 3 items, prioritize in_progress first, then not_started
+  const allCurrentWork = workItems.filter((item) => item.status === "current");
+  const inProgressWork = allCurrentWork.filter(
+    (item) => item.tasks[0].status === "in_progress"
+  );
+  const notStartedWork = allCurrentWork.filter(
+    (item) => item.tasks[0].status === "not_started"
+  );
+
+  // Take up to 3 current work items (prioritize in_progress)
+  const currentWork = [
+    ...inProgressWork.slice(0, 2), // Up to 2 in-progress items
+    ...notStartedWork.slice(0, 3 - Math.min(2, inProgressWork.length)), // Fill remaining with not-started
+  ];
+
+  const completedWork = workItems.filter((item) => item.status === "completed");
 
   if (loading) {
     return (
@@ -140,37 +166,34 @@ export default function LearnPage() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.pageTitle}>Learn</Text>
-      
+
       {/* Homework/Materials Toggle */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[
-            styles.tab,
-            selectedTab === 'Homework' && styles.selectedTab,
-          ]}
-          onPress={() => setSelectedTab('Homework')}
+          style={[styles.tab, selectedTab === "Homework" && styles.selectedTab]}
+          onPress={() => setSelectedTab("Homework")}
         >
           <Text
             style={[
               styles.tabText,
-              selectedTab === 'Homework' && styles.selectedTabText,
+              selectedTab === "Homework" && styles.selectedTabText,
             ]}
           >
             Homework
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[
             styles.tab,
-            selectedTab === 'Materials' && styles.selectedTab,
+            selectedTab === "Materials" && styles.selectedTab,
           ]}
-          onPress={() => setSelectedTab('Materials')}
+          onPress={() => setSelectedTab("Materials")}
         >
           <Text
             style={[
               styles.tabText,
-              selectedTab === 'Materials' && styles.selectedTabText,
+              selectedTab === "Materials" && styles.selectedTabText,
             ]}
           >
             Materials
@@ -178,7 +201,7 @@ export default function LearnPage() {
         </TouchableOpacity>
       </View>
 
-      {selectedTab === 'Homework' ? (
+      {selectedTab === "Homework" ? (
         <View>
           {/* Current Work Section */}
           <View style={styles.sectionHeader}>
@@ -190,35 +213,60 @@ export default function LearnPage() {
             <View style={styles.emptyState}>
               <Ionicons name="checkmark-circle" size={48} color="#22c55e" />
               <Text style={styles.emptyStateText}>All caught up!</Text>
-              <Text style={styles.emptyStateSubtext}>No pending homework at the moment</Text>
+              <Text style={styles.emptyStateSubtext}>
+                No pending homework at the moment
+              </Text>
             </View>
           ) : (
             currentWork.map((item) => (
-              <View key={item.id} style={[styles.workCard, { backgroundColor: item.backgroundColor }]}>
+              <View
+                key={item.id}
+                style={[
+                  styles.workCard,
+                  { backgroundColor: item.backgroundColor },
+                ]}
+              >
                 <View style={styles.workHeader}>
                   <View style={styles.subjectBadge}>
                     <Text style={styles.subjectText}>{item.subject}</Text>
                   </View>
                   <Text style={styles.workDate}>{item.date}</Text>
                 </View>
-                
+
                 <Text style={styles.workTitle}>{item.title}</Text>
-                
+
                 <View style={styles.tasksContainer}>
                   {item.tasks.map((task, index) => (
                     <View key={index} style={styles.taskItem}>
                       <View style={styles.taskInfo}>
-                        <Ionicons name={task.icon as any} size={16} color="#666" />
+                        <Ionicons
+                          name={task.icon as any}
+                          size={16}
+                          color="#666"
+                        />
                         <Text style={styles.taskLabel}>{task.label}</Text>
                       </View>
                       <TouchableOpacity style={styles.taskAction}>
-                        <Ionicons name={task.actionIcon as any} size={16} color="#1a1a2e" />
+                        <Ionicons
+                          name={task.actionIcon as any}
+                          size={16}
+                          color="#1a1a2e"
+                        />
                       </TouchableOpacity>
                     </View>
                   ))}
                 </View>
               </View>
             ))
+          )}
+
+          {/* Show More Current Work Button */}
+          {allCurrentWork.length > 3 && (
+            <TouchableOpacity style={styles.showMoreButton}>
+              <Text style={styles.showMoreText}>
+                Show More Assignments ({allCurrentWork.length - 3} more)
+              </Text>
+            </TouchableOpacity>
           )}
 
           {/* Completed Work Section */}
@@ -230,22 +278,38 @@ export default function LearnPage() {
               </View>
 
               {completedWork.slice(0, 3).map((item) => (
-                <View key={item.id} style={[styles.workCard, styles.completedCard]}>
+                <View
+                  key={item.id}
+                  style={[styles.workCard, styles.completedCard]}
+                >
                   <View style={styles.workHeader}>
                     <View style={[styles.subjectBadge, styles.completedBadge]}>
-                      <Text style={[styles.subjectText, styles.completedText]}>{item.subject}</Text>
+                      <Text style={[styles.subjectText, styles.completedText]}>
+                        {item.subject}
+                      </Text>
                     </View>
                     <Text style={styles.workDate}>{item.date}</Text>
                   </View>
-                  
-                  <Text style={[styles.workTitle, styles.completedTitle]}>{item.title}</Text>
-                  
+
+                  <Text style={[styles.workTitle, styles.completedTitle]}>
+                    {item.title}
+                  </Text>
+
                   <View style={styles.completedIndicator}>
                     <Ionicons name="checkmark" size={16} color="#22c55e" />
                     <Text style={styles.completedLabel}>Completed</Text>
                   </View>
                 </View>
               ))}
+
+              {/* Show More Completed Work Button */}
+              {completedWork.length > 3 && (
+                <TouchableOpacity style={styles.showMoreButton}>
+                  <Text style={styles.showMoreText}>
+                    Show More ({completedWork.length - 3} more)
+                  </Text>
+                </TouchableOpacity>
+              )}
 
               {completedWork.length > 3 && (
                 <TouchableOpacity style={styles.showMoreButton}>
@@ -264,34 +328,62 @@ export default function LearnPage() {
             <View style={styles.emptyState}>
               <Ionicons name="library-outline" size={48} color="#9ca3af" />
               <Text style={styles.emptyStateText}>No materials available</Text>
-              <Text style={styles.emptyStateSubtext}>Learning materials will appear here</Text>
+              <Text style={styles.emptyStateSubtext}>
+                Learning materials will appear here
+              </Text>
             </View>
           ) : (
-            booklets.map((booklet) => (
-              <View key={booklet.id} style={styles.materialCard}>
-                <View style={styles.materialHeader}>
-                  <Ionicons name="book" size={24} color="#8b5cf6" />
-                  <View style={styles.materialInfo}>
-                    <Text style={styles.materialTitle}>{booklet.title}</Text>
-                    {booklet.subtitle && (
-                      <Text style={styles.materialSubtitle}>{booklet.subtitle}</Text>
-                    )}
+            booklets.slice(0, 3).map(
+              (
+                booklet // Limit to first 3 booklets
+              ) => (
+                <View key={booklet.id} style={styles.materialCard}>
+                  <View style={styles.materialHeader}>
+                    <Ionicons name="book" size={24} color="#8b5cf6" />
+                    <View style={styles.materialInfo}>
+                      <Text style={styles.materialTitle}>{booklet.title}</Text>
+                      {booklet.subtitle && (
+                        <Text style={styles.materialSubtitle}>
+                          {booklet.subtitle}
+                        </Text>
+                      )}
+                    </View>
+                    <View style={styles.materialBadge}>
+                      <Text style={styles.materialBadgeText}>
+                        {booklet.subject}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.materialBadge}>
-                    <Text style={styles.materialBadgeText}>{booklet.subject}</Text>
-                  </View>
+
+                  <Text style={styles.moduleCount}>
+                    {booklet.modules.length} modules •{" "}
+                    {booklet.modules.reduce(
+                      (acc, mod) => acc + mod.activities.length,
+                      0
+                    )}{" "}
+                    activities
+                  </Text>
+
+                  <TouchableOpacity style={styles.viewMaterialButton}>
+                    <Text style={styles.viewMaterialText}>View Material</Text>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color="#8b5cf6"
+                    />
+                  </TouchableOpacity>
                 </View>
-                
-                <Text style={styles.moduleCount}>
-                  {booklet.modules.length} modules • {booklet.modules.reduce((acc, mod) => acc + mod.activities.length, 0)} activities
-                </Text>
-                
-                <TouchableOpacity style={styles.viewMaterialButton}>
-                  <Text style={styles.viewMaterialText}>View Material</Text>
-                  <Ionicons name="chevron-forward" size={16} color="#8b5cf6" />
-                </TouchableOpacity>
-              </View>
-            ))
+              )
+            )
+          )}
+
+          {/* Show More Materials Button */}
+          {booklets.length > 3 && (
+            <TouchableOpacity style={styles.showMoreButton}>
+              <Text style={styles.showMoreText}>
+                Show More Materials ({booklets.length - 3} more)
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
       )}
@@ -302,53 +394,53 @@ export default function LearnPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 20,
   },
   pageTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 20,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 50,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 50,
   },
   errorText: {
     marginTop: 12,
     marginBottom: 20,
     fontSize: 16,
-    color: '#ef4444',
-    textAlign: 'center',
+    color: "#ef4444",
+    textAlign: "center",
   },
   retryButton: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: "#8b5cf6",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    flexDirection: "row",
+    backgroundColor: "#f3f4f6",
     borderRadius: 12,
     padding: 4,
     marginBottom: 20,
@@ -357,11 +449,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   selectedTab: {
-    backgroundColor: 'white',
-    shadowColor: '#000',
+    backgroundColor: "white",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -369,23 +461,23 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#666',
+    fontWeight: "500",
+    color: "#666",
   },
   selectedTabText: {
-    color: '#1a1a2e',
-    fontWeight: '600',
+    color: "#1a1a2e",
+    fontWeight: "600",
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     marginTop: 8,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginLeft: 8,
   },
   workCard: {
@@ -393,126 +485,126 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
   },
   completedCard: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     opacity: 0.8,
   },
   workHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   subjectBadge: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: "#1a1a2e",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   completedBadge: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: "#e5e7eb",
   },
   subjectText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: 'white',
+    fontWeight: "600",
+    color: "white",
   },
   completedText: {
-    color: '#666',
+    color: "#666",
   },
   workDate: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
   },
   workTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 16,
   },
   completedTitle: {
-    color: '#666',
+    color: "#666",
   },
   tasksContainer: {
     gap: 8,
   },
   taskItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
     padding: 12,
     borderRadius: 8,
   },
   taskInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   taskLabel: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginLeft: 8,
   },
   taskAction: {
     padding: 4,
   },
   completedIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 8,
   },
   completedLabel: {
     fontSize: 14,
-    color: '#22c55e',
+    color: "#22c55e",
     marginLeft: 4,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   showMoreButton: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     borderRadius: 8,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
     marginBottom: 20,
   },
   showMoreText: {
     fontSize: 14,
-    color: '#374151',
-    fontWeight: '500',
+    color: "#374151",
+    fontWeight: "500",
   },
   emptyState: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 40,
   },
   emptyStateText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#9ca3af',
+    fontWeight: "600",
+    color: "#9ca3af",
     marginTop: 12,
     marginBottom: 4,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: '#9ca3af',
-    textAlign: 'center',
+    color: "#9ca3af",
+    textAlign: "center",
   },
   materialsSection: {
     marginBottom: 20,
   },
   materialCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
   },
   materialHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   materialInfo: {
@@ -521,42 +613,42 @@ const styles = StyleSheet.create({
   },
   materialTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   materialSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 2,
   },
   materialBadge: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: "#8b5cf6",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   materialBadgeText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: 'white',
+    fontWeight: "600",
+    color: "white",
   },
   moduleCount: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 12,
   },
   viewMaterialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f8f9fa",
     paddingVertical: 8,
     borderRadius: 8,
   },
   viewMaterialText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#8b5cf6',
+    fontWeight: "500",
+    color: "#8b5cf6",
     marginRight: 4,
   },
-}); 
+});

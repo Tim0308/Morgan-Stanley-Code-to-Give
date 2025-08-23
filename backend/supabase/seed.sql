@@ -12,21 +12,60 @@ INSERT INTO booklets (id, title, subtitle, week_start, week_end, locale, total_m
   ('660e8400-e29b-41d4-a716-446655440001', 'Alphabet Time', 'Learning Letters A-Z', '2025-01-06', '2025-01-12', 'en', 26, 'Reading'),
   ('660e8400-e29b-41d4-a716-446655440002', 'Vocabulary Time', 'Building Word Knowledge', '2025-01-13', '2025-01-19', 'en', 20, 'Reading'),
   ('660e8400-e29b-41d4-a716-446655440003', 'Sight Words Time', 'Common Word Recognition', '2025-01-20', '2025-01-26', 'en', 15, 'Reading'),
-  ('660e8400-e29b-41d4-a716-446655440004', 'Reading Time', 'Story Comprehension', '2025-01-27', '2025-02-02', 'en', 24, 'Reading');
+  ('660e8400-e29b-41d4-a716-446655440004', 'Reading Time', 'Story Comprehension', '2025-01-27', '2025-02-02', 'en', 24, 'Reading'),
+  ('660e8400-e29b-41d4-a716-446655440005', 'Phonics Time', 'Sound and Letter Connections', '2025-02-03', '2025-02-09', 'en', 18, 'Reading');
 
 -- Sample Modules for Alphabet Time
 INSERT INTO modules (id, booklet_id, idx, title, description) VALUES
   ('770e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 1, 'Letters A-E', 'Introduction to first five letters'),
   ('770e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440001', 2, 'Letters F-J', 'Learning letters F through J'),
   ('770e8400-e29b-41d4-a716-446655440003', '660e8400-e29b-41d4-a716-446655440001', 3, 'Letters K-O', 'Middle alphabet letters'),
-  ('770e8400-e29b-41d4-a716-446655440004', '660e8400-e29b-41d4-a716-446655440001', 12, 'Letters L-P Review', 'Review and practice');
+  ('770e8400-e29b-41d4-a716-446655440004', '660e8400-e29b-41d4-a716-446655440001', 4, 'Letters P-T', 'More alphabet letters'),
+  ('770e8400-e29b-41d4-a716-446655440005', '660e8400-e29b-41d4-a716-446655440001', 5, 'Letters U-Z', 'Final alphabet letters'),
+  
+  -- Sample Modules for Vocabulary Time
+  ('770e8400-e29b-41d4-a716-446655440011', '660e8400-e29b-41d4-a716-446655440002', 1, 'Family Words', 'Learning family member names'),
+  ('770e8400-e29b-41d4-a716-446655440012', '660e8400-e29b-41d4-a716-446655440002', 2, 'Animal Words', 'Common animal vocabulary'),
+  ('770e8400-e29b-41d4-a716-446655440013', '660e8400-e29b-41d4-a716-446655440002', 3, 'Color Words', 'Names of different colors'),
+  
+  -- Sample Modules for Sight Words Time
+  ('770e8400-e29b-41d4-a716-446655440021', '660e8400-e29b-41d4-a716-446655440003', 1, 'Basic Sight Words', 'The, and, to, a'),
+  ('770e8400-e29b-41d4-a716-446655440022', '660e8400-e29b-41d4-a716-446655440003', 2, 'Common Sight Words', 'You, I, it, in'),
+  
+  -- Sample Modules for Reading Time
+  ('770e8400-e29b-41d4-a716-446655440031', '660e8400-e29b-41d4-a716-446655440004', 1, 'Short Stories', 'Simple story reading'),
+  ('770e8400-e29b-41d4-a716-446655440032', '660e8400-e29b-41d4-a716-446655440004', 2, 'Picture Books', 'Reading with pictures'),
+  
+  -- Sample Modules for Phonics Time
+  ('770e8400-e29b-41d4-a716-446655440041', '660e8400-e29b-41d4-a716-446655440005', 1, 'Letter Sounds', 'Basic phonetic sounds'),
+  ('770e8400-e29b-41d4-a716-446655440042', '660e8400-e29b-41d4-a716-446655440005', 2, 'Blending Sounds', 'Combining sounds to make words');
 
 -- Sample Activities
 INSERT INTO activities (id, module_id, type, points, est_minutes, instructions, media) VALUES
+  -- Alphabet Time activities
   ('880e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440001', 'in_app', 5, 10, 'Practice letter recognition in the app', '[]'),
   ('880e8400-e29b-41d4-a716-446655440002', '770e8400-e29b-41d4-a716-446655440001', 'pen_paper', 5, 15, 'Trace letters A-E on the worksheet', '[]'),
   ('880e8400-e29b-41d4-a716-446655440003', '770e8400-e29b-41d4-a716-446655440002', 'in_app', 5, 10, 'Letter sound matching game', '[]'),
-  ('880e8400-e29b-41d4-a716-446655440004', '770e8400-e29b-41d4-a716-446655440003', 'audio', 10, 20, 'Listen to animal sounds exercise', '[]');
+  ('880e8400-e29b-41d4-a716-446655440004', '770e8400-e29b-41d4-a716-446655440003', 'audio', 10, 20, 'Listen to animal sounds exercise', '[]'),
+  ('880e8400-e29b-41d4-a716-446655440005', '770e8400-e29b-41d4-a716-446655440004', 'pen_paper', 5, 15, 'Write letters P-T practice', '[]'),
+  ('880e8400-e29b-41d4-a716-446655440006', '770e8400-e29b-41d4-a716-446655440005', 'in_app', 5, 10, 'Complete the alphabet game', '[]'),
+  
+  -- Vocabulary Time activities
+  ('880e8400-e29b-41d4-a716-446655440011', '770e8400-e29b-41d4-a716-446655440011', 'in_app', 5, 10, 'Family member matching game', '[]'),
+  ('880e8400-e29b-41d4-a716-446655440012', '770e8400-e29b-41d4-a716-446655440012', 'pen_paper', 5, 15, 'Draw and label animals', '[]'),
+  ('880e8400-e29b-41d4-a716-446655440013', '770e8400-e29b-41d4-a716-446655440013', 'in_app', 5, 10, 'Color identification quiz', '[]'),
+  
+  -- Sight Words activities
+  ('880e8400-e29b-41d4-a716-446655440021', '770e8400-e29b-41d4-a716-446655440021', 'in_app', 5, 10, 'Basic sight word recognition', '[]'),
+  ('880e8400-e29b-41d4-a716-446655440022', '770e8400-e29b-41d4-a716-446655440022', 'pen_paper', 5, 15, 'Write common sight words', '[]'),
+  
+  -- Reading Time activities  
+  ('880e8400-e29b-41d4-a716-446655440031', '770e8400-e29b-41d4-a716-446655440031', 'audio', 10, 20, 'Listen to short story', '[]'),
+  ('880e8400-e29b-41d4-a716-446655440032', '770e8400-e29b-41d4-a716-446655440032', 'in_app', 5, 15, 'Picture book comprehension', '[]'),
+  
+  -- Phonics Time activities
+  ('880e8400-e29b-41d4-a716-446655440041', '770e8400-e29b-41d4-a716-446655440041', 'audio', 10, 15, 'Letter sound practice', '[]'),
+  ('880e8400-e29b-41d4-a716-446655440042', '770e8400-e29b-41d4-a716-446655440042', 'in_app', 5, 10, 'Sound blending exercise', '[]');
 
 -- Sample Badges
 INSERT INTO badges (id, name, criteria_json, icon_url) VALUES
