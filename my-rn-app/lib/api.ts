@@ -1058,6 +1058,38 @@ export const api = {
     }
   },
 
+  // Delete proof image for pen & paper activities
+  async deleteProofImage(activityId: string, childId: string) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Mock proof deletion (API disabled)');
+      return { message: 'Proof deleted successfully' };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/content/delete-proof?activity_id=${activityId}&child_id=${childId}`;
+      console.log('🌐 Deleting proof image from:', url);
+
+      const headers = await getAuthHeaders();
+
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Proof image deleted successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error deleting proof image:', error);
+      throw error;
+    }
+  },
+
   // Get user bundle (all data for Home, Learn, Token pages)
   async getUserBundle() {
     if (DISABLE_API_CALLS) {

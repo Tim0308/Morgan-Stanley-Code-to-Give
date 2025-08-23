@@ -192,3 +192,30 @@ async def upload_proof_image(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to upload proof image"
         )
+
+
+@router.delete("/delete-proof")
+async def delete_proof_image(
+    activity_id: str = Query(..., description="Activity ID"),
+    child_id: str = Query(..., description="Child ID"),
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """Delete proof image for pen & paper activities"""
+    try:
+        service = ContentService()
+        
+        # Delete proof image and remove URL from database
+        await service.delete_proof_image(
+            activity_id=activity_id,
+            child_id=child_id,
+            user_id=current_user.user_id
+        )
+        
+        return {"message": "Proof image deleted successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to delete proof image: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete proof image"
+        )

@@ -7,6 +7,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image,
+  Modal,
+  Dimensions,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -40,6 +44,8 @@ export default function LearnPage() {
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [showCompletedWork, setShowCompletedWork] = useState(false);
   const [uploadingProof, setUploadingProof] = useState<string | null>(null);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
 
   // Use cache instead of local state
   const {
@@ -83,25 +89,48 @@ export default function LearnPage() {
     if (taskType !== "pen-paper") return;
 
     try {
-      // For now, show an alert with instructions
-      Alert.alert(
-        "Upload Proof of Work",
-        "Take a photo of your completed pen & paper work to submit proof.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Take Photo",
-            onPress: () => openCamera(activityId),
-          },
-          {
-            text: "Choose from Gallery",
-            onPress: () => openImagePicker(activityId),
-          },
-        ]
-      );
+      // Check if proof already exists
+      const existingProof = getExistingProofUrl(activityId);
+
+      if (existingProof) {
+        // Show options to view or delete existing proof
+        Alert.alert(
+          "Proof Already Uploaded",
+          "You have already uploaded proof for this activity. What would you like to do?",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "View Image",
+              onPress: () => viewProofImage(existingProof),
+            },
+            {
+              text: "Delete & Upload New",
+              style: "destructive",
+              onPress: () => deleteProofImage(activityId),
+            },
+          ]
+        );
+      } else {
+        // Show upload options
+        Alert.alert(
+          "Upload Proof of Work",
+          "Take a photo of your completed pen & paper work to submit proof.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Take Photo",
+              onPress: () => openCamera(activityId),
+            },
+            {
+              text: "Choose from Gallery",
+              onPress: () => openImagePicker(activityId),
+            },
+          ]
+        );
+      }
     } catch (error) {
       console.error("Camera action error:", error);
-      Alert.alert("Error", "Could not open camera. Please try again.");
+      Alert.alert("Error", "Could not process request. Please try again.");
     }
   };
 
@@ -243,6 +272,102 @@ export default function LearnPage() {
     }
   };
 
+  // Helper function to get existing proof URL for an activity
+  const getExistingProofUrl = (activityId: string): string | null => {
+    if (!selectedChildId) return null;
+
+    const currentBooklets = getBookletsForChild(selectedChildId);
+    for (const booklet of currentBooklets) {
+      for (const module of booklet.modules) {
+        for (const activity of module.activities) {
+          if (activity.id === activityId && activity.progress?.proof_url) {
+            return activity.progress.proof_url;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  // Function to view proof image in modal
+  const viewProofImage = (imageUrl: string) => {
+    if (imageUrl && imageUrl.trim()) {
+      setSelectedImageUrl(imageUrl);
+      setImageModalVisible(true);
+    } else {
+      Alert.alert("Error", "Invalid image URL");
+    }
+  };
+
+  // Function to delete proof image
+  const deleteProofImage = async (activityId: string) => {
+    if (!selectedChildId) return;
+
+    try {
+      setUploadingProof(activityId);
+
+      // Call API to delete proof
+      await api.deleteProofImage(activityId, selectedChildId);
+
+      // Update cache to remove proof URL
+      const currentBooklets = getBookletsForChild(selectedChildId);
+      const updatedBooklets = currentBooklets.map((booklet: any) => ({
+        ...booklet,
+        modules: booklet.modules.map((module: any) => ({
+          ...module,
+          activities: module.activities.map((activity: any) => {
+            if (activity.id === activityId) {
+              return {
+                ...activity,
+                progress: {
+                  ...activity.progress,
+                  proof_url: null,
+                },
+              };
+            }
+            return activity;
+          }),
+        })),
+      }));
+
+      // Update cache with new data
+      updateCache({
+        booklets: [
+          ...booklets.filter((b: any) => b.child_id !== selectedChildId),
+          ...updatedBooklets.map((b: any) => ({
+            ...b,
+            child_id: selectedChildId,
+          })),
+        ],
+      });
+
+      // Show success message and then show upload options
+      Alert.alert(
+        "Proof Deleted!",
+        "The proof image has been deleted successfully. You can now upload a new one.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Take Photo",
+            onPress: () => openCamera(activityId),
+          },
+          {
+            text: "Choose from Gallery",
+            onPress: () => openImagePicker(activityId),
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Delete proof error:", error);
+      Alert.alert(
+        "Delete Failed",
+        "Could not delete proof image. Please try again."
+      );
+    } finally {
+      setUploadingProof(null);
+    }
+  };
+
   // Transform booklets into work items
   const generateWorkItems = (): WorkItem[] => {
     const workItems: WorkItem[] = [];
@@ -343,191 +468,208 @@ export default function LearnPage() {
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.pageTitle}>Learn</Text>
+    <>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <Text style={styles.pageTitle}>Learn</Text>
 
-      {/* Homework/Materials Toggle */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === "Homework" && styles.selectedTab]}
-          onPress={() => setSelectedTab("Homework")}
-        >
-          <Text
+        {/* Homework/Materials Toggle */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
             style={[
-              styles.tabText,
-              selectedTab === "Homework" && styles.selectedTabText,
+              styles.tab,
+              selectedTab === "Homework" && styles.selectedTab,
             ]}
+            onPress={() => setSelectedTab("Homework")}
           >
-            Homework
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            selectedTab === "Materials" && styles.selectedTab,
-          ]}
-          onPress={() => setSelectedTab("Materials")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === "Materials" && styles.selectedTabText,
-            ]}
-          >
-            Materials
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {selectedTab === "Homework" ? (
-        <View>
-          {/* Homework Calendar Section */}
-          <View style={styles.calendarSection}>
-            <Text style={styles.calendarTitle}>Homework Calendar</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.calendarScroll}
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === "Homework" && styles.selectedTabText,
+              ]}
             >
-              <View style={styles.calendarContainer}>
-                <View style={[styles.weekCard, styles.completedWeek]}>
-                  <View style={styles.weekIcon}>
-                    <Ionicons name="checkmark" size={20} color="#ffffff" />
-                  </View>
-                  <Text style={styles.weekTitle}>Week 1</Text>
-                  <Text style={styles.weekDates}>12-18 Aug</Text>
-                  <Text style={styles.weekTasks}>2 tasks</Text>
-                </View>
+              Homework
+            </Text>
+          </TouchableOpacity>
 
-                <View style={[styles.weekCard, styles.currentWeek]}>
-                  <View style={styles.weekIconCurrent}>
-                    <Text style={styles.weekNumber}>2</Text>
-                  </View>
-                  <Text style={styles.weekTitle}>Week 2</Text>
-                  <Text style={styles.weekDates}>19-25 Aug</Text>
-                  <Text style={styles.weekTasks}>2 tasks</Text>
-                </View>
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              selectedTab === "Materials" && styles.selectedTab,
+            ]}
+            onPress={() => setSelectedTab("Materials")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === "Materials" && styles.selectedTabText,
+              ]}
+            >
+              Materials
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-                <View style={[styles.weekCard, styles.upcomingWeek]}>
-                  <View style={styles.weekIconUpcoming}>
-                    <Text style={styles.weekNumberUpcoming}>3</Text>
-                  </View>
-                  <Text style={styles.weekTitleUpcoming}>Week 3</Text>
-                  <Text style={styles.weekDatesUpcoming}>26 Aug - 1 Sep</Text>
-                  <Text style={styles.weekTasksUpcoming}>3 tasks</Text>
-                </View>
-
-                <View style={[styles.weekCard, styles.upcomingWeek]}>
-                  <View style={styles.weekIconUpcoming}>
-                    <Text style={styles.weekNumberUpcoming}>4</Text>
-                  </View>
-                  <Text style={styles.weekTitleUpcoming}>Week 4</Text>
-                  <Text style={styles.weekDatesUpcoming}>2-8 Sep</Text>
-                  <Text style={styles.weekTasksUpcoming}>2 tasks</Text>
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-
-          {/* Current Work Section */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="timer-outline" size={20} color="#f97316" />
-            <Text style={styles.sectionTitle}>Current Work</Text>
-          </View>
-
-          {currentWork.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="checkmark-circle" size={48} color="#22c55e" />
-              <Text style={styles.emptyStateText}>All caught up!</Text>
-              <Text style={styles.emptyStateSubtext}>
-                No pending homework at the moment
-              </Text>
-            </View>
-          ) : (
-            currentWork.map((item) => (
-              <View
-                key={item.id}
-                style={[
-                  styles.workCard,
-                  { backgroundColor: item.backgroundColor },
-                ]}
+        {selectedTab === "Homework" ? (
+          <View>
+            {/* Homework Calendar Section */}
+            <View style={styles.calendarSection}>
+              <Text style={styles.calendarTitle}>Homework Calendar</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.calendarScroll}
               >
-                <View style={styles.workHeader}>
-                  <View style={styles.subjectBadge}>
-                    <Text style={styles.subjectText}>{item.subject}</Text>
+                <View style={styles.calendarContainer}>
+                  <View style={[styles.weekCard, styles.completedWeek]}>
+                    <View style={styles.weekIcon}>
+                      <Ionicons name="checkmark" size={20} color="#ffffff" />
+                    </View>
+                    <Text style={styles.weekTitle}>Week 1</Text>
+                    <Text style={styles.weekDates}>12-18 Aug</Text>
+                    <Text style={styles.weekTasks}>2 tasks</Text>
                   </View>
-                  <Text style={styles.workDate}>{item.date}</Text>
+
+                  <View style={[styles.weekCard, styles.currentWeek]}>
+                    <View style={styles.weekIconCurrent}>
+                      <Text style={styles.weekNumber}>2</Text>
+                    </View>
+                    <Text style={styles.weekTitle}>Week 2</Text>
+                    <Text style={styles.weekDates}>19-25 Aug</Text>
+                    <Text style={styles.weekTasks}>2 tasks</Text>
+                  </View>
+
+                  <View style={[styles.weekCard, styles.upcomingWeek]}>
+                    <View style={styles.weekIconUpcoming}>
+                      <Text style={styles.weekNumberUpcoming}>3</Text>
+                    </View>
+                    <Text style={styles.weekTitleUpcoming}>Week 3</Text>
+                    <Text style={styles.weekDatesUpcoming}>26 Aug - 1 Sep</Text>
+                    <Text style={styles.weekTasksUpcoming}>3 tasks</Text>
+                  </View>
+
+                  <View style={[styles.weekCard, styles.upcomingWeek]}>
+                    <View style={styles.weekIconUpcoming}>
+                      <Text style={styles.weekNumberUpcoming}>4</Text>
+                    </View>
+                    <Text style={styles.weekTitleUpcoming}>Week 4</Text>
+                    <Text style={styles.weekDatesUpcoming}>2-8 Sep</Text>
+                    <Text style={styles.weekTasksUpcoming}>2 tasks</Text>
+                  </View>
                 </View>
+              </ScrollView>
+            </View>
 
-                <Text style={styles.workTitle}>{item.title}</Text>
+            {/* Current Work Section */}
+            <View style={styles.sectionHeader}>
+              <Ionicons name="timer-outline" size={20} color="#f97316" />
+              <Text style={styles.sectionTitle}>Current Work</Text>
+            </View>
 
-                <View style={styles.tasksContainer}>
-                  {item.tasks.map((task, index) => (
-                    <View
-                      key={index}
-                      style={[
-                        styles.taskItem,
-                        task.hasProof &&
-                          task.type === "pen-paper" &&
-                          styles.taskItemWithProof,
-                      ]}
-                    >
-                      <View style={styles.taskInfo}>
-                        <Ionicons
-                          name={task.icon as any}
-                          size={16}
-                          color={
-                            task.hasProof && task.type === "pen-paper"
-                              ? "#22c55e"
-                              : "#666"
-                          }
-                        />
-                        <Text
+            {currentWork.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="checkmark-circle" size={48} color="#22c55e" />
+                <Text style={styles.emptyStateText}>All caught up!</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  No pending homework at the moment
+                </Text>
+              </View>
+            ) : (
+              currentWork.map((item) => (
+                <View
+                  key={item.id}
+                  style={[
+                    styles.workCard,
+                    { backgroundColor: item.backgroundColor },
+                  ]}
+                >
+                  <View style={styles.workHeader}>
+                    <View style={styles.subjectBadge}>
+                      <Text style={styles.subjectText}>{item.subject}</Text>
+                    </View>
+                    <Text style={styles.workDate}>{item.date}</Text>
+                  </View>
+
+                  <Text style={styles.workTitle}>{item.title}</Text>
+
+                  <View style={styles.tasksContainer}>
+                    {item.tasks.map((task, index) => (
+                      <View
+                        key={index}
+                        style={[
+                          styles.taskItem,
+                          task.hasProof &&
+                            task.type === "pen-paper" &&
+                            styles.taskItemWithProof,
+                        ]}
+                      >
+                        <View style={styles.taskInfo}>
+                          <Ionicons
+                            name={task.icon as any}
+                            size={16}
+                            color={
+                              task.hasProof && task.type === "pen-paper"
+                                ? "#22c55e"
+                                : "#666"
+                            }
+                          />
+                          <Text
+                            style={[
+                              styles.taskLabel,
+                              task.hasProof &&
+                                task.type === "pen-paper" &&
+                                styles.taskLabelWithProof,
+                            ]}
+                          >
+                            {task.label}
+                          </Text>
+                          {task.hasProof && task.type === "pen-paper" && (
+                            <View style={styles.proofIndicator}>
+                              <Ionicons
+                                name="checkmark-circle"
+                                size={14}
+                                color="#22c55e"
+                              />
+                              <Text style={styles.proofText}>Pending</Text>
+                            </View>
+                          )}
+                        </View>
+                        <TouchableOpacity
                           style={[
-                            styles.taskLabel,
+                            styles.taskAction,
                             task.hasProof &&
                               task.type === "pen-paper" &&
-                              styles.taskLabelWithProof,
+                              styles.taskActionWithProof,
                           ]}
+                          onPress={() => handleCameraAction(item.id, task.type)}
+                          disabled={uploadingProof === item.id}
                         >
-                          {task.label}
-                        </Text>
-                        {task.hasProof && task.type === "pen-paper" && (
-                          <View style={styles.proofIndicator}>
+                          {uploadingProof === item.id ? (
+                            <ActivityIndicator size="small" color="#1a1a2e" />
+                          ) : (
                             <Ionicons
-                              name="checkmark-circle"
-                              size={14}
-                              color="#22c55e"
+                              name={
+                                task.hasProof && task.type === "pen-paper"
+                                  ? "image" // Show image icon when proof exists
+                                  : (task.actionIcon as any)
+                              }
+                              size={16}
+                              color={
+                                task.hasProof && task.type === "pen-paper"
+                                  ? "#22c55e" // Green for existing proof
+                                  : "#1a1a2e"
+                              }
                             />
-                            <Text style={styles.proofText}>Pending</Text>
-                          </View>
-                        )}
+                          )}
+                        </TouchableOpacity>
                       </View>
-                      <TouchableOpacity
-                        style={styles.taskAction}
-                        onPress={() => handleCameraAction(item.id, task.type)}
-                        disabled={uploadingProof === item.id}
-                      >
-                        {uploadingProof === item.id ? (
-                          <ActivityIndicator size="small" color="#1a1a2e" />
-                        ) : (
-                          <Ionicons
-                            name={task.actionIcon as any}
-                            size={16}
-                            color="#1a1a2e"
-                          />
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  ))}
+                    ))}
+                  </View>
                 </View>
-              </View>
-            ))
-          )}
+              ))
+            )}
 
-          {/* Show More Current Work Button */}
-          {/* {allCurrentWork.length > 3 && (
+            {/* Show More Current Work Button */}
+            {/* {allCurrentWork.length > 3 && (
             <TouchableOpacity style={styles.showMoreButton}>
               <Text style={styles.showMoreText}>
                 Show More Assignments ({allCurrentWork.length - 3} more)
@@ -535,129 +677,186 @@ export default function LearnPage() {
             </TouchableOpacity>
           )} */}
 
-          {/* Completed Work Section */}
-          {completedWork.length > 0 && (
-            <>
-              <TouchableOpacity
-                style={styles.sectionHeader}
-                onPress={() => setShowCompletedWork(!showCompletedWork)}
-              >
-                <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
-                <Text style={styles.sectionTitle}>Completed Work</Text>
-                <View style={styles.sectionToggle}>
-                  <Text style={styles.completedCount}>
-                    ({completedWork.length - 3})
-                  </Text>
-                  <Ionicons
-                    name={showCompletedWork ? "chevron-up" : "chevron-down"}
-                    size={16}
-                    color="#666"
-                  />
-                </View>
-              </TouchableOpacity>
-
-              {showCompletedWork && (
-                <>
-                  {completedWork.slice(0, 3).map((item) => (
-                    <View
-                      key={item.id}
-                      style={[styles.workCard, styles.completedCard]}
-                    >
-                      <View style={styles.workHeader}>
-                        <View
-                          style={[styles.subjectBadge, styles.completedBadge]}
-                        >
-                          <Text
-                            style={[styles.subjectText, styles.completedText]}
-                          >
-                            {item.subject}
-                          </Text>
-                        </View>
-                        <Text style={styles.workDate}>{item.date}</Text>
-                      </View>
-
-                      <Text style={[styles.workTitle, styles.completedTitle]}>
-                        {item.title}
-                      </Text>
-
-                      <View style={styles.completedIndicator}>
-                        <Ionicons name="checkmark" size={16} color="#22c55e" />
-                        <Text style={styles.completedLabel}>Completed</Text>
-                      </View>
-                    </View>
-                  ))}
-                </>
-              )}
-            </>
-          )}
-        </View>
-      ) : (
-        /* Materials Tab */
-        <View style={styles.materialsSection}>
-          {booklets.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="library-outline" size={48} color="#9ca3af" />
-              <Text style={styles.emptyStateText}>No materials available</Text>
-              <Text style={styles.emptyStateSubtext}>
-                Learning materials will appear here
-              </Text>
-            </View>
-          ) : (
-            booklets.slice(0, 3).map(
-              (
-                booklet: any // Limit to first 3 booklets
-              ) => (
-                <View key={booklet.id} style={styles.materialCard}>
-                  <View style={styles.materialHeader}>
-                    <Ionicons name="book" size={24} color="#8b5cf6" />
-                    <View style={styles.materialInfo}>
-                      <Text style={styles.materialTitle}>{booklet.title}</Text>
-                      {booklet.subtitle && (
-                        <Text style={styles.materialSubtitle}>
-                          {booklet.subtitle}
-                        </Text>
-                      )}
-                    </View>
-                    <View style={styles.materialBadge}>
-                      <Text style={styles.materialBadgeText}>
-                        {booklet.subject}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Text style={styles.moduleCount}>
-                    {booklet.modules.length} modules •{" "}
-                    {booklet.modules.reduce(
-                      (acc: number, mod: any) => acc + mod.activities.length,
-                      0
-                    )}{" "}
-                    activities
-                  </Text>
-
-                  <TouchableOpacity style={styles.viewMaterialButton}>
-                    <Text style={styles.viewMaterialText}>View Material</Text>
+            {/* Completed Work Section */}
+            {completedWork.length > 0 && (
+              <>
+                <TouchableOpacity
+                  style={styles.sectionHeader}
+                  onPress={() => setShowCompletedWork(!showCompletedWork)}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
+                  <Text style={styles.sectionTitle}>Completed Work</Text>
+                  <View style={styles.sectionToggle}>
+                    <Text style={styles.completedCount}>
+                      ({completedWork.length - 3})
+                    </Text>
                     <Ionicons
-                      name="chevron-forward"
+                      name={showCompletedWork ? "chevron-up" : "chevron-down"}
                       size={16}
-                      color="#8b5cf6"
+                      color="#666"
                     />
-                  </TouchableOpacity>
-                </View>
-              )
-            )
-          )}
+                  </View>
+                </TouchableOpacity>
 
-          {/* Show More Materials Button */}
-          {/* {booklets.length > 3 && (
+                {showCompletedWork && (
+                  <>
+                    {completedWork.slice(0, 3).map((item) => (
+                      <View
+                        key={item.id}
+                        style={[styles.workCard, styles.completedCard]}
+                      >
+                        <View style={styles.workHeader}>
+                          <View
+                            style={[styles.subjectBadge, styles.completedBadge]}
+                          >
+                            <Text
+                              style={[styles.subjectText, styles.completedText]}
+                            >
+                              {item.subject}
+                            </Text>
+                          </View>
+                          <Text style={styles.workDate}>{item.date}</Text>
+                        </View>
+
+                        <Text style={[styles.workTitle, styles.completedTitle]}>
+                          {item.title}
+                        </Text>
+
+                        <View style={styles.completedIndicator}>
+                          <Ionicons
+                            name="checkmark"
+                            size={16}
+                            color="#22c55e"
+                          />
+                          <Text style={styles.completedLabel}>Completed</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </>
+                )}
+              </>
+            )}
+          </View>
+        ) : (
+          /* Materials Tab */
+          <View style={styles.materialsSection}>
+            {booklets.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="library-outline" size={48} color="#9ca3af" />
+                <Text style={styles.emptyStateText}>
+                  No materials available
+                </Text>
+                <Text style={styles.emptyStateSubtext}>
+                  Learning materials will appear here
+                </Text>
+              </View>
+            ) : (
+              booklets.slice(0, 3).map(
+                (
+                  booklet: any // Limit to first 3 booklets
+                ) => (
+                  <View key={booklet.id} style={styles.materialCard}>
+                    <View style={styles.materialHeader}>
+                      <Ionicons name="book" size={24} color="#8b5cf6" />
+                      <View style={styles.materialInfo}>
+                        <Text style={styles.materialTitle}>
+                          {booklet.title}
+                        </Text>
+                        {booklet.subtitle && (
+                          <Text style={styles.materialSubtitle}>
+                            {booklet.subtitle}
+                          </Text>
+                        )}
+                      </View>
+                      <View style={styles.materialBadge}>
+                        <Text style={styles.materialBadgeText}>
+                          {booklet.subject}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.moduleCount}>
+                      {booklet.modules.length} modules •{" "}
+                      {booklet.modules.reduce(
+                        (acc: number, mod: any) => acc + mod.activities.length,
+                        0
+                      )}{" "}
+                      activities
+                    </Text>
+
+                    <TouchableOpacity style={styles.viewMaterialButton}>
+                      <Text style={styles.viewMaterialText}>View Material</Text>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={16}
+                        color="#8b5cf6"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )
+              )
+            )}
+
+            {/* Show More Materials Button */}
+            {/* {booklets.length > 3 && (
             <TouchableOpacity style={styles.showMoreButton}>
               <Text style={styles.showMoreText}>
                 Show More Materials ({booklets.length - 3} more)
               </Text>
             </TouchableOpacity>
           )} */}
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Image Viewer Modal */}
+      <Modal
+        visible={imageModalVisible}
+        transparent={false}
+        animationType="slide"
+        onRequestClose={() => setImageModalVisible(false)}
+        statusBarTranslucent={true}
+      >
+        <View style={styles.modalContainer}>
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Uploaded Proof</Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setImageModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Image */}
+          <View style={styles.imageContainer}>
+            {selectedImageUrl ? (
+              <Image
+                source={{ uri: selectedImageUrl }}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
+            ) : (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#8b5cf6" />
+                <Text>Loading image...</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Modal Footer with Actions */}
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={styles.modalActionButton}
+              onPress={() => setImageModalVisible(false)}
+            >
+              <Text style={styles.modalActionText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      )}
-    </ScrollView>
+      </Modal>
+    </>
   );
 }
 
@@ -968,6 +1167,10 @@ const styles = StyleSheet.create({
   taskAction: {
     padding: 4,
   },
+  taskActionWithProof: {
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
+    borderRadius: 6,
+  },
   completedIndicator: {
     flexDirection: "row",
     alignItems: "center",
@@ -1068,5 +1271,59 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#8b5cf6",
     marginRight: 4,
+  },
+  // Modal styles
+  modalContainer: {
+    backgroundColor: "white",
+    width: "100%",
+    height: "100%",
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 16 : 50,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    backgroundColor: "white",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  imageContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+    padding: 10,
+  },
+  modalImage: {
+    width: "100%",
+    height: "100%",
+  },
+  modalFooter: {
+    padding: 16,
+    backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+  },
+  modalActionButton: {
+    backgroundColor: "#8b5cf6",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  modalActionText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

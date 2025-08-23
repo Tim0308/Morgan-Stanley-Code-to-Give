@@ -408,3 +408,53 @@ class ContentService:
         except Exception as e:
             logger.error(f"Failed to save proof URL: {e}")
             raise
+        
+    async def delete_proof_image(self, activity_id: str, child_id: str, user_id: str) -> None:
+        """Delete proof image and remove proof URL from activity progress"""
+        try:
+            logger.info(f"Deleting proof image for activity {activity_id}, child {child_id}, user {user_id}")
+            
+            # Verify parent owns child
+            result = self.supabase.table("children").select("*").eq("id", child_id).eq("parent_user_id", user_id).execute()
+            if not result.data:
+                logger.error(f"Child verification failed: child {child_id} not found for user {user_id}")
+                raise ValueError("Child not found or access denied")
+            
+            # Get existing progress record to get the proof URL
+            existing_progress = self.supabase.table("activity_progress").select("*").eq("child_id", child_id).eq("activity_id", activity_id).execute()
+            
+            if not existing_progress.data or not existing_progress.data[0].get("proof_url"):
+                logger.warning(f"No proof URL found for activity {activity_id}, child {child_id}")
+                return  # Nothing to delete
+            
+            proof_url = existing_progress.data[0]["proof_url"]
+            logger.info(f"Found proof URL to delete: {proof_url}")
+            
+            # Extract filename from URL for storage deletion
+            try:
+                # URL format: https://xxx.supabase.co/storage/v1/object/public/proof-images/user_id/filename.jpg
+                filename = proof_url.split('/proof-images/')[-1] if '/proof-images/' in proof_url else None
+                
+                if filename:
+                    logger.info(f"Attempting to delete file from storage: {filename}")
+                    # Delete from Supabase Storage
+                    storage_response = self.supabase.storage.from_("proof-images").remove([filename])
+                    logger.info(f"Storage delete response: {storage_response}")
+                
+            except Exception as storage_error:
+                logger.warning(f"Failed to delete from storage (continuing anyway): {storage_error}")
+                # Continue to remove from database even if storage deletion fails
+            
+            # Remove proof URL from database
+            try:
+                update_result = self.supabase.table("activity_progress").update({
+                    "proof_url": None
+                }).eq("id", existing_progress.data[0]["id"]).execute()
+                logger.info("Proof URL removed from database successfully")
+            except Exception as update_error:
+                logger.error(f"Failed to remove proof URL from database: {update_error}")
+                raise Exception(f"Failed to remove proof URL: {update_error}")
+                
+        except Exception as e:
+            logger.error(f"Failed to delete proof image: {e}")
+            raise
