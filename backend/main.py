@@ -3,10 +3,17 @@ Main FastAPI application for Project Reach Educational Platform
 Microservices architecture with single Supabase database
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Add the current directory to Python path
+current_dir = Path(__file__).parent
+sys.path.insert(0, str(current_dir))
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import os
 from dotenv import load_dotenv
 
 # Load environment variables
