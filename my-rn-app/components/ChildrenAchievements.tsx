@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { api, CommunityPost } from '../lib/api';
 
 interface Achievement {
   id: string;
@@ -14,28 +15,40 @@ interface Achievement {
 }
 
 export default function ChildrenAchievements() {
-  const achievements: Achievement[] = [
-    {
-      id: '1',
-      authorName: 'Sarah M.',
-      school: 'Sunny Hills',
-      grade: 'K1',
-      content: 'My child just completed their first reading story! So proud! 🎉',
-      mediaType: 'photo',
-      likes: 12,
-      timeAgo: '2h ago',
-    },
-    {
-      id: '2',
-      authorName: "Emma's Mom",
-      school: 'Rainbow Learning',
-      grade: 'K2',
-      content: "Emma finished all of Alphabet Time! Here's her reading the letters.",
-      mediaType: 'video',
-      likes: 18,
-      timeAgo: '4h ago',
-    },
-  ];
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAchievements();
+  }, []);
+
+  const loadAchievements = async () => {
+    try {
+      const feed = await api.getCommunityFeed();
+      setAchievements(feed.posts.map((post: CommunityPost) => ({
+        id: post.id,
+        authorName: post.author.name,
+        school: post.author.name, // Using author name as placeholder
+        grade: 'K1', // Default grade
+        content: post.content,
+        mediaType: null as 'photo' | 'video' | null,
+        likes: post.likes,
+        timeAgo: new Date(post.created_at).toLocaleString(),
+      })));
+    } catch (error) {
+      console.error('Failed to load achievements:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#8b5cf6" />
+      </View>
+    );
+  }
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();

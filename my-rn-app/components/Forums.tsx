@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { api } from '../lib/api';
 
 interface ForumCategory {
   id: string;
@@ -18,9 +19,95 @@ interface Discussion {
   likes: number;
   comments: number;
   hasReply?: boolean;
+  isLiked?: boolean;
 }
 
 export default function Forums() {
+  const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [newPostContent, setNewPostContent] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadForumPosts();
+  }, []);
+
+  const loadForumPosts = async () => {
+    try {
+      // Load from API or use mock data for now
+      setDiscussions([
+        {
+          id: '1',
+          title: 'Best ways to teach letter recognition?',
+          content: 'My child is struggling to remember the difference between b and d. Any tips?',
+          author: 'Mrs. Chen',
+          timeAgo: '2h ago',
+          likes: 12,
+          comments: 8,
+          hasReply: true,
+          isLiked: false,
+        },
+        {
+          id: '2',
+          title: 'Phonics activities that actually work',
+          content: 'Looking for engaging phonics games that kept your child interested.',
+          author: 'Anonymous',
+          timeAgo: '1d ago',
+          likes: 7,
+          comments: 5,
+          hasReply: true,
+          isLiked: false,
+        },
+      ]);
+    } catch (error) {
+      console.error('Failed to load forum posts:', error);
+    }
+  };
+
+  const handleLike = async (discussionId: string) => {
+    try {
+      // Update UI immediately for better UX
+      setDiscussions(prev => prev.map(discussion => {
+        if (discussion.id === discussionId) {
+          const wasLiked = discussion.isLiked || false;
+          return {
+            ...discussion,
+            isLiked: !wasLiked,
+            likes: wasLiked ? discussion.likes - 1 : discussion.likes + 1
+          };
+        }
+        return discussion;
+      }));
+
+      // Call API
+      await api.toggleLike(discussionId);
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      // Revert optimistic update on error
+      loadForumPosts();
+    }
+  };
+
+  const handleCreatePost = async () => {
+    if (!newPostContent.trim()) {
+      Alert.alert('Error', 'Please enter some content for your post.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await api.createPost(newPostContent.trim(), 'question');
+      setNewPostContent('');
+      Alert.alert('Success', 'Your post has been created!');
+      // Refresh the discussions
+      loadForumPosts();
+    } catch (error) {
+      console.error('Failed to create post:', error);
+      Alert.alert('Error', 'Failed to create post. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const categories: ForumCategory[] = [
     {
       id: '1',
@@ -45,29 +132,6 @@ export default function Forums() {
       name: 'Reading Time',
       icon: 'reader',
       color: '#3b82f6',
-    },
-  ];
-
-  const discussions: Discussion[] = [
-    {
-      id: '1',
-      title: 'Best ways to teach letter recognition?',
-      content: 'My child is struggling to remember the difference between b and d. Any tips?',
-      author: 'Mrs. Chen',
-      timeAgo: '2h ago',
-      likes: 12,
-      comments: 8,
-      hasReply: true,
-    },
-    {
-      id: '2',
-      title: 'Phonics activities that actually work',
-      content: 'Looking for engaging phonics games that kept your child interested.',
-      author: 'Anonymous',
-      timeAgo: '1d ago',
-      likes: 7,
-      comments: 5,
-      hasReply: true,
     },
   ];
 
@@ -117,9 +181,19 @@ export default function Forums() {
               </View>
               
               <View style={styles.engagement}>
-                <TouchableOpacity style={styles.engagementItem}>
-                  <Ionicons name="heart-outline" size={16} color="#666" />
-                  <Text style={styles.engagementText}>{discussion.likes}</Text>
+                <TouchableOpacity 
+                  style={styles.engagementItem}
+                  onPress={() => handleLike(discussion.id)}
+                >
+                  <Ionicons 
+                    name={discussion.isLiked ? "heart" : "heart-outline"} 
+                    size={16} 
+                    color={discussion.isLiked ? "#ef4444" : "#666"} 
+                  />
+                  <Text style={[
+                    styles.engagementText,
+                    discussion.isLiked && { color: "#ef4444" }
+                  ]}>{discussion.likes}</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity style={styles.engagementItem}>
@@ -139,7 +213,23 @@ export default function Forums() {
           placeholder="Share your thoughts about Alphabet Time..."
           placeholderTextColor="#9ca3af"
           multiline
+          value={newPostContent}
+          onChangeText={setNewPostContent}
         />
+        <TouchableOpacity 
+          style={[
+            styles.postButton,
+            !newPostContent.trim() && styles.postButtonDisabled
+          ]}
+          onPress={handleCreatePost}
+          disabled={loading || !newPostContent.trim()}
+        >
+          <Ionicons 
+            name="send" 
+            size={20} 
+            color={!newPostContent.trim() ? "#ccc" : "#fff"} 
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -280,6 +370,8 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
     backgroundColor: '#f9fafb',
     borderRadius: 12,
     padding: 16,
@@ -287,9 +379,22 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
   },
   textInput: {
+    flex: 1,
     fontSize: 14,
     color: '#333',
     minHeight: 40,
     textAlignVertical: 'top',
+    marginRight: 12,
+  },
+  postButton: {
+    backgroundColor: '#007AFF',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  postButtonDisabled: {
+    backgroundColor: '#f0f0f0',
   },
 }); 
