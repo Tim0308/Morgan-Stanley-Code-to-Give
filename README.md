@@ -1,5 +1,12 @@
 ### clone it and run the following
 
 ```
-./start-dev.sh
+cd my-rn-app
+npm install
+```
+
+
+Run this in root directory
+```
+./start-dev.sh 
 ```
