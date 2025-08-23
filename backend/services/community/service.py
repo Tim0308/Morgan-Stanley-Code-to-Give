@@ -377,3 +377,384 @@ class CommunityService:
         except Exception as e:
             logger.error(f"Failed to create report: {e}")
             raise
+
+    async def get_post_by_id(self, post_id: str, user_id: str) -> Optional[PostWithAuthor]:
+        """Get a single post by ID with author info and user's like status"""
+        try:
+            # Get the post
+            post_result = self.supabase.table("posts").select("""
+                id,
+                type,
+                content,
+                media,
+                anonymous,
+                created_at,
+                author_user_id,
+                class_id
+            """).eq("id", post_id).execute()
+            
+            if not post_result.data:
+                return None
+            
+            post_data = post_result.data[0]
+            
+            # Get author profile
+            author_profile = {}
+            if not post_data.get("anonymous", False):
+                profile_result = self.supabase.table("profiles").select(
+                    "user_id, full_name, school, grade"
+                ).eq("user_id", post_data["author_user_id"]).execute()
+                
+                if profile_result.data:
+                    author_profile = profile_result.data[0]
+            
+            # Get engagement stats
+            likes_result = self.supabase.table("reactions").select("id").eq("post_id", post_id).execute()
+            comments_result = self.supabase.table("comments").select("id").eq("post_id", post_id).execute()
+            user_like_result = self.supabase.table("reactions").select("id").eq("post_id", post_id).eq("user_id", user_id).execute()
+            
+            return PostWithAuthor(
+                id=post_data["id"],
+                type=post_data["type"],
+                content=post_data["content"],
+                media=post_data.get("media", []),
+                anonymous=post_data.get("anonymous", False),
+                class_id=post_data.get("class_id"),
+                author_user_id=post_data["author_user_id"],
+                created_at=post_data["created_at"],
+                likes_count=len(likes_result.data),
+                comments_count=len(comments_result.data),
+                user_has_liked=len(user_like_result.data) > 0,
+                author_name=author_profile.get("full_name"),
+                author_school=author_profile.get("school"),
+                author_grade=author_profile.get("grade")
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to get post by ID: {e}")
+            raise
+
+    async def get_post_comments(self, post_id: str, limit: int = 20) -> List[CommentWithAuthor]:
+        """Get comments for a specific post"""
+        try:
+            # Get comments
+            comments_result = self.supabase.table("comments").select("""
+                id,
+                content,
+                created_at,
+                author_user_id
+            """).eq("post_id", post_id).order("created_at", desc=False).limit(limit).execute()
+            
+            if not comments_result.data:
+                return []
+            
+            # Get author profiles
+            author_ids = list(set(comment["author_user_id"] for comment in comments_result.data))
+            profiles_dict = {}
+            
+            if author_ids:
+                profiles_result = self.supabase.table("profiles").select(
+                    "user_id, full_name, school, grade"
+                ).in_("user_id", author_ids).execute()
+                
+                profiles_dict = {
+                    profile["user_id"]: profile 
+                    for profile in profiles_result.data
+                }
+            
+            # Build comments with author info
+            comments_with_authors = []
+            for comment_data in comments_result.data:
+                author_info = profiles_dict.get(comment_data["author_user_id"], {})
+                
+                comment_with_author = CommentWithAuthor(
+                    id=comment_data["id"],
+                    post_id=post_id,
+                    content=comment_data["content"],
+                    author_user_id=comment_data["author_user_id"],
+                    created_at=comment_data["created_at"],
+                    author_name=author_info.get("full_name", "Anonymous"),
+                    author_school=author_info.get("school"),
+                    author_grade=author_info.get("grade")
+                )
+                
+                comments_with_authors.append(comment_with_author)
+            
+            return comments_with_authors
+            
+        except Exception as e:
+            logger.error(f"Failed to get post comments: {e}")
+            raise
+
+    async def create_thread(self, user_id: str, thread_data: ThreadCreate) -> Thread:
+        """Create a new chat thread"""
+        try:
+            thread_dict = {
+                "id": str(uuid.uuid4()),
+                "type": thread_data.type,
+                "class_id": thread_data.class_id,
+                "created_by": user_id,
+                "created_at": datetime.utcnow()
+            }
+            
+            # Create the thread
+            thread_result = self.supabase.table("threads").insert(thread_dict).execute()
+            
+            if not thread_result.data:
+                raise ValueError("Failed to create thread")
+            
+            thread = Thread(**thread_result.data[0])
+            
+            # Add participants
+            participants = []
+            for participant_id in thread_data.participant_ids:
+                participants.append({
+                    "thread_id": thread.id,
+                    "user_id": participant_id,
+                    "last_read_at": datetime.utcnow()
+                })
+            
+            # Add creator as participant if not already included
+            if user_id not in thread_data.participant_ids:
+                participants.append({
+                    "thread_id": thread.id,
+                    "user_id": user_id,
+                    "last_read_at": datetime.utcnow()
+                })
+            
+            if participants:
+                self.supabase.table("thread_participants").insert(participants).execute()
+            
+            return thread
+            
+        except Exception as e:
+            logger.error(f"Failed to create thread: {e}")
+            raise
+
+    async def send_message(self, user_id: str, message_data: MessageCreate) -> MessageWithAuthor:
+        """Send a message in a chat thread"""
+        try:
+            # Verify user is participant in thread
+            participant_result = self.supabase.table("thread_participants").select("user_id").eq(
+                "thread_id", message_data.thread_id
+            ).eq("user_id", user_id).execute()
+            
+            if not participant_result.data:
+                raise ValueError("User is not a participant in this thread")
+            
+            message_dict = {
+                "id": str(uuid.uuid4()),
+                "thread_id": message_data.thread_id,
+                "author_id": user_id,
+                "body": message_data.body,
+                "media": message_data.media or [],
+                "created_at": datetime.utcnow()
+            }
+            
+            result = self.supabase.table("messages").insert(message_dict).execute()
+            
+            if not result.data:
+                raise ValueError("Failed to send message")
+            
+            # Get author profile
+            profile_result = self.supabase.table("profiles").select(
+                "user_id, full_name, school, grade"
+            ).eq("user_id", user_id).execute()
+            
+            author_info = profile_result.data[0] if profile_result.data else {}
+            
+            return MessageWithAuthor(
+                id=result.data[0]["id"],
+                thread_id=result.data[0]["thread_id"],
+                author_id=result.data[0]["author_id"],
+                body=result.data[0]["body"],
+                media=result.data[0]["media"],
+                created_at=result.data[0]["created_at"],
+                author_name=author_info.get("full_name", "Unknown"),
+                author_school=author_info.get("school"),
+                author_grade=author_info.get("grade")
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send message: {e}")
+            raise
+
+    async def get_thread_messages(self, thread_id: str, user_id: str, limit: int = 50) -> List[MessageWithAuthor]:
+        """Get messages from a chat thread"""
+        try:
+            # Verify user is participant in thread
+            participant_result = self.supabase.table("thread_participants").select("user_id").eq(
+                "thread_id", thread_id
+            ).eq("user_id", user_id).execute()
+            
+            if not participant_result.data:
+                raise ValueError("User is not a participant in this thread")
+            
+            # Get messages
+            messages_result = self.supabase.table("messages").select("""
+                id,
+                thread_id,
+                author_id,
+                body,
+                media,
+                created_at
+            """).eq("thread_id", thread_id).order("created_at", desc=False).limit(limit).execute()
+            
+            if not messages_result.data:
+                return []
+            
+            # Get author profiles
+            author_ids = list(set(msg["author_id"] for msg in messages_result.data))
+            profiles_dict = {}
+            
+            if author_ids:
+                profiles_result = self.supabase.table("profiles").select(
+                    "user_id, full_name, school, grade"
+                ).in_("user_id", author_ids).execute()
+                
+                profiles_dict = {
+                    profile["user_id"]: profile 
+                    for profile in profiles_result.data
+                }
+            
+            # Build messages with author info
+            messages_with_authors = []
+            for msg_data in messages_result.data:
+                author_info = profiles_dict.get(msg_data["author_id"], {})
+                
+                message_with_author = MessageWithAuthor(
+                    id=msg_data["id"],
+                    thread_id=msg_data["thread_id"],
+                    author_id=msg_data["author_id"],
+                    body=msg_data["body"],
+                    media=msg_data["media"] or [],
+                    created_at=msg_data["created_at"],
+                    author_name=author_info.get("full_name", "Unknown"),
+                    author_school=author_info.get("school"),
+                    author_grade=author_info.get("grade")
+                )
+                
+                messages_with_authors.append(message_with_author)
+            
+            return messages_with_authors
+            
+        except Exception as e:
+            logger.error(f"Failed to get thread messages: {e}")
+            raise
+
+    async def get_forums_by_category(self, category: str, user_id: str, limit: int = 20) -> List[PostWithAuthor]:
+        """Get forum posts filtered by category/subject"""
+        try:
+            # For now, we'll use the content type as category filter
+            # In a real implementation, you might have a separate categories table
+            query = self.supabase.table("posts").select("""
+                id,
+                type,
+                content,
+                media,
+                anonymous,
+                created_at,
+                author_user_id,
+                class_id
+            """)
+            
+            # Filter by post type (questions are forum-like)
+            query = query.eq("type", "question")
+            
+            # Order by creation time and limit
+            query = query.order("created_at", desc=True).limit(limit)
+            
+            result = query.execute()
+            posts_data = result.data
+            
+            # Get author profiles
+            author_ids = list(set(post["author_user_id"] for post in posts_data))
+            profiles_dict = {}
+            
+            if author_ids:
+                profiles_result = self.supabase.table("profiles").select(
+                    "user_id, full_name, school, grade"
+                ).in_("user_id", author_ids).execute()
+                
+                profiles_dict = {
+                    profile["user_id"]: profile 
+                    for profile in profiles_result.data
+                }
+            
+            # Build posts with author info and engagement stats
+            posts_with_authors = []
+            for post_data in posts_data:
+                # Get engagement stats
+                likes_result = self.supabase.table("reactions").select("id").eq("post_id", post_data["id"]).execute()
+                comments_result = self.supabase.table("comments").select("id").eq("post_id", post_data["id"]).execute()
+                user_like_result = self.supabase.table("reactions").select("id").eq("post_id", post_data["id"]).eq("user_id", user_id).execute()
+                
+                # Get author info
+                author_info = profiles_dict.get(post_data["author_user_id"], {})
+                
+                post_with_author = PostWithAuthor(
+                    id=post_data["id"],
+                    type=post_data["type"],
+                    content=post_data["content"],
+                    media=post_data.get("media", []),
+                    anonymous=post_data.get("anonymous", False),
+                    class_id=post_data.get("class_id"),
+                    author_user_id=post_data["author_user_id"],
+                    created_at=post_data["created_at"],
+                    likes_count=len(likes_result.data),
+                    comments_count=len(comments_result.data),
+                    user_has_liked=len(user_like_result.data) > 0,
+                    author_name=author_info.get("full_name") if not post_data.get("anonymous") else "Anonymous",
+                    author_school=author_info.get("school") if not post_data.get("anonymous") else None,
+                    author_grade=author_info.get("grade") if not post_data.get("anonymous") else None
+                )
+                
+                posts_with_authors.append(post_with_author)
+            
+            return posts_with_authors
+            
+        except Exception as e:
+            logger.error(f"Failed to get forums by category: {e}")
+            raise
+
+    async def get_categories(self) -> List[Dict[str, Any]]:
+        """Get available forum categories"""
+        try:
+            # For now, return hardcoded categories based on the booklet subjects
+            # In a real implementation, you might query a categories table or booklets table
+            categories = [
+                {
+                    "id": "alphabet_time",
+                    "name": "Alphabet Time",
+                    "icon": "library",
+                    "color": "#1a1a2e",
+                    "description": "Letter recognition and phonics discussions"
+                },
+                {
+                    "id": "vocabulary_time",
+                    "name": "Vocabulary Time", 
+                    "icon": "book",
+                    "color": "#22c55e",
+                    "description": "Building vocabulary and word meaning"
+                },
+                {
+                    "id": "sight_words_time",
+                    "name": "Sight Words Time",
+                    "icon": "eye", 
+                    "color": "#8b5cf6",
+                    "description": "High frequency word recognition"
+                },
+                {
+                    "id": "reading_time",
+                    "name": "Reading Time",
+                    "icon": "reader",
+                    "color": "#3b82f6", 
+                    "description": "Reading comprehension and fluency"
+                }
+            ]
+            
+            return categories
+            
+        except Exception as e:
+            logger.error(f"Failed to get categories: {e}")
+            raise

@@ -163,6 +163,8 @@ class Message(MessageBase, BaseResponse):
 class MessageWithAuthor(Message):
     """Message with author information"""
     author_name: Optional[str] = None
+    author_school: Optional[str] = None
+    author_grade: Optional[str] = None
 
 
 # Expert models
