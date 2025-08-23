@@ -102,27 +102,24 @@ class BookletWithModules(Booklet):
     progress_summary: Optional[Dict[str, Any]] = None
 
 
-class BookletProgress(BaseModel):
-    """Booklet progress summary"""
-    booklet_id: UUIDField
-    child_id: UUIDField
-    total_activities: int
-    completed_activities: int
-    current_module: Optional[int] = None
-    completion_percentage: float
-    estimated_time_remaining: Optional[str] = None
-
-
 # Weekly progress models
 class WeeklyProgress(BaseModel):
     """Weekly progress summary"""
-    week_start: date
-    week_end: date
-    child_id: UUIDField
-    activities_completed: int
+    week: str  # Week identifier like "2025-W02"
     total_activities: int
-    streak_maintained: bool
-    tokens_earned: int
+    completed_activities: int
+    completion_percentage: float
+
+
+class BookletProgress(BaseModel):
+    """Booklet progress summary"""
+    booklet_id: str
+    booklet_name: str
+    total_modules: int
+    completed_modules: int
+    current_module: int
+    progress_percentage: float
+    estimated_completion_time: str
 
 
 # Request models
@@ -138,4 +135,4 @@ class ProgressUpdateRequest(BaseModel):
 
 class BulkProgressRequest(BaseModel):
     """Request to update multiple activities"""
-    updates: List[ProgressUpdateRequest] 
+    updates: List[ProgressUpdateRequest]
