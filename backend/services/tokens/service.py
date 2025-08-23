@@ -166,22 +166,71 @@ class TokensService:
             logger.error(f"Failed to redeem tokens: {e}")
             raise
     
+    async def get_token_history(self, child_id: str, user_id: str, limit: int = 20, cursor: Optional[str] = None) -> Dict[str, Any]:
+        """Get token transaction history for a child"""
+        try:
+            # Verify child belongs to user
+            result = self.supabase.table("children").select("*").eq("id", child_id).eq("parent_user_id", user_id).execute()
+            if not result.data:
+                raise ValueError("Child not found or access denied")
+            
+            # Build query for token transactions
+            query = (
+                self.supabase.table("token_transactions")
+                .select("*")
+                .eq("account_id", child_id)
+                .order("created_at", desc=True)
+                .limit(limit)
+            )
+            
+            # Apply cursor if provided (for pagination)
+            if cursor:
+                query = query.gt("created_at", cursor)
+            
+            transaction_result = query.execute()
+            transactions = transaction_result.data or []
+            
+            # Format transactions for frontend
+            formatted_transactions = []
+            for transaction in transactions:
+                formatted_transactions.append({
+                    "id": transaction["id"],
+                    "description": self._get_transaction_description(transaction),
+                    "amount": transaction["delta"],
+                    "type": "earned" if transaction["delta"] > 0 else "spent",
+                    "created_at": transaction["created_at"]
+                })
+            
+            # Determine if there are more results
+            has_more = len(transactions) == limit
+            next_cursor = transactions[-1]["created_at"] if transactions and has_more else None
+            
+            return {
+                "transactions": formatted_transactions,
+                "next_cursor": next_cursor,
+                "has_more": has_more
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to get token history: {e}")
+            raise
+    
     def _get_transaction_description(self, transaction: Dict[str, Any]) -> str:
         """Generate human-readable description for transaction"""
         reason = transaction["reason"]
         delta = transaction["delta"]
         
         if reason == "activity_complete":
-            return f"Completed activity (+{delta} tokens)"
+            return f"Completed activity"
         elif reason == "weekly_goal":
-            return f"Weekly goal achieved (+{delta} tokens)"
+            return f"Weekly goal achieved"
         elif reason == "helpful_answer":
-            return f"Helpful answer (+{delta} tokens)"
+            return f"Helpful answer"
         elif reason == "engagement_bonus":
-            return f"Engagement bonus (+{delta} tokens)"
+            return f"Engagement bonus"
         elif reason == "purchase":
-            return f"Shop purchase ({delta} tokens)"
+            return f"Shop purchase"
         elif reason == "gift":
-            return f"Gift received (+{delta} tokens)"
+            return f"Gift received"
         else:
-            return f"{reason.replace('_', ' ').title()} ({'+' if delta > 0 else ''}{delta} tokens)"
+            return f"{reason.replace('_', ' ').title()}"

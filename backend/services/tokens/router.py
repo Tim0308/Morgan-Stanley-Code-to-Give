@@ -79,4 +79,28 @@ async def redeem_tokens(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process token redemption"
+        )
+
+
+@router.get("/history")
+async def get_token_history(
+    child_id: str = Query(..., description="Child ID"),
+    limit: int = Query(default=20, ge=1, le=100, description="Number of transactions to return"),
+    cursor: str = Query(default=None, description="Pagination cursor"),
+    current_user: AuthUser = Depends(get_current_parent)
+):
+    """Get token transaction history for a child"""
+    try:
+        service = TokensService()
+        return await service.get_token_history(child_id, current_user.user_id, limit, cursor)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Failed to get token history: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve token history"
         ) 

@@ -9,8 +9,8 @@ from datetime import datetime, date
 
 from core.database import get_supabase_client
 from models.content import (
-    BookletWithModules, Activity, ActivityProgress,
-    ProgressUpdateRequest, WeeklyProgress, BookletProgress
+    BookletWithModules, Activity, ActivityProgress, ActivityWithProgress,
+    ModuleWithActivities, ProgressUpdateRequest, WeeklyProgress, BookletProgress
 )
 
 logger = logging.getLogger(__name__)
@@ -25,9 +25,82 @@ class ContentService:
     async def get_booklets_with_progress(self, week: Optional[str], child_id: Optional[str], user_id: str) -> List[BookletWithModules]:
         """Get booklets with modules and progress"""
         try:
-            # For now, return mock data structure
-            # TODO: Implement real database queries
-            return []
+            # If child_id is provided, verify it belongs to the user
+            if child_id:
+                result = self.supabase.table("children").select("*").eq("id", child_id).eq("parent_user_id", user_id).execute()
+                if not result.data:
+                    raise ValueError("Child not found or access denied")
+            
+            # Get booklets with their modules and activities
+            booklets_result = self.supabase.table("booklets").select("""
+                id, title, subtitle, subject, total_modules, week_start, week_end, locale,
+                modules(
+                    id, idx, title, description,
+                    activities(
+                        id, type, points, est_minutes, instructions
+                    )
+                )
+            """).order("title").execute()
+            
+            booklets_with_modules = []
+            
+            for booklet_data in booklets_result.data:
+                # Sort modules by index
+                modules = sorted(booklet_data.get('modules', []), key=lambda m: m.get('idx', 0))
+                
+                modules_with_activities = []
+                for module_data in modules:
+                    activities = []
+                    
+                    for activity_data in module_data.get('activities', []):
+                        # Get progress for this activity if child_id is provided
+                        activity_status = 'not_started'
+                        if child_id:
+                            progress_result = self.supabase.table("activity_progress").select("status").eq("child_id", child_id).eq("activity_id", activity_data['id']).execute()
+                            if progress_result.data:
+                                activity_status = progress_result.data[0]['status']
+                        
+                        # Create ActivityWithProgress object
+                        activity = ActivityWithProgress(
+                            id=activity_data['id'],
+                            module_id=module_data['id'],
+                            type=activity_data['type'],
+                            points=activity_data.get('points', 10),
+                            est_minutes=activity_data.get('est_minutes', 10),
+                            instructions=activity_data.get('instructions', ''),
+                            media=[],
+                            title=f"Activity {len(activities) + 1}",  # Generate title
+                            status=activity_status
+                        )
+                        activities.append(activity)
+                    
+                    # Create ModuleWithActivities object
+                    module = ModuleWithActivities(
+                        id=module_data['id'],
+                        booklet_id=booklet_data['id'],
+                        idx=module_data.get('idx', 1),
+                        title=module_data.get('title', f"Module {module_data.get('idx', 1)}"),
+                        description=module_data.get('description', ''),
+                        activities=activities
+                    )
+                    modules_with_activities.append(module)
+                
+                # Create BookletWithModules object
+                booklet = BookletWithModules(
+                    id=booklet_data['id'],
+                    title=booklet_data['title'],
+                    subtitle=booklet_data.get('subtitle', ''),
+                    week_start=booklet_data.get('week_start'),
+                    week_end=booklet_data.get('week_end'),
+                    locale=booklet_data.get('locale', 'en'),
+                    total_modules=booklet_data.get('total_modules'),
+                    subject=booklet_data.get('subject', 'Learning'),
+                    modules=modules_with_activities,
+                    progress_summary=None
+                )
+                booklets_with_modules.append(booklet)
+            
+            return booklets_with_modules
             
         except Exception as e:
             logger.error(f"Failed to get booklets: {e}")
