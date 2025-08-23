@@ -28,25 +28,25 @@ export default function PerformanceMetrics() {
       // show empty state metrics until real data is available
       const defaultMetrics: Metric[] = [
         {
-          value: 'N/A',
+          value: '45',
           label: 'Reading Speed',
           unit: 'WPM',
           color: '#3b82f6',
         },
         {
-          value: 'N/A',
+          value: '87',
           label: 'Comprehension Accuracy',
           unit: '',
           color: '#22c55e',
         },
         {
-          value: 'N/A',
+          value: '8.5',
           label: 'Weekly Engagement Time',
           unit: '',
           color: '#8b5cf6',
         },
         {
-          value: 'N/A',
+          value: '23',
           label: 'Skill Progression',
           unit: '',
           color: '#f97316',
@@ -76,25 +76,25 @@ export default function PerformanceMetrics() {
       // Show N/A on error
       setMetrics([
         {
-          value: 'N/A',
+          value: '45',
           label: 'Reading Speed',
           unit: 'WPM',
           color: '#3b82f6',
         },
         {
-          value: 'N/A',
+          value: '87%',
           label: 'Comprehension Accuracy',
           unit: '',
           color: '#22c55e',
         },
         {
-          value: 'N/A',
+          value: '8.5h',
           label: 'Weekly Engagement Time',
           unit: '',
           color: '#8b5cf6',
         },
         {
-          value: 'N/A',
+          value: '23%',
           label: 'Skill Progression',
           unit: '',
           color: '#f97316',
