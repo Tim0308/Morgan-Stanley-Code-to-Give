@@ -20,14 +20,17 @@ Once your project is ready, go to **Settings > API**:
 ### Required API Keys:
 
 1. **Project URL**
+
    ```
    https://your-project-id.supabase.co
    ```
 
 2. **Anonymous Key (anon/public)**
+
    ```
    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    ```
+
    - Used by frontend/mobile app
    - RLS policies enforced
    - Safe to expose in client code
@@ -86,7 +89,7 @@ Click **"Run"** to execute.
 Copy and paste the contents of `supabase/rls_policies.sql`:
 
 ```sql
--- Copy the entire content from supabase/rls_policies.sql  
+-- Copy the entire content from supabase/rls_policies.sql
 -- This sets up security policies for data access
 ```
 
@@ -121,14 +124,18 @@ Go to **Settings > API**:
 1. **JWT expiry**: Set to `604800` (7 days) or your preference
 2. Note the **JWT Secret** (automatically managed)
 
-## Step 6: Set Up Storage (Optional)
+## Step 6: Set Up Storage (Required for File Uploads)
 
-If you plan to upload files (photos, documents):
+To support proof image uploads for pen & paper activities:
 
-1. Go to **Storage**
-2. Create a new bucket: `user-uploads`
-3. Set bucket to **Public** if files should be publicly accessible
-4. Configure upload policies as needed
+1. Go to **Storage** in your Supabase dashboard
+2. Click **"Create a new bucket"**
+3. Create bucket: `proof-images`
+4. Set bucket to **Public** so images can be accessed by parents
+5. Configure upload policies:
+   - Allow authenticated users to upload
+   - File size limit: 10MB
+   - Allowed file types: image/jpeg, image/png
 
 ## Step 7: Test Connection
 
@@ -161,25 +168,26 @@ Update your React Native app's environment:
 
 ```typescript
 // In your React Native app
-const SUPABASE_URL = 'https://your-project-id.supabase.co'
-const SUPABASE_ANON_KEY = 'your-anon-key'  // NOT the service role key!
+const SUPABASE_URL = "https://your-project-id.supabase.co";
+const SUPABASE_ANON_KEY = "your-anon-key"; // NOT the service role key!
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ```
 
 ## API Keys Summary
 
-| Key Type | Usage | Security Level | Where to Use |
-|----------|-------|----------------|--------------|
-| **Project URL** | Base URL for all requests | Public | Frontend + Backend |
-| **Anonymous Key** | Client-side operations | RLS enforced | Frontend/Mobile only |
-| **Service Role Key** | Server-side operations | Full access | Backend only |
+| Key Type             | Usage                     | Security Level | Where to Use         |
+| -------------------- | ------------------------- | -------------- | -------------------- |
+| **Project URL**      | Base URL for all requests | Public         | Frontend + Backend   |
+| **Anonymous Key**    | Client-side operations    | RLS enforced   | Frontend/Mobile only |
+| **Service Role Key** | Server-side operations    | Full access    | Backend only         |
 
 ## Security Best Practices
 
 ### ✅ DO:
+
 - Use **Service Role Key** only in backend
 - Use **Anonymous Key** in frontend/mobile
 - Keep Service Role Key in environment variables
@@ -187,6 +195,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 - Test policies with different user roles
 
 ### ❌ DON'T:
+
 - Expose Service Role Key in client code
 - Disable RLS without proper policies
 - Use Service Role Key in frontend
@@ -195,18 +204,21 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 ## Troubleshooting
 
 ### Connection Issues:
+
 1. **Check API keys** - ensure they're copied correctly
 2. **Verify project URL** - should include your project ID
 3. **Check network** - ensure Supabase is accessible
 4. **Review logs** - check backend logs for specific errors
 
 ### RLS Issues:
+
 1. **Test policies** - use Supabase SQL editor to test queries
 2. **Check user context** - ensure `auth.uid()` returns expected user
 3. **Verify relationships** - ensure foreign keys are correct
 4. **Review policy logic** - test with different user scenarios
 
 ### Schema Issues:
+
 1. **Check execution order** - run schema.sql → rls_policies.sql → seed.sql
 2. **Review error messages** - SQL editor shows specific errors
 3. **Verify dependencies** - ensure all referenced tables exist
@@ -225,4 +237,4 @@ Once Supabase is configured:
 
 - **Supabase Docs**: https://supabase.com/docs
 - **FastAPI Docs**: https://fastapi.tiangolo.com
-- **Project PRD**: See `project_reach_prd_cursor_ready.md` for complete specifications 
+- **Project PRD**: See `project_reach_prd_cursor_ready.md` for complete specifications

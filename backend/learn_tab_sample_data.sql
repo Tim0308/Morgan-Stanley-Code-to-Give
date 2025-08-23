@@ -30,10 +30,10 @@ BEGIN
 
     -- Insert Booklets (keeping smaller module counts for demo)
     INSERT INTO booklets (id, title, subtitle, week_start, week_end, locale, total_modules, subject) VALUES
-    (vocab_booklet_id, 'Vocabulary Time', 'Building Essential Vocabulary', CURRENT_DATE - INTERVAL '4 weeks', CURRENT_DATE + INTERVAL '16 weeks', 'en', 2, 'Reading'),
-    (sight_words_booklet_id, 'Sight Words Time', 'Common Sight Words Practice', CURRENT_DATE - INTERVAL '3 weeks', CURRENT_DATE + INTERVAL '12 weeks', 'en', 2, 'Reading'),
-    (reading_booklet_id, 'Reading Time', 'Reading Comprehension Skills', CURRENT_DATE - INTERVAL '2 weeks', CURRENT_DATE + INTERVAL '22 weeks', 'en', 2, 'Reading'),
-    (phonics_booklet_id, 'Phonics Time', 'Sound and Letter Recognition', CURRENT_DATE - INTERVAL '1 week', CURRENT_DATE + INTERVAL '17 weeks', 'en', 2, 'Reading');
+    (vocab_booklet_id, 'Vocabulary Time', 'Building Essential Vocabulary', CURRENT_DATE - INTERVAL '4 weeks', CURRENT_DATE + INTERVAL '16 weeks', 'en', 1, 'Reading'),
+    (sight_words_booklet_id, 'Sight Words Time', 'Common Sight Words Practice', CURRENT_DATE - INTERVAL '3 weeks', CURRENT_DATE + INTERVAL '12 weeks', 'en', 1, 'Reading'),
+    (reading_booklet_id, 'Reading Time', 'Reading Comprehension Skills', CURRENT_DATE - INTERVAL '2 weeks', CURRENT_DATE + INTERVAL '22 weeks', 'en', 1, 'Reading'),
+    (phonics_booklet_id, 'Phonics Time', 'Sound and Letter Recognition', CURRENT_DATE - INTERVAL '1 week', CURRENT_DATE + INTERVAL '17 weeks', 'en', 1, 'Reading');
 
     RAISE NOTICE '✅ Booklets created';
 
@@ -59,13 +59,13 @@ BEGIN
     END LOOP;
 
     -- Insert Modules and Activities for Sight Words Time (2 modules, 2 activities each)
-    FOR i IN 1..2 LOOP
+    FOR i IN 1..1 LOOP
         module_id := gen_random_uuid();
         INSERT INTO modules (id, booklet_id, idx, title, description) VALUES
         (module_id, sight_words_booklet_id, i, 'Sight Words Module ' || i, 'Practice common sight words set ' || i);
         
         -- Add 2 activities per module
-        FOR j IN 1..2 LOOP
+        FOR j IN 1..1 LOOP
             activity_id := gen_random_uuid();
             INSERT INTO activities (id, module_id, type, points, est_minutes, instructions) VALUES
             (activity_id, module_id, 
@@ -80,7 +80,7 @@ BEGIN
     END LOOP;
 
     -- Insert Modules and Activities for Reading Time (2 modules, 2 activities each)
-    FOR i IN 1..2 LOOP
+    FOR i IN 1..1 LOOP
         module_id := gen_random_uuid();
         INSERT INTO modules (id, booklet_id, idx, title, description) VALUES
         (module_id, reading_booklet_id, i, 'Reading Module ' || i, 'Reading comprehension practice level ' || i);
@@ -107,7 +107,7 @@ BEGIN
         (module_id, phonics_booklet_id, i, 'Phonics Module ' || i, 'Sound recognition and phonics practice ' || i);
         
         -- Add 2 activities per module
-        FOR j IN 1..2 LOOP
+        FOR j IN 1..1 LOOP
             activity_id := gen_random_uuid();
             INSERT INTO activities (id, module_id, type, points, est_minutes, instructions) VALUES
             (activity_id, module_id, 

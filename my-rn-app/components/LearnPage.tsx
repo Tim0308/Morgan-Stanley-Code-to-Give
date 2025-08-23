@@ -6,9 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
 import { api, BookletWithModules, UserProfile } from "../lib/api";
+import { useCache } from "../contexts/CacheContext";
 
 interface Task {
   type: "pen-paper" | "app";
@@ -16,6 +20,7 @@ interface Task {
   icon: string;
   actionIcon?: string;
   status: "not_started" | "in_progress" | "completed";
+  hasProof?: boolean; // Track if proof was uploaded for pen & paper tasks
 }
 
 interface WorkItem {
@@ -30,43 +35,211 @@ interface WorkItem {
 
 export default function LearnPage() {
   const [selectedTab, setSelectedTab] = useState("Homework");
-  const [booklets, setBooklets] = useState<BookletWithModules[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [showCompletedWork, setShowCompletedWork] = useState(false);
+  const [uploadingProof, setUploadingProof] = useState<string | null>(null);
 
+  // Use cache instead of local state
+  const {
+    getUserProfile,
+    getChildren,
+    getBookletsForChild,
+    updateCache,
+    refreshData,
+    isLoading: cacheLoading,
+    error: cacheError,
+  } = useCache();
+
+  // Get data from cache
+  const userProfile = getUserProfile();
+  const children = getChildren();
+
+  // Set selected child on component mount
   useEffect(() => {
-    loadLearnData();
-  }, []);
+    if (children && children.length > 0 && !selectedChildId) {
+      setSelectedChildId(children[0].id);
+    }
+  }, [children, selectedChildId]);
+
+  // Get booklets for selected child
+  const booklets = selectedChildId ? getBookletsForChild(selectedChildId) : [];
 
   const loadLearnData = async () => {
     try {
       setLoading(true);
       setError(null);
+      await refreshData();
+    } catch (err) {
+      console.error("Error refreshing learn data:", err);
+      setError("Failed to refresh learning materials");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // Get user profile to get children
-      const userProfile: UserProfile = await api.getUserProfile();
+  const handleCameraAction = async (activityId: string, taskType: string) => {
+    if (taskType !== "pen-paper") return;
 
-      if (!userProfile.children || userProfile.children.length === 0) {
-        // No children found, show empty state
-        setBooklets([]);
-        setLoading(false);
+    try {
+      // For now, show an alert with instructions
+      Alert.alert(
+        "Upload Proof of Work",
+        "Take a photo of your completed pen & paper work to submit proof.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Take Photo",
+            onPress: () => openCamera(activityId),
+          },
+          {
+            text: "Choose from Gallery",
+            onPress: () => openImagePicker(activityId),
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Camera action error:", error);
+      Alert.alert("Error", "Could not open camera. Please try again.");
+    }
+  };
+
+  const openCamera = async (activityId: string) => {
+    try {
+      // Request camera permissions
+      const cameraPermission =
+        await ImagePicker.requestCameraPermissionsAsync();
+      if (cameraPermission.status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Camera access is needed to take photos of your completed work."
+        );
         return;
       }
 
-      // Use first child for now
-      const firstChild = userProfile.children[0];
-      setSelectedChildId(firstChild.id);
+      // Launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
 
-      // Get booklets with activities
-      const bookletsData = await api.getBooklets(firstChild.id);
-      setBooklets(bookletsData || []);
-    } catch (err) {
-      console.error("Error loading learn data:", err);
-      setError("Failed to load learning materials");
-      setBooklets([]);
+      if (!result.canceled && result.assets[0]) {
+        await uploadProofImage(result.assets[0].uri, activityId);
+      }
+    } catch (error) {
+      console.error("Camera error:", error);
+      Alert.alert("Error", "Failed to open camera. Please try again.");
+    }
+  };
+
+  const openImagePicker = async (activityId: string) => {
+    try {
+      // Request media library permissions
+      const mediaPermission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (mediaPermission.status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Photo library access is needed to select images."
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadProofImage(result.assets[0].uri, activityId);
+      }
+    } catch (error) {
+      console.error("Image picker error:", error);
+      Alert.alert("Error", "Failed to open image picker. Please try again.");
+    }
+  };
+
+  const uploadProofImage = async (imageUri: string, activityId: string) => {
+    if (!selectedChildId) return;
+
+    try {
+      setUploadingProof(activityId);
+
+      // Create FormData for file upload
+      const formData = new FormData();
+
+      // Get file info from URI
+      const filename = imageUri.split("/").pop() || "proof.jpg";
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : "image/jpeg";
+
+      // Append file to FormData
+      formData.append("file", {
+        uri: imageUri,
+        name: filename,
+        type,
+      } as any);
+
+      formData.append("activity_id", activityId);
+      formData.append("child_id", selectedChildId);
+
+      // Upload image to backend
+      const result = await api.uploadProofImage(formData);
+
+      // Update cache with the new proof URL
+      if (selectedChildId && result.proof_url) {
+        const currentBooklets = getBookletsForChild(selectedChildId);
+        const updatedBooklets = currentBooklets.map((booklet: any) => ({
+          ...booklet,
+          modules: booklet.modules.map((module: any) => ({
+            ...module,
+            activities: module.activities.map((activity: any) => {
+              if (activity.id === activityId) {
+                return {
+                  ...activity,
+                  progress: {
+                    ...activity.progress,
+                    proof_url: result.proof_url,
+                  },
+                };
+              }
+              return activity;
+            }),
+          })),
+        }));
+
+        // Update cache with new data
+        updateCache({
+          booklets: [
+            ...booklets.filter((b: any) => b.child_id !== selectedChildId),
+            ...updatedBooklets.map((b: any) => ({
+              ...b,
+              child_id: selectedChildId,
+            })),
+          ],
+        });
+      }
+
+      // Show success message
+      Alert.alert(
+        "Proof Uploaded!",
+        "Your work proof has been submitted successfully.",
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      console.error("Upload proof error:", error);
+      Alert.alert(
+        "Upload Failed",
+        "Could not upload proof image. Please try again."
+      );
     } finally {
-      setLoading(false);
+      setUploadingProof(null);
     }
   };
 
@@ -74,10 +247,12 @@ export default function LearnPage() {
   const generateWorkItems = (): WorkItem[] => {
     const workItems: WorkItem[] = [];
 
-    booklets.forEach((booklet) => {
-      booklet.modules.forEach((module) => {
-        module.activities.forEach((activity) => {
+    booklets.forEach((booklet: any) => {
+      booklet.modules.forEach((module: any) => {
+        module.activities.forEach((activity: any) => {
           // Convert activity to work item
+          const hasProof = activity.progress?.proof_url ? true : false;
+
           const tasks: Task[] = [
             {
               type: activity.type === "pen_paper" ? "pen-paper" : "app",
@@ -87,7 +262,8 @@ export default function LearnPage() {
                   : "In-App Task",
               icon: activity.type === "pen_paper" ? "camera" : "play-circle",
               actionIcon: activity.type === "pen_paper" ? "camera" : "play",
-              status: activity.status,
+              status: activity.progress?.status || "not_started",
+              hasProof: hasProof, // Add this to track if proof was uploaded
             },
           ];
 
@@ -108,7 +284,10 @@ export default function LearnPage() {
             backgroundColor:
               subjectColors[booklet.subject || "default"] ||
               subjectColors.default,
-            status: activity.status === "completed" ? "completed" : "current",
+            status:
+              activity.progress?.status === "completed"
+                ? "completed"
+                : "current",
           });
         });
       });
@@ -136,7 +315,7 @@ export default function LearnPage() {
 
   const completedWork = workItems.filter((item) => item.status === "completed");
 
-  if (loading) {
+  if (loading || cacheLoading) {
     return (
       <View style={styles.container}>
         <Text style={styles.pageTitle}>Learn</Text>
@@ -148,13 +327,13 @@ export default function LearnPage() {
     );
   }
 
-  if (error) {
+  if (error || cacheError) {
     return (
       <View style={styles.container}>
         <Text style={styles.pageTitle}>Learn</Text>
         <View style={styles.errorContainer}>
           <Ionicons name="warning-outline" size={48} color="#ef4444" />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>{error || cacheError}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadLearnData}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
@@ -203,6 +382,54 @@ export default function LearnPage() {
 
       {selectedTab === "Homework" ? (
         <View>
+          {/* Homework Calendar Section */}
+          <View style={styles.calendarSection}>
+            <Text style={styles.calendarTitle}>Homework Calendar</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.calendarScroll}
+            >
+              <View style={styles.calendarContainer}>
+                <View style={[styles.weekCard, styles.completedWeek]}>
+                  <View style={styles.weekIcon}>
+                    <Ionicons name="checkmark" size={20} color="#ffffff" />
+                  </View>
+                  <Text style={styles.weekTitle}>Week 1</Text>
+                  <Text style={styles.weekDates}>12-18 Aug</Text>
+                  <Text style={styles.weekTasks}>2 tasks</Text>
+                </View>
+
+                <View style={[styles.weekCard, styles.currentWeek]}>
+                  <View style={styles.weekIconCurrent}>
+                    <Text style={styles.weekNumber}>2</Text>
+                  </View>
+                  <Text style={styles.weekTitle}>Week 2</Text>
+                  <Text style={styles.weekDates}>19-25 Aug</Text>
+                  <Text style={styles.weekTasks}>2 tasks</Text>
+                </View>
+
+                <View style={[styles.weekCard, styles.upcomingWeek]}>
+                  <View style={styles.weekIconUpcoming}>
+                    <Text style={styles.weekNumberUpcoming}>3</Text>
+                  </View>
+                  <Text style={styles.weekTitleUpcoming}>Week 3</Text>
+                  <Text style={styles.weekDatesUpcoming}>26 Aug - 1 Sep</Text>
+                  <Text style={styles.weekTasksUpcoming}>3 tasks</Text>
+                </View>
+
+                <View style={[styles.weekCard, styles.upcomingWeek]}>
+                  <View style={styles.weekIconUpcoming}>
+                    <Text style={styles.weekNumberUpcoming}>4</Text>
+                  </View>
+                  <Text style={styles.weekTitleUpcoming}>Week 4</Text>
+                  <Text style={styles.weekDatesUpcoming}>2-8 Sep</Text>
+                  <Text style={styles.weekTasksUpcoming}>2 tasks</Text>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+
           {/* Current Work Section */}
           <View style={styles.sectionHeader}>
             <Ionicons name="timer-outline" size={20} color="#f97316" />
@@ -237,21 +464,60 @@ export default function LearnPage() {
 
                 <View style={styles.tasksContainer}>
                   {item.tasks.map((task, index) => (
-                    <View key={index} style={styles.taskItem}>
+                    <View
+                      key={index}
+                      style={[
+                        styles.taskItem,
+                        task.hasProof &&
+                          task.type === "pen-paper" &&
+                          styles.taskItemWithProof,
+                      ]}
+                    >
                       <View style={styles.taskInfo}>
                         <Ionicons
                           name={task.icon as any}
                           size={16}
-                          color="#666"
+                          color={
+                            task.hasProof && task.type === "pen-paper"
+                              ? "#22c55e"
+                              : "#666"
+                          }
                         />
-                        <Text style={styles.taskLabel}>{task.label}</Text>
+                        <Text
+                          style={[
+                            styles.taskLabel,
+                            task.hasProof &&
+                              task.type === "pen-paper" &&
+                              styles.taskLabelWithProof,
+                          ]}
+                        >
+                          {task.label}
+                        </Text>
+                        {task.hasProof && task.type === "pen-paper" && (
+                          <View style={styles.proofIndicator}>
+                            <Ionicons
+                              name="checkmark-circle"
+                              size={14}
+                              color="#22c55e"
+                            />
+                            <Text style={styles.proofText}>Pending</Text>
+                          </View>
+                        )}
                       </View>
-                      <TouchableOpacity style={styles.taskAction}>
-                        <Ionicons
-                          name={task.actionIcon as any}
-                          size={16}
-                          color="#1a1a2e"
-                        />
+                      <TouchableOpacity
+                        style={styles.taskAction}
+                        onPress={() => handleCameraAction(item.id, task.type)}
+                        disabled={uploadingProof === item.id}
+                      >
+                        {uploadingProof === item.id ? (
+                          <ActivityIndicator size="small" color="#1a1a2e" />
+                        ) : (
+                          <Ionicons
+                            name={task.actionIcon as any}
+                            size={16}
+                            color="#1a1a2e"
+                          />
+                        )}
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -261,62 +527,66 @@ export default function LearnPage() {
           )}
 
           {/* Show More Current Work Button */}
-          {allCurrentWork.length > 3 && (
+          {/* {allCurrentWork.length > 3 && (
             <TouchableOpacity style={styles.showMoreButton}>
               <Text style={styles.showMoreText}>
                 Show More Assignments ({allCurrentWork.length - 3} more)
               </Text>
             </TouchableOpacity>
-          )}
+          )} */}
 
           {/* Completed Work Section */}
           {completedWork.length > 0 && (
             <>
-              <View style={styles.sectionHeader}>
+              <TouchableOpacity
+                style={styles.sectionHeader}
+                onPress={() => setShowCompletedWork(!showCompletedWork)}
+              >
                 <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
                 <Text style={styles.sectionTitle}>Completed Work</Text>
-              </View>
-
-              {completedWork.slice(0, 3).map((item) => (
-                <View
-                  key={item.id}
-                  style={[styles.workCard, styles.completedCard]}
-                >
-                  <View style={styles.workHeader}>
-                    <View style={[styles.subjectBadge, styles.completedBadge]}>
-                      <Text style={[styles.subjectText, styles.completedText]}>
-                        {item.subject}
-                      </Text>
-                    </View>
-                    <Text style={styles.workDate}>{item.date}</Text>
-                  </View>
-
-                  <Text style={[styles.workTitle, styles.completedTitle]}>
-                    {item.title}
+                <View style={styles.sectionToggle}>
+                  <Text style={styles.completedCount}>
+                    ({completedWork.length - 3})
                   </Text>
-
-                  <View style={styles.completedIndicator}>
-                    <Ionicons name="checkmark" size={16} color="#22c55e" />
-                    <Text style={styles.completedLabel}>Completed</Text>
-                  </View>
+                  <Ionicons
+                    name={showCompletedWork ? "chevron-up" : "chevron-down"}
+                    size={16}
+                    color="#666"
+                  />
                 </View>
-              ))}
+              </TouchableOpacity>
 
-              {/* Show More Completed Work Button */}
-              {completedWork.length > 3 && (
-                <TouchableOpacity style={styles.showMoreButton}>
-                  <Text style={styles.showMoreText}>
-                    Show More ({completedWork.length - 3} more)
-                  </Text>
-                </TouchableOpacity>
-              )}
+              {showCompletedWork && (
+                <>
+                  {completedWork.slice(0, 3).map((item) => (
+                    <View
+                      key={item.id}
+                      style={[styles.workCard, styles.completedCard]}
+                    >
+                      <View style={styles.workHeader}>
+                        <View
+                          style={[styles.subjectBadge, styles.completedBadge]}
+                        >
+                          <Text
+                            style={[styles.subjectText, styles.completedText]}
+                          >
+                            {item.subject}
+                          </Text>
+                        </View>
+                        <Text style={styles.workDate}>{item.date}</Text>
+                      </View>
 
-              {completedWork.length > 3 && (
-                <TouchableOpacity style={styles.showMoreButton}>
-                  <Text style={styles.showMoreText}>
-                    Show More ({completedWork.length - 3} more)
-                  </Text>
-                </TouchableOpacity>
+                      <Text style={[styles.workTitle, styles.completedTitle]}>
+                        {item.title}
+                      </Text>
+
+                      <View style={styles.completedIndicator}>
+                        <Ionicons name="checkmark" size={16} color="#22c55e" />
+                        <Text style={styles.completedLabel}>Completed</Text>
+                      </View>
+                    </View>
+                  ))}
+                </>
               )}
             </>
           )}
@@ -335,7 +605,7 @@ export default function LearnPage() {
           ) : (
             booklets.slice(0, 3).map(
               (
-                booklet // Limit to first 3 booklets
+                booklet: any // Limit to first 3 booklets
               ) => (
                 <View key={booklet.id} style={styles.materialCard}>
                   <View style={styles.materialHeader}>
@@ -358,7 +628,7 @@ export default function LearnPage() {
                   <Text style={styles.moduleCount}>
                     {booklet.modules.length} modules •{" "}
                     {booklet.modules.reduce(
-                      (acc, mod) => acc + mod.activities.length,
+                      (acc: number, mod: any) => acc + mod.activities.length,
                       0
                     )}{" "}
                     activities
@@ -378,13 +648,13 @@ export default function LearnPage() {
           )}
 
           {/* Show More Materials Button */}
-          {booklets.length > 3 && (
+          {/* {booklets.length > 3 && (
             <TouchableOpacity style={styles.showMoreButton}>
               <Text style={styles.showMoreText}>
                 Show More Materials ({booklets.length - 3} more)
               </Text>
             </TouchableOpacity>
-          )}
+          )} */}
         </View>
       )}
     </ScrollView>
@@ -468,6 +738,118 @@ const styles = StyleSheet.create({
     color: "#1a1a2e",
     fontWeight: "600",
   },
+
+  // Calendar styles
+  calendarSection: {
+    marginBottom: 24,
+  },
+  calendarTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 16,
+  },
+  calendarScroll: {
+    marginHorizontal: -20,
+  },
+  calendarContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  weekCard: {
+    width: 120,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 140,
+  },
+  completedWeek: {
+    backgroundColor: "#dcfce7",
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+  },
+  currentWeek: {
+    backgroundColor: "#f3e8ff",
+    borderWidth: 1,
+    borderColor: "#c4b5fd",
+  },
+  upcomingWeek: {
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  weekIcon: {
+    width: 32,
+    height: 32,
+    backgroundColor: "#22c55e",
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  weekIconCurrent: {
+    width: 32,
+    height: 32,
+    backgroundColor: "#a855f7",
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  weekIconUpcoming: {
+    width: 32,
+    height: 32,
+    backgroundColor: "#9ca3af",
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  weekNumber: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#ffffff",
+  },
+  weekNumberUpcoming: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#ffffff",
+  },
+  weekTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  weekTitleUpcoming: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#9ca3af",
+    marginBottom: 4,
+  },
+  weekDates: {
+    fontSize: 11,
+    color: "#666",
+    marginBottom: 4,
+  },
+  weekDatesUpcoming: {
+    fontSize: 11,
+    color: "#9ca3af",
+    marginBottom: 4,
+  },
+  weekTasks: {
+    fontSize: 11,
+    color: "#666",
+    fontWeight: "500",
+  },
+  weekTasksUpcoming: {
+    fontSize: 11,
+    color: "#9ca3af",
+    fontWeight: "500",
+  },
+
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -479,6 +861,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     marginLeft: 8,
+    flex: 1,
+  },
+  sectionToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: "auto",
+  },
+  completedCount: {
+    fontSize: 14,
+    color: "#666",
+    marginRight: 8,
   },
   workCard: {
     borderRadius: 12,
@@ -538,14 +931,39 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
   },
+  taskItemWithProof: {
+    backgroundColor: "rgba(34, 197, 94, 0.1)", // Light green background
+    borderWidth: 1,
+    borderColor: "rgba(34, 197, 94, 0.3)",
+  },
   taskInfo: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
   taskLabel: {
     fontSize: 14,
     color: "#666",
     marginLeft: 8,
+  },
+  taskLabelWithProof: {
+    color: "#22c55e",
+    fontWeight: "500",
+  },
+  proofIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
+    borderRadius: 12,
+  },
+  proofText: {
+    fontSize: 10,
+    color: "#22c55e",
+    marginLeft: 4,
+    fontWeight: "500",
   },
   taskAction: {
     padding: 4,

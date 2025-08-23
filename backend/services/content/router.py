@@ -3,7 +3,7 @@ Content microservice router
 Handles booklets, modules, activities, and progress tracking
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Form
 from typing import List, Optional
 import logging
 
@@ -145,4 +145,50 @@ async def get_booklet_progress(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve booklet progress"
-        ) 
+        )
+
+
+@router.post("/upload-proof")
+async def upload_proof_image(
+    file: UploadFile = File(...),
+    activity_id: str = Form(...),
+    child_id: str = Form(...),
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """Upload proof image for pen & paper activities"""
+    try:
+        # Validate file type
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only image files are allowed"
+            )
+        
+        # Validate file size (max 10MB)
+        if file.size and file.size > 10 * 1024 * 1024:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File size too large (max 10MB)"
+            )
+        
+        service = ContentService()
+        
+        # Upload image and get URL
+        proof_url = await service.upload_proof_image(file, current_user.user_id)
+        
+        # Just save the proof URL without changing status to completed
+        await service.save_proof_url(
+            activity_id=activity_id,
+            child_id=child_id,
+            proof_url=proof_url,
+            user_id=current_user.user_id
+        )
+        
+        return {"proof_url": proof_url, "message": "Proof uploaded successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to upload proof image: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upload proof image"
+        )

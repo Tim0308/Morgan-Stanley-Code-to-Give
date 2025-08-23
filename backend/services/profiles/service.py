@@ -31,14 +31,16 @@ class ProfileService:
             profile_result = self.supabase.table("profiles").select("*").eq("user_id", user_id).execute()
             
             if not profile_result.data:
-                # Create default profile if not exists
-                profile_data = {
-                    "user_id": user_id,
-                    "role": "parent",
-                    "locale": "en"
-                }
-                create_result = self.supabase.table("profiles").insert(profile_data).execute()
-                profile = Profile(**create_result.data[0])
+                logger.warning(f"No profile found for user {user_id}, creating default profile object")
+                # Return a default profile object without saving to DB to avoid FK constraint issues
+                profile = Profile(
+                    user_id=user_id,
+                    role="parent",
+                    locale="en",
+                    full_name=None,
+                    school=None,
+                    grade=None
+                )
             else:
                 profile = Profile(**profile_result.data[0])
             

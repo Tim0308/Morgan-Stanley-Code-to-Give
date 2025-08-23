@@ -1021,6 +1021,94 @@ export const api = {
       throw error;
     }
   },
+
+  // Upload proof image for pen & paper activities
+  async uploadProofImage(formData: FormData) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Mock proof upload (API disabled)');
+      return { proof_url: 'mock-proof-url' };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/content/upload-proof`;
+      console.log('🌐 Uploading proof image to:', url);
+
+      const headers = await getAuthHeaders();
+      // Remove content-type header to let the browser set it with boundary
+      const uploadHeaders = { ...headers };
+      delete (uploadHeaders as any)['Content-Type'];
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: uploadHeaders,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Proof image uploaded successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error uploading proof image:', error);
+      throw error;
+    }
+  },
+
+  // Get user bundle (all data for Home, Learn, Token pages)
+  async getUserBundle() {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock user bundle (API disabled)');
+      return {
+        success: true,
+        data: {
+          profile: {
+            id: 'mock-user-1',
+            name: 'Sarah Johnson',
+            email: 'sarah@example.com',
+            role: 'parent'
+          },
+          children: [
+            {
+              id: 'mock-child-1',
+              name: 'Emma',
+              age: 5,
+              grade: 'K1'
+            }
+          ],
+          booklets: [],
+          token_accounts: [],
+          recent_activity: []
+        }
+      };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/user/bundle`;
+      console.log('🌐 Fetching user bundle from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ User bundle fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching user bundle:', error);
+      throw error;
+    }
+  },
 };
 
 // Types for API responses
@@ -1083,6 +1171,16 @@ export interface Activity {
   points: number;
   est_minutes?: number;
   instructions?: string;
+  progress?: {
+    id?: string;
+    child_id?: string;
+    activity_id?: string;
+    status: 'not_started' | 'in_progress' | 'completed';
+    proof_url?: string;
+    score?: number;
+    notes?: string;
+    completed_at?: string;
+  };
 }
 
 export interface Module {
@@ -1214,4 +1312,4 @@ export interface Notification {
   message: string;
   read_at?: string;
   created_at: string;
-} 
+}
