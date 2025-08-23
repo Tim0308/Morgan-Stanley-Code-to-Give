@@ -1,0 +1,214 @@
+{
+  "forumCategories": [
+    {
+      "id": "alphabet-time",
+      "title": "Alphabet Time",
+      "icon": "book-outline",
+      "color": "#374151",
+      "posts": [
+        {
+          "id": "post-1",
+          "title": "Best ways to teach letter recognition?",
+          "preview": "My child is struggling to remember the difference between b and d. Any tips?",
+          "fullContent": "Hi everyone! My 5-year-old daughter keeps confusing b and d letters. We've been practicing for weeks but she still mixes them up. I've tried the 'bed' trick where b comes first in the word, but it doesn't seem to stick. Has anyone found effective methods to help children distinguish between these mirror letters? I'm getting a bit worried since she starts kindergarten soon. Any advice would be greatly appreciated!",
+          "author": "Mrs. Chen",
+          "timeAgo": "2h ago",
+          "likes": 12,
+          "commentsCount": 8,
+          "comments": [
+            {
+              "id": "comment-1",
+              "author": "TeacherSarah",
+              "content": "Try using hand gestures! Make a 'b' with your left hand (thumb up, fingers curved) and 'd' with your right hand. Kids love the physical movement!",
+              "timeAgo": "1h ago",
+              "likes": 5
+            },
+            {
+              "id": "comment-2",
+              "author": "DadOfThree",
+              "content": "We used sandpaper letters. The tactile experience really helped my son remember the shapes. Also, practice writing them in sand or finger paint!",
+              "timeAgo": "45min ago",
+              "likes": 3
+            }
+          ]
+        },
+        {
+          "id": "post-2",
+          "title": "Fun alphabet songs that actually work",
+          "preview": "Looking for catchy alphabet songs beyond the traditional ABC song...",
+          "fullContent": "I'm looking for fresh alphabet songs that can help my twin boys (age 4) learn their letters. The traditional ABC song is getting old and they're not that engaged anymore. I've heard there are some great new songs that focus on letter sounds rather than just names. Does anyone have recommendations for songs that have been effective with your children? Bonus points if they're available on Spotify or YouTube!",
+          "author": "MomOfTwins",
+          "timeAgo": "1d ago",
+          "likes": 18,
+          "commentsCount": 12,
+          "comments": [
+            {
+              "id": "comment-3",
+              "author": "MusicTeacherJen",
+              "content": "Try 'Have You Ever Seen a Letter?' to the tune of 'Have You Ever Seen a Lassie?' - my students love it and it focuses on letter shapes!",
+              "timeAgo": "12h ago",
+              "likes": 7
+            }
+          ]
+        },
+        {
+          "id": "post-3",
+          "title": "Uppercase vs lowercase - when to introduce?",
+          "preview": "Should I teach uppercase first or start with lowercase letters?",
+          "fullContent": "I'm a bit confused about the order of teaching letters. Some sources say to start with uppercase because they're easier to write, while others suggest lowercase since that's what children see most in books. My daughter (3.5 years old) knows some uppercase letters already from alphabet blocks, but I'm wondering if I should focus on one type first or teach them together. What approach worked best for your children?",
+          "author": "FirstTimeMom",
+          "timeAgo": "3d ago",
+          "likes": 9,
+          "commentsCount": 6,
+          "comments": [
+            {
+              "id": "comment-4",
+              "author": "KindergartenPro",
+              "content": "Start with uppercase! They're easier to form and recognize. Lowercase can wait until they're more confident with the basic letter concepts.",
+              "timeAgo": "2d ago",
+              "likes": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vocabulary-time",
+      "title": "Vocabulary Time",
+      "icon": "chatbubbles-outline",
+      "color": "#059669",
+      "posts": [
+        {
+          "id": "post-4",
+          "title": "Building vocabulary through everyday activities",
+          "preview": "Simple ways to expand your child's vocabulary during daily routines...",
+          "fullContent": "I've found that some of the best vocabulary building happens during everyday activities. Here are a few strategies that have worked well with my 4-year-old: 1) Narrating what we're doing during cooking ('We're whisking the eggs until they're fluffy'), 2) Describing objects in detail during walks ('Look at that enormous oak tree with rough bark'), and 3) Playing 'I Spy' with descriptive words instead of just colors. What everyday activities do you use for vocabulary building?",
+          "author": "VocabMom",
+          "timeAgo": "4h ago",
+          "likes": 22,
+          "commentsCount": 15,
+          "comments": [
+            {
+              "id": "comment-5",
+              "author": "BusyDad",
+              "content": "Great tips! We do 'word of the day' during breakfast. Today's word was 'scrumptious' and my daughter used it three times already!",
+              "timeAgo": "2h ago",
+              "likes": 8
+            }
+          ]
+        },
+        {
+          "id": "post-5",
+          "title": "When to worry about vocabulary development?",
+          "preview": "My 3-year-old has about 200 words. Is this normal?",
+          "fullContent": "I'm a bit concerned about my son's vocabulary development. He just turned 3 and I estimate he has around 200-250 words. He speaks in 2-3 word phrases mostly. His pediatrician said not to worry yet, but I see other kids his age speaking in full sentences. He understands everything we say to him and follows complex instructions, so his comprehension seems fine. Should I be doing more to help him, or is this still within the normal range? Has anyone experienced similar concerns?",
+          "author": "WorriedMom",
+          "timeAgo": "6h ago",
+          "likes": 8,
+          "commentsCount": 11,
+          "comments": [
+            {
+              "id": "comment-6",
+              "author": "SLProfessional",
+              "content": "Every child develops at their own pace! The fact that his comprehension is strong is a great sign. Keep reading together and narrating your activities.",
+              "timeAgo": "4h ago",
+              "likes": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sight-words",
+      "title": "Sight Words Time",
+      "icon": "eye-outline",
+      "color": "#7c3aed",
+      "posts": [
+        {
+          "id": "post-6",
+          "title": "Sight words games that don't feel like work",
+          "preview": "Creative ways to practice sight words through play...",
+          "fullContent": "My kindergartner needs to learn 50 sight words this year, and traditional flashcards are boring her to tears. I've been experimenting with different approaches and found some great games: 1) Sight word scavenger hunts around the house, 2) Writing words in shaving cream on the bathtub wall, 3) Sight word bingo during car rides, and 4) Hiding word cards in her lunch box with little notes. She's much more engaged now! What creative methods have worked for your children?",
+          "author": "CreativeMama",
+          "timeAgo": "1d ago",
+          "likes": 31,
+          "commentsCount": 19,
+          "comments": [
+            {
+              "id": "comment-7",
+              "author": "PlayfulParent",
+              "content": "We play 'sight word hopscotch' - write words in chalk and she has to read the word before hopping on it. She loves it!",
+              "timeAgo": "18h ago",
+              "likes": 12
+            }
+          ]
+        },
+        {
+          "id": "post-7",
+          "title": "Dolch vs Fry sight word lists?",
+          "preview": "Which sight word list should we focus on for kindergarten?",
+          "fullContent": "I'm getting conflicting advice about sight word lists. My daughter's teacher uses the Dolch list, but I've heard the Fry list is more current and comprehensive. Should I stick with what the teacher is using or supplement with additional words? I don't want to confuse my daughter or overwhelm her, but I also want to give her the best foundation. Has anyone compared these lists or have experience with both approaches?",
+          "author": "AnalyticalDad",
+          "timeAgo": "2d ago",
+          "likes": 7,
+          "commentsCount": 9,
+          "comments": [
+            {
+              "id": "comment-8",
+              "author": "Reading Specialist",
+              "content": "Stick with your teacher's list! Consistency is key. Both lists cover the most important high-frequency words for early readers.",
+              "timeAgo": "1d ago",
+              "likes": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reading-time",
+      "title": "Reading Time",
+      "icon": "library-outline",
+      "color": "#2563eb",
+      "posts": [
+        {
+          "id": "post-8",
+          "title": "Phonics activities that actually work",
+          "preview": "Looking for engaging phonics games that kept your child interested.",
+          "fullContent": "I'm struggling to find phonics activities that hold my 5-year-old's attention. We've tried workbooks, apps, and some online games, but he gets bored quickly. I'm looking for hands-on, engaging activities that make learning phonics fun rather than a chore. He loves building with blocks and anything with movement, so I'm hoping to find activities that incorporate these interests. What phonics activities have been most successful with your children?",
+          "author": "Anonymous",
+          "timeAgo": "1d ago",
+          "likes": 7,
+          "commentsCount": 5,
+          "comments": [
+            {
+              "id": "comment-9",
+              "author": "PhonicsExpert",
+              "content": "Try 'sound boxes' with small objects! Put items that start with the target sound in boxes. Kids love the treasure hunt aspect.",
+              "timeAgo": "20h ago",
+              "likes": 4
+            }
+          ]
+        },
+        {
+          "id": "post-9",
+          "title": "When should kids start reading independently?",
+          "preview": "My 4-year-old wants to read alone but still needs help with most words...",
+          "fullContent": "My daughter has been showing a lot of interest in reading independently lately. She's 4 years old and knows all her letters and sounds, plus about 20 sight words. She'll sit with books and 'read' by looking at pictures and remembering parts of stories we've read together. But she still needs help with most words when actually reading text. Should I encourage her independence even if she's mostly guessing, or should I continue to read with her until she has more skills? I don't want to discourage her enthusiasm, but I also want to make sure she's building real reading skills.",
+          "author": "ProudMama",
+          "timeAgo": "3d ago",
+          "likes": 14,
+          "commentsCount": 8,
+          "comments": [
+            {
+              "id": "comment-10",
+              "author": "EarlyLiteracy",
+              "content": "Encourage her! Independent 'reading' builds confidence and love for books. Keep doing shared reading too for skill building.",
+              "timeAgo": "2d ago",
+              "likes": 6
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
