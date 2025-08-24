@@ -79,7 +79,7 @@ function MainApp() {
             style={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            <TabToggle />
+            {/* <TabToggle /> */}
             <WeeklyGoal />
             <BookletProgress />
             <PerformanceMetrics />

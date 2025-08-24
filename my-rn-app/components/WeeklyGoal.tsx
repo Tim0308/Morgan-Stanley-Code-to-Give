@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     marginBottom: 20,
+    marginTop: 20,
   },
   card: {
     backgroundColor: 'white',
