@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { testConnection } from "../lib/api";
 
 interface AuthUser {
   id: string;
@@ -16,6 +17,7 @@ interface AuthContextType {
   user: AuthUser | null;
   session: Session | null;
   loading: boolean;
+  isSigningIn: boolean; // Flag specifically for sign-in loading animation
   signUp: (email: string, password: string, userData: any) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -28,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -168,14 +171,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
+      setIsSigningIn(true); // Show loading animation
 
-      // Add a small delay to ensure state update is processed
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Start the minimum 2-second delay for cache initialization
+      // Start the 3-second loading experience
       const startTime = Date.now();
 
+      // Authenticate first
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -183,18 +184,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
 
-      // Ensure minimum 2-second delay has passed for smooth UX
-      const elapsed = Date.now() - startTime;
-      const remainingTime = Math.max(0, 2000 - elapsed);
+      // Start background tasks while showing animation
+      const backgroundTasks = Promise.all([
+        testConnection().catch(console.error),
+        // Cache loading will be handled by App.tsx useEffect when user is set
+        new Promise((resolve) => setTimeout(resolve, 500)), // Small buffer
+      ]);
 
-      if (remainingTime > 0) {
-        await new Promise((resolve) => setTimeout(resolve, remainingTime));
-      }
+      // Ensure minimum 3-second delay has passed for smooth UX
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, 3000 - elapsed);
+
+      await Promise.all([
+        backgroundTasks,
+        remainingTime > 0
+          ? new Promise((resolve) => setTimeout(resolve, remainingTime))
+          : Promise.resolve(),
+      ]);
     } catch (error: any) {
       console.error("Sign in error:", error);
+      setIsSigningIn(false); // Hide loading animation on error
       throw new Error(error.message || "Failed to sign in");
     } finally {
-      setLoading(false);
+      setIsSigningIn(false); // Hide loading animation when done
     }
   };
 
@@ -233,6 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     loading,
+    isSigningIn,
     signUp,
     signIn,
     signOut,
