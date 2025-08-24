@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import WelcomeScreen from './WelcomeScreen';
-import NameInputScreen from './NameInputScreen';
-import ContactMethodScreen from './ContactMethodScreen';
-import PasswordScreen from './PasswordScreen';
-import LoadingScreen from './LoadingScreen';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from "react";
+import { Alert } from "react-native";
+import WelcomeScreen from "./WelcomeScreen";
+import NameInputScreen from "./NameInputScreen";
+import ContactMethodScreen from "./ContactMethodScreen";
+import PasswordScreen from "./PasswordScreen";
+import LoadingScreen from "./LoadingScreen";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface OnboardingData {
   name: string;
   relationship: string;
-  contactMethod: 'phone' | 'email';
+  contactMethod: "phone" | "email";
   contact: string;
   password: string;
 }
@@ -29,12 +29,12 @@ export default function OnboardingFlow({ onBackToLogin }: OnboardingFlowProps) {
   };
 
   const handleNameNext = (name: string, relationship: string) => {
-    setData(prev => ({ ...prev, name, relationship }));
+    setData((prev) => ({ ...prev, name, relationship }));
     setStep(2);
   };
 
-  const handleContactNext = (method: 'phone' | 'email', contact: string) => {
-    setData(prev => ({ ...prev, contactMethod: method, contact }));
+  const handleContactNext = (method: "phone" | "email", contact: string) => {
+    setData((prev) => ({ ...prev, contactMethod: method, contact }));
     setStep(3);
   };
 
@@ -46,30 +46,25 @@ export default function OnboardingFlow({ onBackToLogin }: OnboardingFlowProps) {
 
       // Convert phone number to email format for Supabase Auth
       let authEmail = finalData.contact!;
-      if (finalData.contactMethod === 'phone') {
+      if (finalData.contactMethod === "phone") {
         // Convert phone to email format: phone@reach.app
-        const cleanPhone = finalData.contact!.replace(/\D/g, ''); // Remove non-digits
+        const cleanPhone = finalData.contact!.replace(/\D/g, ""); // Remove non-digits
         authEmail = `${cleanPhone}@reach.app`;
       }
 
       // Create account with Supabase
-      await signUp(
-        authEmail,
-        password,
-        {
-          name: finalData.name,
-          relationship: finalData.relationship,
-          contactMethod: finalData.contactMethod,
-          originalContact: finalData.contact, // Store original phone/email
-        }
-      );
-
+      await signUp(authEmail, password, {
+        name: finalData.name,
+        relationship: finalData.relationship,
+        contactMethod: finalData.contactMethod,
+        originalContact: finalData.contact, // Store original phone/email
+      });
     } catch (error: any) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
       Alert.alert(
-        'Registration Failed',
-        error.message || 'Failed to create account. Please try again.',
-        [{ text: 'OK', onPress: () => setStep(3) }] // Go back to password screen
+        "Registration Failed",
+        error.message || "Failed to create account. Please try again.",
+        [{ text: "OK", onPress: () => setStep(3) }] // Go back to password screen
       );
     }
   };
@@ -81,16 +76,35 @@ export default function OnboardingFlow({ onBackToLogin }: OnboardingFlowProps) {
 
   switch (step) {
     case 0:
-      return <WelcomeScreen onContinue={handleWelcomeContinue} onBackToLogin={onBackToLogin} />;
+      return (
+        <WelcomeScreen
+          onContinue={handleWelcomeContinue}
+          onBackToLogin={onBackToLogin}
+        />
+      );
     case 1:
-      return <NameInputScreen onNext={handleNameNext} onBack={() => setStep(0)} />;
+      return (
+        <NameInputScreen onNext={handleNameNext} onBack={() => setStep(0)} />
+      );
     case 2:
-      return <ContactMethodScreen onNext={handleContactNext} onBack={() => setStep(1)} />;
+      return (
+        <ContactMethodScreen
+          onNext={handleContactNext}
+          onBack={() => setStep(1)}
+        />
+      );
     case 3:
-      return <PasswordScreen onNext={handlePasswordNext} onBack={() => setStep(2)} />;
+      return (
+        <PasswordScreen onNext={handlePasswordNext} onBack={() => setStep(2)} />
+      );
     case 4:
       return <LoadingScreen onComplete={handleLoadingComplete} />;
     default:
-      return <WelcomeScreen onContinue={handleWelcomeContinue} onBackToLogin={onBackToLogin} />;
+      return (
+        <WelcomeScreen
+          onContinue={handleWelcomeContinue}
+          onBackToLogin={onBackToLogin}
+        />
+      );
   }
-} 
+}

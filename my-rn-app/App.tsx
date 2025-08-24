@@ -1,46 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, ScrollView, View, ActivityIndicator } from 'react-native';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { testConnection } from './lib/api';
-import AuthNavigator from './components/auth/AuthNavigator';
-import Header from './components/Header';
-import TabToggle from './components/TabToggle';
-import WeeklyGoal from './components/WeeklyGoal';
-import BookletProgress from './components/BookletProgress';
-import PerformanceMetrics from './components/PerformanceMetrics';
-import CertificatesEarned from './components/CertificatesEarned';
-import BottomNavigation from './components/BottomNavigation';
-import LearnPage from './components/LearnPage';
-import CommunityPage from './components/CommunityPage';
-import GamesPage from './components/GamesPage';
-import AnalyticsPage from './components/AnalyticsPage';
-import TokensPage from './components/TokensPage';
+import React, { useState, useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, ScrollView, View, ActivityIndicator} from "react-native";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { CacheProvider, useCache } from "./contexts/CacheContext";
+import { testConnection } from "./lib/api";
+import AuthNavigator from "./components/auth/AuthNavigator";
+import SigningInRing from "./components/SigningInRing";
+import Header from "./components/Header";
+import TabToggle from "./components/TabToggle";
+import WeeklyGoal from "./components/WeeklyGoal";
+import BookletProgress from "./components/BookletProgress";
+import PerformanceMetrics from "./components/PerformanceMetrics";
+import CertificatesEarned from "./components/CertificatesEarned";
+import BottomNavigation from "./components/BottomNavigation";
+import LearnPage from "./components/LearnPage";
+import CommunityPage from "./components/CommunityPage";
+import GamesPage from "./components/GamesPage";
+import AnalyticsPage from "./components/AnalyticsPage";
+import TokensPage from "./components/TokensPage";
 import PageWrapper from './components/PageWrapper';
 import ScreenshotTest from './components/ScreenshotTest';
 
 function MainApp() {
-  const [currentPage, setCurrentPage] = useState('Home');
+  const [currentPage, setCurrentPage] = useState("Home");
   const { user, loading } = useAuth();
-  const [testMode, setTestMode] = useState(false); // Temporary test mode
+  const { loadInitialData, isLoading: cacheLoading } = useCache();
 
-  // Test backend connection on app start
+
+  // Load initial cache data when user logs in
   useEffect(() => {
-    const checkConnection = async () => {
+    const initializeApp = async () => {
       if (user) {
+        console.log("👤 User authenticated, initializing app data...");
         await testConnection();
+        await loadInitialData();
       }
     };
-    checkConnection();
-  }, [user]);
+    initializeApp();
+  }, [user]); // Remove loadInitialData from dependencies
 
-  // Show loading spinner while checking auth state
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#8b5cf6" />
-      </View>
-    );
+  // Show colorful loading ring while checking auth state or loading cache
+  if (loading || cacheLoading) {
+    return <SigningInRing text="Loading" />;
   }
 
   // Show test mode if enabled
@@ -61,49 +62,30 @@ function MainApp() {
   // Show main app for authenticated users
   const renderPage = () => {
     switch (currentPage) {
-      case 'Learn':
-        return (
-          <PageWrapper>
-            <LearnPage />
-          </PageWrapper>
-        );
-      case 'Community':
-        return (
-          <PageWrapper>
-            <CommunityPage />
-          </PageWrapper>
-        );
-      case 'Games':
-        return (
-          <PageWrapper>
-            <GamesPage />
-          </PageWrapper>
-        );
-      case 'Analytics':
-        return (
-          <PageWrapper>
-            <AnalyticsPage />
-          </PageWrapper>
-        );
-      case 'Tokens':
-        return (
-          <PageWrapper>
-            <TokensPage />
-          </PageWrapper>
-        );
-      case 'Home':
+      case "Learn":
+        return <LearnPage />;
+      case "Community":
+        return <CommunityPage />;
+      case "Games":
+        return <GamesPage />;
+      case "Analytics":
+        return <AnalyticsPage />;
+      case "Tokens":
+        return <TokensPage />;
+      case "Home":
       default:
         return (
-          <PageWrapper>
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-              <TabToggle />
-              <WeeklyGoal />
-              <BookletProgress />
-              <PerformanceMetrics />
-              <CertificatesEarned />
-              <View style={styles.spacer} />
-            </ScrollView>
-          </PageWrapper>
+          <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
+            <TabToggle />
+            <WeeklyGoal />
+            <BookletProgress />
+            <PerformanceMetrics />
+            <CertificatesEarned />
+            <View style={styles.spacer} />
+          </ScrollView>
         );
     }
   };
@@ -112,10 +94,13 @@ function MainApp() {
     <View style={styles.container}>
       <StatusBar style="light" />
       <Header />
-      
+
       {renderPage()}
-      
-      <BottomNavigation currentPage={currentPage} onPageChange={setCurrentPage} />
+
+      <BottomNavigation
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </View>
   );
 }
@@ -123,7 +108,9 @@ function MainApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <MainApp />
+      <CacheProvider>
+        <MainApp />
+      </CacheProvider>
     </AuthProvider>
   );
 }
@@ -131,19 +118,19 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   content: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   spacer: {
     height: 20,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 });

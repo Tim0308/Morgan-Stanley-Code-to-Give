@@ -44,6 +44,7 @@ class ActivityBase(BaseModel):
     """Base activity model"""
     module_id: UUIDField
     type: TaskType
+    title: Optional[str] = None  # Display title for the activity
     points: int = 5
     est_minutes: int = 10
     instructions: Optional[str] = None

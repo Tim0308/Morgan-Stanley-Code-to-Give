@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import VocabVentureGame from './VocabVentureGame';
 
 export default function GamesPage() {
+  const [showVocabVenture, setShowVocabVenture] = useState(false);
+
+  const handleGameComplete = (result: any) => {
+    console.log('Game completed:', result);
+    // Handle game completion - award tokens, update progress, etc.
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
@@ -23,9 +31,9 @@ export default function GamesPage() {
 
         <View style={styles.challengeCard}>
           <View style={styles.challengeCardHeader}>
-            <Text style={styles.challengeName}>Family Reading Marathon</Text>
+            <Text style={styles.challengeName}>VocabVenture</Text>
             <View style={styles.difficultyBadge}>
-              <Text style={styles.difficultyText}>Medium</Text>
+              <Text style={styles.difficultyText}>Outdoors</Text>
             </View>
           </View>
 
@@ -47,7 +55,7 @@ export default function GamesPage() {
             <View style={styles.challengeStats}>
               <View style={styles.statItem}>
                 <Ionicons name="people" size={16} color="#666" />
-                <Text style={styles.statText}>23 families</Text>
+                <Text style={styles.statText}>23 players completed</Text>
               </View>
               <View style={styles.statItem}>
                 <Ionicons name="time" size={16} color="#666" />
@@ -55,7 +63,10 @@ export default function GamesPage() {
               </View>
             </View>
             
-            <TouchableOpacity style={styles.playButton}>
+            <TouchableOpacity 
+              style={styles.playButton}
+              onPress={() => setShowVocabVenture(true)}
+            >
               <Ionicons name="play" size={20} color="white" />
             </TouchableOpacity>
           </View>
@@ -106,6 +117,14 @@ export default function GamesPage() {
       </View>
 
       <View style={styles.spacer} />
+      
+      {/* VocabVenture Game Modal */}
+      {showVocabVenture && (
+        <VocabVentureGame
+          onClose={() => setShowVocabVenture(false)}
+          onGameComplete={handleGameComplete}
+        />
+      )}
     </ScrollView>
   );
 }

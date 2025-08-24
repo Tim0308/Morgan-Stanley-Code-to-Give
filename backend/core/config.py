@@ -28,8 +28,12 @@ class Settings(BaseSettings):
     POSTHOG_KEY: str = ""
     EXPO_PUSH_KEY: str = ""
     
-    # AI Services
-    HF_TOKEN: str = ""
+
+    # OpenAI Configuration
+    OPENAI_API_KEY: str = "a97fe937957949079c02267ba32a86dd"
+    
+    # Frontend API URL
+    EXPO_PUBLIC_API_URL: str = "http://192.168.1.100:8000"
     
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000,exp://192.168.1.100:8081,https://your-app.vercel.app"

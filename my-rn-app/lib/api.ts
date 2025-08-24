@@ -530,6 +530,617 @@ export const api = {
       throw error;
     }
   },
+
+  // Get performance metrics/KPIs for a child
+  async getPerformanceMetrics(childId: string) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock performance metrics (API disabled)');
+      return {
+        reading_speed: { value: 45, unit: 'WPM' },
+        comprehension_accuracy: { value: 85, unit: '%' },
+        engagement_time: { value: 3.5, unit: 'hours' },
+        skill_progression: { value: 78, unit: '%' }
+      };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/analytics/performance?child_id=${childId}`;
+      console.log('🌐 Fetching performance metrics from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Performance metrics fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching performance metrics:', error);
+      throw error;
+    }
+  },
+
+  // Get community feed/posts
+  async getCommunityFeed(classId?: string, limit: number = 20, cursor?: string) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock community feed (API disabled)');
+      return {
+        posts: [
+          {
+            id: '1',
+            author: { name: 'Sarah J.', avatar: null },
+            content: 'Emma just completed her first reading module! So proud! 📚',
+            media: [],
+            likes: 5,
+            comments: 2,
+            created_at: '2025-01-09T10:00:00Z',
+            type: 'achievement'
+          }
+        ],
+        next_cursor: null
+      };
+    }
+
+    try {
+      let url = `${API_BASE_URL}/api/v1/community/feed?limit=${limit}`;
+      if (classId) url += `&class_id=${classId}`;
+      if (cursor) url += `&cursor=${cursor}`;
+      
+      console.log('🌐 Fetching community feed from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Community feed fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching community feed:', error);
+      throw error;
+    }
+  },
+
+  // Create a community post
+  async createPost(content: string, type: 'achievement' | 'question', media: string[] = [], anonymous: boolean = false) {
+    try {
+      const url = `${API_BASE_URL}/api/v1/community/posts`;
+      console.log('🌐 Creating community post:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          content,
+          type,
+          media,
+          anonymous
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Post created successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error creating post:', error);
+      throw error;
+    }
+  },
+
+  // Get expert parents directory
+  async getExpertParents(limit: number = 20) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock expert parents (API disabled)');
+      return [
+        {
+          id: '1',
+          name: 'Helen C.',
+          expertise: ['Reading', 'Math'],
+          helpful_answers: 15,
+          rating: 4.8,
+          online: true
+        }
+      ];
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/community/experts?limit=${limit}`;
+      console.log('🌐 Fetching expert parents from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Expert parents fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching expert parents:', error);
+      throw error;
+    }
+  },
+
+  // Get chat threads
+  async getChatThreads() {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock chat threads (API disabled)');
+      return [
+        {
+          id: '1',
+          name: 'Teacher Ms. Wong',
+          last_message: 'Great progress on Emma\'s reading!',
+          last_message_at: '2025-01-09T15:30:00Z',
+          unread_count: 1
+        }
+      ];
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/community/threads`;
+      console.log('🌐 Fetching chat threads from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Chat threads fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching chat threads:', error);
+      throw error;
+    }
+  },
+
+  // Get weekly games/challenges
+  async getWeeklyGames(childId: string, classId?: string) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock weekly games (API disabled)');
+      return [
+        {
+          id: '1',
+          title: 'Family Reading Marathon',
+          description: 'Read together for 20 minutes each day',
+          difficulty: 'Easy',
+          days_completed: 4,
+          total_days: 7,
+          participants: 23,
+          days_remaining: 3
+        }
+      ];
+    }
+
+    try {
+      let url = `${API_BASE_URL}/api/v1/games/weekly?child_id=${childId}`;
+      if (classId) url += `&class_id=${classId}`;
+      
+      console.log('🌐 Fetching weekly games from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Weekly games fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching weekly games:', error);
+      throw error;
+    }
+  },
+
+  // Get child badges and certificates
+  async getChildAwards(childId: string) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock child awards (API disabled)');
+      return {
+        badges: [
+          {
+            id: '1',
+            name: '3-Week Streak',
+            description: 'Completed activities for 3 weeks in a row',
+            icon_url: null,
+            awarded_at: '2025-01-09T10:00:00Z'
+          }
+        ],
+        certificates: [
+          {
+            id: '1',
+            title: 'Alphabet Master',
+            description: 'Completed all alphabet recognition activities',
+            image_url: null,
+            awarded_at: '2025-01-08T14:00:00Z'
+          }
+        ]
+      };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/gamification/awards?child_id=${childId}`;
+      console.log('🌐 Fetching child awards from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Child awards fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching child awards:', error);
+      throw error;
+    }
+  },
+
+  // Update activity progress
+  async updateActivityProgress(childId: string, activityId: string, status: 'in_progress' | 'completed', proofUrl?: string) {
+    try {
+      const url = `${API_BASE_URL}/api/v1/content/progress`;
+      console.log('🌐 Updating activity progress:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          child_id: childId,
+          activity_id: activityId,
+          status,
+          proof_url: proofUrl
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Activity progress updated successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error updating activity progress:', error);
+      throw error;
+    }
+  },
+
+  // Get redemption history
+  async getRedemptionHistory(childId: string) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock redemption history (API disabled)');
+      return [
+        {
+          id: '1',
+          item_name: 'Fun Stickers Pack',
+          cost: 30,
+          status: 'fulfilled',
+          requested_at: '2025-01-08T15:30:00Z',
+          fulfilled_at: '2025-01-09T09:00:00Z'
+        }
+      ];
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/tokens/redemptions?child_id=${childId}`;
+      console.log('🌐 Fetching redemption history from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Redemption history fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching redemption history:', error);
+      throw error;
+    }
+  },
+
+  // Redeem shop item
+  async redeemShopItem(childId: string, itemId: string, quantity: number = 1) {
+    try {
+      const url = `${API_BASE_URL}/api/v1/tokens/redeem`;
+      console.log('🌐 Redeeming shop item:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          child_id: childId,
+          item_id: itemId,
+          qty: quantity
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Shop item redeemed successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error redeeming shop item:', error);
+      throw error;
+    }
+  },
+
+  // Get notifications
+  async getNotifications(limit: number = 20) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock notifications (API disabled)');
+      return [
+        {
+          id: '1',
+          type: 'streak_reminder',
+          title: 'Keep your streak going!',
+          message: 'Complete 1 more activity to maintain your streak',
+          read_at: null,
+          created_at: '2025-01-09T08:00:00Z'
+        }
+      ];
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/notifications?limit=${limit}`;
+      console.log('🌐 Fetching notifications from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Notifications fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching notifications:', error);
+      throw error;
+    }
+  },
+
+  // Toggle like on a post
+  async toggleLike(postId: string) {
+    try {
+      const url = `${API_BASE_URL}/api/v1/community/reactions`;
+      console.log('🌐 Toggling like for post:', postId);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          post_id: postId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Like toggled successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error toggling like:', error);
+      throw error;
+    }
+  },
+
+  // Create a comment on a post
+  async createComment(postId: string, content: string) {
+    try {
+      const url = `${API_BASE_URL}/api/v1/community/comments`;
+      console.log('🌐 Creating comment on post:', postId);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          post_id: postId,
+          content: content
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Comment created successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error creating comment:', error);
+      throw error;
+    }
+  },
+
+  // Upload proof image for pen & paper activities
+  async uploadProofImage(formData: FormData) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Mock proof upload (API disabled)');
+      return { proof_url: 'mock-proof-url' };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/content/upload-proof`;
+      console.log('🌐 Uploading proof image to:', url);
+
+      const headers = await getAuthHeaders();
+      // Remove content-type header to let the browser set it with boundary
+      const uploadHeaders = { ...headers };
+      delete (uploadHeaders as any)['Content-Type'];
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: uploadHeaders,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Proof image uploaded successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error uploading proof image:', error);
+      throw error;
+    }
+  },
+
+  // Delete proof image for pen & paper activities
+  async deleteProofImage(activityId: string, childId: string) {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Mock proof deletion (API disabled)');
+      return { message: 'Proof deleted successfully' };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/content/delete-proof?activity_id=${activityId}&child_id=${childId}`;
+      console.log('🌐 Deleting proof image from:', url);
+
+      const headers = await getAuthHeaders();
+
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Proof image deleted successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error deleting proof image:', error);
+      throw error;
+    }
+  },
+
+  // Get user bundle (all data for Home, Learn, Token pages)
+  async getUserBundle() {
+    if (DISABLE_API_CALLS) {
+      console.log('API: Using mock user bundle (API disabled)');
+      return {
+        success: true,
+        data: {
+          profile: {
+            id: 'mock-user-1',
+            name: 'Sarah Johnson',
+            email: 'sarah@example.com',
+            role: 'parent'
+          },
+          children: [
+            {
+              id: 'mock-child-1',
+              name: 'Emma',
+              age: 5,
+              grade: 'K1'
+            }
+          ],
+          booklets: [],
+          token_accounts: [],
+          recent_activity: []
+        }
+      };
+    }
+
+    try {
+      const url = `${API_BASE_URL}/api/v1/user/bundle`;
+      console.log('🌐 Fetching user bundle from:', url);
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ User bundle fetched successfully');
+      return data;
+    } catch (error) {
+      console.error('💥 Error fetching user bundle:', error);
+      throw error;
+    }
+  },
 };
 
 // Types for API responses
@@ -592,6 +1203,16 @@ export interface Activity {
   points: number;
   est_minutes?: number;
   instructions?: string;
+  progress?: {
+    id?: string;
+    child_id?: string;
+    activity_id?: string;
+    status: 'not_started' | 'in_progress' | 'completed';
+    proof_url?: string;
+    score?: number;
+    notes?: string;
+    completed_at?: string;
+  };
 }
 
 export interface Module {
@@ -665,3 +1286,95 @@ export const explainScreenshot = async (base64Image: string): Promise<string> =>
     throw error;
   }
 }; 
+
+// Additional interfaces for new API endpoints
+export interface PerformanceMetric {
+  value: number;
+  unit: string;
+}
+
+export interface PerformanceMetrics {
+  reading_speed: PerformanceMetric;
+  comprehension_accuracy: PerformanceMetric;
+  engagement_time: PerformanceMetric;
+  skill_progression: PerformanceMetric;
+}
+
+export interface CommunityPost {
+  id: string;
+  author: {
+    name: string;
+    avatar?: string;
+  };
+  content: string;
+  type: 'achievement' | 'question';
+  media: string[];
+  likes: number;
+  comments: number;
+  created_at: string;
+  anonymous?: boolean;
+}
+
+export interface CommunityFeed {
+  posts: CommunityPost[];
+  next_cursor?: string;
+}
+
+export interface ExpertParent {
+  id: string;
+  name: string;
+  expertise: string[];
+  helpful_answers: number;
+  rating: number;
+  online: boolean;
+}
+
+export interface ChatThread {
+  id: string;
+  name: string;
+  last_message: string;
+  last_message_at: string;
+  unread_count: number;
+}
+
+export interface WeeklyGame {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  days_completed: number;
+  total_days: number;
+  participants: number;
+  days_remaining: number;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon_url?: string;
+  awarded_at: string;
+}
+
+export interface ChildAwards {
+  badges: Badge[];
+  certificates: Certificate[];
+}
+
+export interface Redemption {
+  id: string;
+  item_name: string;
+  cost: number;
+  status: 'requested' | 'approved' | 'fulfilled' | 'canceled';
+  requested_at: string;
+  fulfilled_at?: string;
+}
+
+export interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  read_at?: string;
+  created_at: string;
+}
