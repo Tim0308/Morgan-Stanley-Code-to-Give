@@ -1,8 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Svg, Path, Line, Text as SvgText } from 'react-native-svg';
 import { useTranslation } from '../contexts/TranslationContext';
+
+const COLORS = {
+  primary: "#006e34",
+  secondary: "#A6B84E",
+  accent: "#C83E0A",
+  light: "#F4F4F9",
+  textDark: "#222",
+  textLight: "#fff",
+  border: "#e5e7eb",
+  inputBg: "#F4F4F9",
+};
 
 export default function AnalyticsPage() {
   const { t } = useTranslation();
@@ -150,101 +161,110 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.pageTitle}>{t.gradeAnalytics}</Text>
-        <Ionicons name="trending-up" size={24} color="#666" />
-      </View>
+    <ImageBackground
+      source={require('..\\assets\\backdrop.jpg')}
+      style={styles.bg}
+      resizeMode="cover"
+    >
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.pageTitle}>{t.gradeAnalytics}</Text>
+          <Ionicons name="trending-up" size={24} color={COLORS.secondary} />
+        </View>
 
-      {/* Performance Metrics */}
-      <View style={styles.metricsCard}>
-        <View style={styles.metricsHeader}>
-          <Ionicons name="pulse" size={20} color="#3b82f6" />
-          <Text style={styles.metricsTitle}>{t.performanceMetrics}</Text>
-        </View>
-        
-        <View style={styles.metricsGrid}>
-          <View style={styles.metricItem}>
-            <Text style={[styles.metricValue, { color: '#3b82f6' }]}>45</Text>
-            <Text style={styles.metricLabel}>{t.readingSpeed}</Text>
-            <Text style={styles.metricUnit}>{t.wpm}</Text>
+        {/* Performance Metrics */}
+        <View style={styles.metricsCard}>
+          <View style={styles.metricsHeader}>
+            <Ionicons name="pulse" size={20} color={COLORS.primary} />
+            <Text style={styles.metricsTitle}>{t.performanceMetrics}</Text>
           </View>
           
-          <View style={styles.metricItem}>
-            <Text style={[styles.metricValue, { color: '#22c55e' }]}>87%</Text>
-            <Text style={styles.metricLabel}>{t.comprehensionAccuracy}</Text>
-          </View>
-          
-          <View style={styles.metricItem}>
-            <Text style={[styles.metricValue, { color: '#8b5cf6' }]}>8.5h</Text>
-            <Text style={styles.metricLabel}>{t.weeklyEngagementTime}</Text>
-          </View>
-          
-          <View style={styles.metricItem}>
-            <Text style={[styles.metricValue, { color: '#f97316' }]}>23%</Text>
-            <Text style={styles.metricLabel}>{t.skillProgression}</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* SuperAPP Progress */}
-      <View style={styles.superappCard}>
-        <View style={styles.superappHeader}>
-          <Ionicons name="apps" size={20} color="#3b82f6" />
-          <Text style={styles.superappTitle}>{t.superAppProgress}</Text>
-        </View>
-        
-        <View style={styles.connectionStatus}>
-          <View style={styles.connectedIndicator}>
-            <View style={styles.greenDot} />
-            <Text style={styles.connectedText}>{t.connected}</Text>
-          </View>
-          <View style={styles.pointsContainer}>
-            <Ionicons name="star" size={16} color="#f59e0b" />
-            <Text style={styles.pointsText}>2847</Text>
-          </View>
-        </View>
-        
-        <View style={styles.progressRow}>
-          <View style={styles.progressItem}>
-            <Text style={styles.progressLabel}>{t.mathProgress}</Text>
-            <Text style={styles.progressLevel}>Level 5</Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '75%' }]} />
+          <View style={styles.metricsGrid}>
+            <View style={styles.metricItem}>
+              <Text style={[styles.metricValue, { color: COLORS.primary }]}>45</Text>
+              <Text style={styles.metricLabel}>{t.readingSpeed}</Text>
+              <Text style={styles.metricUnit}>{t.wpm}</Text>
             </View>
-          </View>
-          
-          <View style={styles.progressItem}>
-            <Text style={styles.progressLabel}>{t.scienceProgress}</Text>
-            <Text style={styles.progressLevel}>Level 3</Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '45%' }]} />
+            
+            <View style={styles.metricItem}>
+              <Text style={[styles.metricValue, { color: COLORS.secondary }]}>87%</Text>
+              <Text style={styles.metricLabel}>{t.comprehensionAccuracy}</Text>
+            </View>
+            
+            <View style={styles.metricItem}>
+              <Text style={[styles.metricValue, { color: COLORS.accent }]}>8.5h</Text>
+              <Text style={styles.metricLabel}>{t.weeklyEngagementTime}</Text>
+            </View>
+            
+            <View style={styles.metricItem}>
+              <Text style={[styles.metricValue, { color: COLORS.accent }]}>23%</Text>
+              <Text style={styles.metricLabel}>{t.skillProgression}</Text>
             </View>
           </View>
         </View>
-        
-        <TouchableOpacity style={styles.openButton}>
-          <Ionicons name="open-outline" size={16} color="#666" />
-          <Text style={styles.openButtonText}>{t.openSuperapp}</Text>
-        </TouchableOpacity>
-      </View>
 
-      {/* Reading Performance Chart */}
-      {renderDistributionChart(85, '#8b5cf6', t.reading)}
+        {/* SuperAPP Progress */}
+        <View style={styles.superappCard}>
+          <View style={styles.superappHeader}>
+            <Ionicons name="apps" size={20} color={COLORS.primary} />
+            <Text style={styles.superappTitle}>{t.superAppProgress}</Text>
+          </View>
+          
+          <View style={styles.connectionStatus}>
+            <View style={styles.connectedIndicator}>
+              <View style={styles.greenDot} />
+              <Text style={styles.connectedText}>{t.connected}</Text>
+            </View>
+            <View style={styles.pointsContainer}>
+              <Ionicons name="star" size={16} color={COLORS.accent} />
+              <Text style={styles.pointsText}>2847</Text>
+            </View>
+          </View>
+          
+          <View style={styles.progressRow}>
+            <View style={styles.progressItem}>
+              <Text style={styles.progressLabel}>{t.mathProgress}</Text>
+              <Text style={styles.progressLevel}>Level 5</Text>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: '75%', backgroundColor: COLORS.primary }]} />
+              </View>
+            </View>
+            
+            <View style={styles.progressItem}>
+              <Text style={styles.progressLabel}>{t.scienceProgress}</Text>
+              <Text style={styles.progressLevel}>Level 3</Text>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: '45%', backgroundColor: COLORS.secondary }]} />
+              </View>
+            </View>
+          </View>
+          
+          <TouchableOpacity style={styles.openButton}>
+            <Ionicons name="open-outline" size={16} color={COLORS.primary} />
+            <Text style={styles.openButtonText}>{t.openSuperapp}</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Writing Performance Chart */}
-      {renderDistributionChart(82, '#22c55e', t.writing)}
+        {/* Reading Performance Chart */}
+        {renderDistributionChart(85, COLORS.accent, t.reading)}
 
-      <View style={styles.spacer} />
-    </ScrollView>
+        {/* Writing Performance Chart */}
+        {renderDistributionChart(82, COLORS.secondary, t.writing)}
+
+        <View style={styles.spacer} />
+      </ScrollView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  bg: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(244,244,249,0.93)', // COLORS.light with opacity for readability
   },
   header: {
     flexDirection: 'row',
@@ -257,16 +277,16 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.primary,
   },
   metricsCard: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: COLORS.light,
     marginHorizontal: 20,
     marginBottom: 20,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#dcfce7',
+    borderColor: COLORS.border,
   },
   metricsHeader: {
     flexDirection: 'row',
@@ -276,7 +296,7 @@ const styles = StyleSheet.create({
   metricsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.primary,
     marginLeft: 8,
   },
   metricsGrid: {
@@ -296,13 +316,13 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textDark,
     textAlign: 'center',
     lineHeight: 16,
   },
   metricUnit: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textDark,
     marginTop: 2,
   },
   superappCard: {
@@ -322,7 +342,7 @@ const styles = StyleSheet.create({
   superappTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.primary,
     marginLeft: 8,
   },
   connectionStatus: {
@@ -339,12 +359,12 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#22c55e',
+    backgroundColor: COLORS.secondary,
     marginRight: 6,
   },
   connectedText: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.primary,
     fontWeight: '500',
   },
   pointsContainer: {
@@ -353,7 +373,7 @@ const styles = StyleSheet.create({
   },
   pointsText: {
     fontSize: 16,
-    color: '#333',
+    color: COLORS.primary,
     fontWeight: 'bold',
     marginLeft: 4,
   },
@@ -367,60 +387,59 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.primary,
     fontWeight: '500',
     marginBottom: 4,
   },
   progressLevel: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textDark,
     marginBottom: 8,
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: COLORS.border,
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#1a1a2e',
     borderRadius: 3,
   },
   openButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: COLORS.light,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: COLORS.border,
   },
   openButtonText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.primary,
     fontWeight: '500',
     marginLeft: 6,
   },
   chartContainer: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.light,
     marginHorizontal: 20,
     marginBottom: 20,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#f3f4f6',
+    borderColor: COLORS.border,
   },
   chartTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.primary,
     marginBottom: 8,
   },
   positionText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textDark,
     marginBottom: 16,
   },
   chart: {
@@ -441,10 +460,10 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.primary,
     fontWeight: '500',
   },
   spacer: {
     height: 20,
   },
-}); 
+});
