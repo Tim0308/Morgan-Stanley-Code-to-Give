@@ -76,13 +76,54 @@ async def analyze_image_with_gpt4o(image_base64: str, word_of_the_day: str):
         
         # Prepare system prompt
         system_prompt = f"""
-This is a kids game. The kid has sent in a picture. Today's word is {word_of_the_day}. 
-Analyze the picture and return with the following format:
+            Role: You are a friendly and encouraging children's game AI. Your job is to judge pictures submitted by kids against a daily word. 
+            Your feedback must be positive, constructive, and simple enough for a child to understand.
 
-Correct/Wrong (this will determine if the picture taken by the kid is exactly of the word_of_the_day)
-A feedback: 
-[if correct, put in short encouragements that's different all the time. for e.g. Good job! This is a {word_of_the_day}; Well done! You nailed it! ]
-[if wrong, suggest how to guide them to their answer. for e.g. if word_of_the_day = {word_of_the_day}, but picture shows: a toy. Feedback: "This seems to be a toy, maybe find something that has this feature?" and clip a small part of the {word_of_the_day}'s body parts, maybe its face, or its tail wtv.]
+            Instruction: Analyze the provided image. The "Word of the Day" is {word_of_the_day}.
+
+            Output Format: You MUST respond in the following exact format. 
+
+            Correct/Wrong: Correct
+            Feedback: [Your feedback text here]
+
+            OR
+
+            Correct/Wrong: Wrong
+            Feedback: [Your feedback text here]
+
+            Feedback Rules:
+
+                1. If the picture is CORRECT and clearly shows {word_of_the_day}:
+                Correct/Wrong: Correct
+                Your feedback must be a short, excited encouragement.
+                Choose one of these phrases or mix and match their style:
+                "Wow! You found a perfect {word_of_the_day}! Great job!"
+                "That's it! A fantastic {word_of_the_day}! You're a superstar!"
+                "Well done! I recognized that {word_of_the_day} right away!"
+                "Perfect! That's exactly what a {word_of_the_day} looks like! 🎉"
+
+                2. If the picture is WRONG and shows something else (e.g., a toy):
+
+                Correct/Wrong: Wrong
+                First, gently identify what you see. "I see a [object name]!"
+                Then, provide a simple, guiding hint. Frame it as a fun clue, not a correction.
+                Finally, encourage them to try again.
+                Formula:"I see a [object name]! Try looking for something that [hint about {word_of_the_day}]. Can you try again?"
+
+                    Example Hints:
+                            If {word_of_the_day} is elephant: "...something with a big trunk and floppy ears."
+
+                            If {word_of_the_day} is apple: "...something red or green that grows on a tree and is yummy to eat."
+
+                            If {word_of_the_day} is book: "...something with pages that we read stories from."
+
+                3. If the image is unclear, blurry, or you cannot identify the main object:
+                    Correct/Wrong: Wrong
+                    Feedback: "Hmm, my robot eyes are having a little trouble seeing this clearly! Could you take another picture so I can get a better look? I'm looking for a {word_of_the_day}!"
+
+
+        
+        
         """
         
         # Prepare request payload
@@ -125,18 +166,36 @@ A feedback:
         is_correct = False
         feedback = ""
         
-        for line in lines:
+        print(f"🎯 AI Raw Response: {content}")  # Debug log
+        print(f"🎯 Number of lines: {len(lines)}")  # Debug log
+        
+        for i, line in enumerate(lines):
             line = line.strip()
-            if line.lower().startswith('correct'):
+            print(f"🎯 Line {i}: '{line}'")  # Debug log
+            
+            if line.lower().startswith('correct/wrong:'):
+                print(f"🎯 Found Correct/Wrong line: '{line}'")  # Debug log
+                # Handle "Correct/Wrong: Correct" format
+                if ': correct' in line.lower():
+                    is_correct = True
+                    print(f"🎯 Setting is_correct = True")  # Debug log
+                elif ': wrong' in line.lower():
+                    is_correct = False
+                    print(f"🎯 Setting is_correct = False")  # Debug log
+            elif line.lower().startswith('correct:'):
                 is_correct = True
-                feedback = line.replace('Correct', '').replace('correct', '').strip(': ')
-            elif line.lower().startswith('wrong'):
+                print(f"🎯 Found 'Correct:' line, setting is_correct = True")  # Debug log
+            elif line.lower().startswith('wrong:'):
                 is_correct = False
-                feedback = line.replace('Wrong', '').replace('wrong', '').strip(': ')
-            elif line.lower().startswith('feedback'):
-                feedback = line.replace('Feedback', '').replace('feedback', '').strip(': ')
-            elif feedback == "" and line:
+                print(f"🎯 Found 'Wrong:' line, setting is_correct = False")  # Debug log
+            elif line.lower().startswith('feedback:'):
+                feedback = line.replace('Feedback:', '').replace('feedback:', '').strip()
+                print(f"🎯 Found feedback line: '{feedback}'")  # Debug log
+            elif feedback == "" and line and not line.lower().startswith('correct') and not line.lower().startswith('wrong') and not line.lower().startswith('correct/wrong'):
                 feedback = line
+                print(f"🎯 Using line as feedback: '{feedback}'")  # Debug log
+        
+        print(f"🎯 Final parsed result - is_correct: {is_correct}, feedback: {feedback}")  # Debug log
         
         return {
             "is_correct": is_correct,

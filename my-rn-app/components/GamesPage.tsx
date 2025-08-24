@@ -33,15 +33,19 @@ export default function GamesPage() {
 
         <View style={styles.challengeCard}>
           <View style={styles.challengeCardHeader}>
-            <Text style={styles.challengeName}>VocabVenture</Text>
+            <Text style={styles.challengeName}>Pic-a-Word</Text>
             <View style={styles.difficultyBadge}>
-              <Text style={styles.difficultyText}>Outdoors</Text>
+              <Text style={styles.difficultyText}>Medium</Text>
+            </View>
+            <View style={styles.tokenReward}>
+              <Ionicons name="diamond" size={16} color="#fbbf24" />
+              <Text style={styles.tokenText}>+10</Text>
             </View>
           </View>
 
           <Text style={styles.challengeDescription}>
-            Read together for 30 minutes every day this week.{'\n'}
-            Parent and child take turns reading paragraphs.
+            Let's take pictures of different things around us! {'\n'}
+        
           </Text>
 
           <View style={styles.progressSection}>
@@ -57,7 +61,7 @@ export default function GamesPage() {
             <View style={styles.challengeStats}>
               <View style={styles.statItem}>
                 <Ionicons name="people" size={16} color="#666" />
-                <Text style={styles.statText}>23 players completed</Text>
+                <Text style={styles.statText}>23 families </Text>
               </View>
               <View style={styles.statItem}>
                 <Ionicons name="time" size={16} color="#666" />
@@ -84,32 +88,19 @@ export default function GamesPage() {
             <Ionicons name="search" size={24} color="#666" />
           </View>
           <View style={styles.gameInfo}>
-            <Text style={styles.gameName}>Word Detective</Text>
+            <View style={styles.gameNameRow}>
+              <Text style={styles.gameName}>Word Detective</Text>
+              <View style={styles.tokenReward}>
+                <Ionicons name="diamond" size={14} color="#fbbf24" />
+                <Text style={styles.tokenText}>+5</Text>
+              </View>
+            </View>
             <Text style={styles.gameDescription}>
               Find hidden words in picture scenes together
             </Text>
             <View style={styles.gameTime}>
               <Ionicons name="time" size={14} color="#666" />
               <Text style={styles.timeText}>10 mins</Text>
-            </View>
-          </View>
-          <TouchableOpacity style={styles.gamePlayButton}>
-            <Ionicons name="play" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.gameCard}>
-          <View style={styles.gameIcon}>
-            <Text style={styles.gameEmoji}>🏃‍♂️</Text>
-          </View>
-          <View style={styles.gameInfo}>
-            <Text style={styles.gameName}>Alphabet Race</Text>
-            <Text style={styles.gameDescription}>
-              Race to find objects starting with each letter
-            </Text>
-            <View style={styles.gameTime}>
-              <Ionicons name="time" size={14} color="#666" />
-              <Text style={styles.timeText}>15 mins</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.gamePlayButton}>
@@ -332,5 +323,27 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 20,
+  },
+  tokenReward: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF8DC',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FFD700',
+  },
+  tokenText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#B8860B',
+    marginLeft: 2,
+  },
+  gameNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
 }); 
