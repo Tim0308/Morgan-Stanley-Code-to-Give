@@ -31,7 +31,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     Animated.loop(
       Animated.timing(rotateAnim, {
         toValue: 1,
-        duration: 2000,
+        duration: 2500,
         useNativeDriver: true,
       })
     ).start();

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, ScrollView, View, ActivityIndicator } from "react-native";
+import { StyleSheet, ScrollView, View } from "react-native";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CacheProvider, useCache } from "./contexts/CacheContext";
 import { testConnection } from "./lib/api";
 import AuthNavigator from "./components/auth/AuthNavigator";
+import SigningInRing from "./components/SigningInRing";
 import Header from "./components/Header";
 import TabToggle from "./components/TabToggle";
 import WeeklyGoal from "./components/WeeklyGoal";
@@ -35,13 +36,9 @@ function MainApp() {
     initializeApp();
   }, [user]); // Remove loadInitialData from dependencies
 
-  // Show loading spinner while checking auth state or loading cache
+  // Show colorful loading ring while checking auth state or loading cache
   if (loading || cacheLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#8b5cf6" />
-      </View>
-    );
+    return <SigningInRing text="Loading" />;
   }
 
   // Show auth navigator if user is not authenticated
