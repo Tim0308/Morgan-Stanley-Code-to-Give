@@ -8,6 +8,5 @@ python-jose[cryptography]==3.5.0
 python-dotenv==1.1.1
 pytest==8.4.1
 httpx==0.28.1
-sqlalchemy==2.0.43 
-expo-camera
-expo-image-picker
+sqlalchemy==2.0.43
+requests==2.32.3
