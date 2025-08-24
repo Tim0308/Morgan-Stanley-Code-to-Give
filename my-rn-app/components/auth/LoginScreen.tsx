@@ -11,6 +11,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Alert,
+  ImageBackground
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,45 +19,50 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "../../contexts/TranslationContext";
 import LanguageDropdown from "../LanguageDropdown";
 
+const COLORS = {
+  primary: "#006e34",
+  secondary: "#A6B84E",
+  accent: "#C83E0A",
+  light: "#F4F4F9",
+  textDark: "#222",
+  textLight: "#fff",
+  border: "#e5e7eb",
+  inputBg: "#F4F4F9",
+};
+
 interface LoginScreenProps {
   onSignUpPress: () => void;
 }
 
 export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isSigningIn } = useAuth();
   const { t } = useTranslation();
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert(t.error, t.enterEmailPassword);
+    if (!phone.trim() || !password.trim()) {
+      Alert.alert(t.error, "Please enter your phone number and password.");
       return;
     }
 
     try {
-      // Convert phone number to email format if it's a phone number
-      let loginEmail = email.trim();
-      if (/^\d+$/.test(loginEmail)) {
-        // It's a phone number, convert to email format
-        loginEmail = `${loginEmail}@reach.app`;
-      }
-
+      // Convert phone number to email format
+      let loginEmail = `${phone.trim()}@reach.app`;
       await signIn(loginEmail, password.trim());
     } catch (error: any) {
       Alert.alert(t.loginFailed, error.message || t.invalidCredentials);
     }
   };
 
-  const isValid = email.trim().length > 0 && password.trim().length > 0;
+  const isValid = phone.trim().length > 0 && password.trim().length > 0;
 
   return (
-    <LinearGradient
-      colors={["#8b5cf6", "#3b82f6"]}
-      style={styles.container}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+    <ImageBackground
+          source={require('..\\assets\\backdrop.jpg')}
+          style={styles.container}
+          resizeMode="cover"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
@@ -82,18 +88,18 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
               <View style={styles.form}>
                 <View style={styles.inputContainer}>
                   <Ionicons
-                    name="mail"
+                    name="call"
                     size={20}
-                    color="#999"
+                    color={COLORS.primary}
                     style={styles.inputIcon}
                   />
                   <TextInput
                     style={styles.input}
-                    placeholder={t.emailOrPhone}
-                    placeholderTextColor="#999"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
+                    placeholder="Phone number"
+                    placeholderTextColor={COLORS.primary}
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
                     autoCapitalize="none"
                     autoCorrect={false}
                   />
@@ -103,13 +109,13 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
                   <Ionicons
                     name="lock-closed"
                     size={20}
-                    color="#999"
+                    color={COLORS.primary}
                     style={styles.inputIcon}
                   />
                   <TextInput
                     style={styles.input}
                     placeholder={t.password}
-                    placeholderTextColor="#999"
+                    placeholderTextColor={COLORS.primary}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
@@ -123,16 +129,20 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
                     <Ionicons
                       name={showPassword ? "eye-off" : "eye"}
                       size={20}
-                      color="#999"
+                      color={COLORS.primary}
                     />
                   </TouchableOpacity>
                 </View>
               </View>
 
               <TouchableOpacity
-                style={[styles.loginButton, isValid && styles.activeButton]}
+                style={[
+                  styles.loginButton,
+                  isValid ? styles.activeButton : styles.disabledButton,
+                ]}
                 onPress={handleLogin}
                 disabled={!isValid}
+                activeOpacity={0.85}
               >
                 <Text
                   style={[
@@ -154,7 +164,7 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
           </ScrollView>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
@@ -171,7 +181,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 40,
   },
   languageContainer: {
@@ -181,10 +191,17 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   card: {
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 30,
+    backgroundColor: COLORS.light,
+    borderRadius: 28,
+    padding: 32,
+    paddingTop: 40,
     alignItems: "center",
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
+    marginHorizontal: 4,
   },
   header: {
     alignItems: "center",
@@ -192,14 +209,14 @@ const styles = StyleSheet.create({
   },
   welcomeBack: {
     fontSize: 16,
-    color: "#8b5cf6",
+    color: COLORS.secondary,
     fontWeight: "600",
     marginBottom: 8,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: COLORS.primary,
     textAlign: "center",
   },
   form: {
@@ -208,46 +225,51 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: "100%",
-    height: 50,
+    height: 52,
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 12,
-    backgroundColor: "#f9fafb",
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: COLORS.secondary,
+    borderRadius: 14,
+    backgroundColor: COLORS.inputBg,
+    paddingHorizontal: 12,
+    marginBottom: 18,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: "#333",
+    fontSize: 17,
+    color: COLORS.primary,
+    height: "100%",
   },
   eyeButton: {
     padding: 4,
   },
   loginButton: {
     width: "100%",
-    height: 50,
-    backgroundColor: "#6b7280",
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
+    marginTop: 8,
   },
   activeButton: {
-    backgroundColor: "#1a1a2e",
+    backgroundColor: COLORS.accent,
+  },
+  disabledButton: {
+    backgroundColor: COLORS.secondary,
+    opacity: 0.6,
   },
   loginButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "white",
+    fontSize: 17,
+    fontWeight: "700",
+    color: COLORS.textLight,
+    letterSpacing: 0.5,
   },
   disabledButtonText: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   footer: {
     flexDirection: "row",
@@ -255,11 +277,11 @@ const styles = StyleSheet.create({
   },
   signUpText: {
     fontSize: 14,
-    color: "#666",
+    color: COLORS.primary,
   },
   signUpLink: {
     fontSize: 14,
-    color: "#8b5cf6",
-    fontWeight: "600",
+    color: COLORS.accent,
+    fontWeight: 600,
   },
-});
+});    

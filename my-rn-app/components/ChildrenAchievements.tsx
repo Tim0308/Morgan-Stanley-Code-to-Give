@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   achievementCard: {
-    backgroundColor: "white",
+    backgroundColor: "#eff0e9ff",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,

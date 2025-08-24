@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import VocabVentureGame from './VocabVentureGame';
 import { useTranslation } from '../contexts/TranslationContext';
+
+const COLORS = {
+  primary: "#006e34",
+  secondary: "#A6B84E",
+  accent: "#C83E0A",
+  light: "#F4F4F9",
+  textDark: "#222",
+  textLight: "#fff",
+  border: "#e5e7eb",
+  inputBg: "#F4F4F9",
+};
 
 export default function GamesPage() {
   const { t } = useTranslation();
@@ -14,118 +25,138 @@ export default function GamesPage() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.pageTitle}>{t.games}</Text>
-        <Ionicons name="game-controller" size={24} color="#666" />
-      </View>
+    <ImageBackground
+      source={require('..\\assets\\backdrop.jpg')}
+      style={styles.bg}
+      resizeMode="cover"
+    >
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.pageTitle}>{t.games}</Text>
+          <Ionicons name="game-controller" size={24} color={COLORS.secondary} />
+        </View>
 
-      {/* Weekly Challenge */}
-      <View style={styles.weeklyChallenge}>
-        <View style={styles.challengeHeader}>
-          <Text style={styles.challengeTitle}>{t.weeklyChallenge}</Text>
-          <View style={styles.completedGames}>
-            <Text style={styles.completedNumber}>5</Text>
-            <Text style={styles.completedText}>{t.gamesCompleted}</Text>
+        {/* Weekly Challenge */}
+        <View style={styles.weeklyChallenge}>
+          <View style={styles.challengeHeader}>
+            <Text style={styles.challengeTitle}>{t.weeklyChallenge}</Text>
+            <View style={styles.completedGames}>
+              <Text style={styles.completedNumber}>5</Text>
+              <Text style={styles.completedText}>{t.gamesCompleted}</Text>
+            </View>
+          </View>
+
+          <View style={styles.challengeCard}>
+            <View style={styles.challengeCardHeader}>
+              <Text style={styles.challengeName}>VocabVenture</Text>
+              <View style={styles.difficultyBadge}>
+                <Text style={styles.difficultyText}>Outdoors</Text>
+              </View>
+            </View>
+
+
+            <Text style={styles.challengeDescription}>
+              Read together for 30 minutes every day this week.{'\n'}
+              Parent and child take turns reading paragraphs.
+            </Text>
+
+            <View style={styles.progressSection}>
+              <Text style={styles.progressLabel}>{t.progress}</Text>
+              <Text style={styles.progressText}>4/7 {t.days}</Text>
+            </View>
+
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: '57%' }]} />
+            </View>
+
+            <View style={styles.challengeFooter}>
+              <View style={styles.challengeStats}>
+                <View style={styles.statItem}>
+                  <Ionicons name="people" size={16} color={COLORS.primary} />
+                  <Text style={styles.statText}>23 players completed</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Ionicons name="time" size={16} color={COLORS.primary} />
+                  <Text style={styles.statText}>3 days left</Text>
+                </View>
+
+              </View>
+              
+              <TouchableOpacity 
+                style={styles.playButton}
+                onPress={() => setShowVocabVenture(true)}
+              >
+                <Ionicons name="play" size={20} color={COLORS.textLight} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
-        <View style={styles.challengeCard}>
-          <View style={styles.challengeCardHeader}>
-            <Text style={styles.challengeName}>Pic-a-Word</Text>
-            <View style={styles.difficultyBadge}>
-              <Text style={styles.difficultyText}>Medium</Text>
+        {/* Extra Games */}
+        <View style={styles.extraGames}>
+          <Text style={styles.sectionTitle}>{t.extraGames}</Text>
+
+          <View style={styles.gameCard}>
+            <View style={styles.gameIcon}>
+              <Ionicons name="search" size={24} color={COLORS.primary} />
             </View>
-            <View style={styles.tokenReward}>
-              <Ionicons name="diamond" size={16} color="#fbbf24" />
-              <Text style={styles.tokenText}>+10</Text>
-            </View>
-          </View>
-
-          <Text style={styles.challengeDescription}>
-            Let's take pictures of different things around us! {'\n'}
-        
-          </Text>
-
-          <View style={styles.progressSection}>
-            <Text style={styles.progressLabel}>{t.progress}</Text>
-            <Text style={styles.progressText}>4/7 {t.days}</Text>
-          </View>
-
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '57%' }]} />
-          </View>
-
-          <View style={styles.challengeFooter}>
-            <View style={styles.challengeStats}>
-              <View style={styles.statItem}>
-                <Ionicons name="people" size={16} color="#666" />
-                <Text style={styles.statText}>23 families </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Ionicons name="time" size={16} color="#666" />
-                <Text style={styles.statText}>3 days left</Text>
+            <View style={styles.gameInfo}>
+              <Text style={styles.gameName}>Word Detective</Text>
+              <Text style={styles.gameDescription}>
+                Find hidden words in picture scenes together
+              </Text>
+              <View style={styles.gameTime}>
+                <Ionicons name="time" size={14} color={COLORS.primary} />
+                <Text style={styles.timeText}>10 mins</Text>
               </View>
             </View>
-            
-            <TouchableOpacity 
-              style={styles.playButton}
-              onPress={() => setShowVocabVenture(true)}
-            >
-              <Ionicons name="play" size={20} color="white" />
+            <TouchableOpacity style={styles.gamePlayButton}>
+              <Ionicons name="play" size={20} color={COLORS.textLight} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.gameCard}>
+            <View style={styles.gameIcon}>
+              <Text style={styles.gameEmoji}>🏃‍♂️</Text>
+            </View>
+            <View style={styles.gameInfo}>
+              <Text style={styles.gameName}>Alphabet Race</Text>
+              <Text style={styles.gameDescription}>
+                Race to find objects starting with each letter
+              </Text>
+              <View style={styles.gameTime}>
+                <Ionicons name="time" size={14} color={COLORS.primary} />
+                <Text style={styles.timeText}>15 mins</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.gamePlayButton}>
+              <Ionicons name="play" size={20} color={COLORS.textLight} />
             </TouchableOpacity>
           </View>
         </View>
-      </View>
 
-      {/* Extra Games */}
-      <View style={styles.extraGames}>
-        <Text style={styles.sectionTitle}>{t.extraGames}</Text>
 
-        <View style={styles.gameCard}>
-          <View style={styles.gameIcon}>
-            <Ionicons name="search" size={24} color="#666" />
-          </View>
-          <View style={styles.gameInfo}>
-            <View style={styles.gameNameRow}>
-              <Text style={styles.gameName}>Word Detective</Text>
-              <View style={styles.tokenReward}>
-                <Ionicons name="diamond" size={14} color="#fbbf24" />
-                <Text style={styles.tokenText}>+5</Text>
-              </View>
-            </View>
-            <Text style={styles.gameDescription}>
-              Find hidden words in picture scenes together
-            </Text>
-            <View style={styles.gameTime}>
-              <Ionicons name="time" size={14} color="#666" />
-              <Text style={styles.timeText}>10 mins</Text>
-            </View>
-          </View>
-          <TouchableOpacity style={styles.gamePlayButton}>
-            <Ionicons name="play" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.spacer} />
-      
-      {/* VocabVenture Game Modal */}
-      {showVocabVenture && (
-        <VocabVentureGame
-          onClose={() => setShowVocabVenture(false)}
-          onGameComplete={handleGameComplete}
-        />
-      )}
-    </ScrollView>
+        <View style={styles.spacer} />
+        
+        {/* VocabVenture Game Modal */}
+        {showVocabVenture && (
+          <VocabVentureGame
+            onClose={() => setShowVocabVenture(false)}
+            onGameComplete={handleGameComplete}
+          />
+        )}
+      </ScrollView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  bg: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(244,244,249,0.93)', // COLORS.light with opacity for readability
   },
   header: {
     flexDirection: 'row',
@@ -138,7 +169,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.primary,
   },
   weeklyChallenge: {
     paddingHorizontal: 20,
@@ -153,7 +184,7 @@ const styles = StyleSheet.create({
   challengeTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.primary,
   },
   completedGames: {
     alignItems: 'flex-end',
@@ -161,18 +192,18 @@ const styles = StyleSheet.create({
   completedNumber: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#22c55e',
+    color: COLORS.secondary,
   },
   completedText: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textDark,
   },
   challengeCard: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: COLORS.light,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: COLORS.border,
   },
   challengeCardHeader: {
     flexDirection: 'row',
@@ -183,22 +214,22 @@ const styles = StyleSheet.create({
   challengeName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.primary,
   },
   difficultyBadge: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.accent,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   difficultyText: {
     fontSize: 12,
-    color: 'white',
+    color: COLORS.textLight,
     fontWeight: '500',
   },
   challengeDescription: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textDark,
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -210,23 +241,23 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.primary,
     fontWeight: '500',
   },
   progressText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textDark,
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: COLORS.border,
     borderRadius: 4,
     marginBottom: 16,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.secondary,
     borderRadius: 4,
   },
   challengeFooter: {
@@ -245,13 +276,13 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textDark,
     marginLeft: 4,
   },
   playButton: {
-    backgroundColor: '#1a1a2e',
-    width: 48,
-    height: 48,
+    backgroundColor: COLORS.accent,
+    width: 37,
+    height: 37,
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
@@ -262,25 +293,25 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.primary,
     marginBottom: 16,
   },
   gameCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: COLORS.light,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: COLORS.border,
     borderStyle: 'dashed',
   },
   gameIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: COLORS.secondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -294,12 +325,12 @@ const styles = StyleSheet.create({
   gameName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.primary,
     marginBottom: 4,
   },
   gameDescription: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textDark,
     lineHeight: 18,
     marginBottom: 8,
   },
@@ -309,11 +340,11 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textDark,
     marginLeft: 4,
   },
   gamePlayButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.accent,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -324,6 +355,7 @@ const styles = StyleSheet.create({
   spacer: {
     height: 20,
   },
+});
   tokenReward: {
     flexDirection: 'row',
     alignItems: 'center',

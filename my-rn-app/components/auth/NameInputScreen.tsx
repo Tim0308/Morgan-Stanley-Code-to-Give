@@ -1,7 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ImageBackground,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
+const COLORS = {
+  primary: '#006e34',
+  secondary: '#A6B84E',
+  accent: '#C83E0A',
+  light: '#F4F4F9',
+  textDark: '#222',
+  textLight: '#fff',
+  border: '#e5e7eb',
+  inputBg: '#F4F4F9',
+};
 
 interface NameInputScreenProps {
   onNext: (name: string, relationship: string) => void;
@@ -12,7 +34,6 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
   const [step, setStep] = useState(1); // 1: name input, 2: relationship selection
   const [name, setName] = useState('');
   const [selectedRelationship, setSelectedRelationship] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
 
   const relationships = [
     'Father',
@@ -25,7 +46,7 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
     'Brother (above 18)',
     'Caregiver',
     'Guardian',
-    'Other'
+    'Other',
   ];
 
   const handleNameNext = () => {
@@ -46,127 +67,139 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
   if (step === 1) {
     // Name Input Screen
     return (
-      <LinearGradient
-        colors={['#8b5cf6', '#3b82f6']}
+      <ImageBackground
+        source={require('..\\assets\\backdrop.jpg')}
         style={styles.container}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        resizeMode="cover"
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             style={styles.keyboardAvoid}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
-            <ScrollView 
+            <ScrollView
               style={styles.scrollContainer}
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-                            <View style={styles.card}>
+              <View style={styles.card}>
                 {onBack && (
                   <TouchableOpacity style={styles.backButton} onPress={onBack}>
-                    <Ionicons name="arrow-back" size={24} color="#666" />
+                    <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
                   </TouchableOpacity>
                 )}
                 <Text style={styles.title}>Input your name</Text>
                 <Text style={styles.subtitle}>
                   You can write your real name, or your kids' name like "Kelly's mom"
                 </Text>
-            
-            <TextInput
-              style={styles.nameInput}
-              placeholder="Name"
-              placeholderTextColor="#999"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              autoCorrect={false}
-            />
-            
-            <TouchableOpacity
-              style={[styles.nextButton, isNameValid && styles.activeButton]}
-              onPress={handleNameNext}
-              disabled={!isNameValid}
-            >
-              <Text style={[styles.nextButtonText, !isNameValid && styles.disabledButtonText]}>
-                Next
-              </Text>
-            </TouchableOpacity>
+                <TextInput
+                  style={styles.nameInput}
+                  placeholder="Name"
+                  placeholderTextColor={COLORS.primary}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.nextButton,
+                    isNameValid ? styles.activeButton : styles.disabledButton,
+                  ]}
+                  onPress={handleNameNext}
+                  disabled={!isNameValid}
+                >
+                  <Text
+                    style={[
+                      styles.nextButtonText,
+                      !isNameValid && styles.disabledButtonText,
+                    ]}
+                  >
+                    Next
+                  </Text>
+                </TouchableOpacity>
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
-      </LinearGradient>
+      </ImageBackground>
     );
   }
 
-    // Relationship Selection Screen
+  // Relationship Selection Screen
   return (
-    <LinearGradient
-      colors={['#8b5cf6', '#3b82f6']}
+    <ImageBackground
+      source={require('..\\assets\\backdrop.jpg')} 
       style={styles.container}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      resizeMode="cover"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           style={styles.keyboardAvoid}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-        <ScrollView 
-          style={styles.scrollContainer}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.card}>
-            <Text style={styles.title}>
-              Then type in the relationship you have with your kids
-            </Text>
-            
-            <TouchableOpacity
-              style={styles.dropdown}
-              onPress={() => setShowDropdown(true)}
-            >
-              <Text style={[styles.dropdownText, !selectedRelationship && styles.placeholderText]}>
-                {selectedRelationship || 'Select relationship'}
+          <ScrollView
+            style={styles.scrollContainer}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.card}>
+              <Text style={styles.title}>
+                Then type in the relationship you have with your kids
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
-            </TouchableOpacity>
-            
-            <ScrollView style={styles.relationshipList} showsVerticalScrollIndicator={false}>
-              {relationships.map((relationship) => (
-                <TouchableOpacity
-                  key={relationship}
+              <TouchableOpacity
+                style={styles.dropdown}
+                activeOpacity={0.85}
+              >
+                <Text style={[styles.dropdownText, !selectedRelationship && styles.placeholderText]}>
+                  {selectedRelationship || 'Select relationship'}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color={COLORS.primary} />
+              </TouchableOpacity>
+              <ScrollView style={styles.relationshipList} showsVerticalScrollIndicator={false}>
+                {relationships.map((relationship) => (
+                  <TouchableOpacity
+                    key={relationship}
+                    style={[
+                      styles.relationshipItem,
+                      selectedRelationship === relationship && styles.selectedRelationship,
+                    ]}
+                    onPress={() => setSelectedRelationship(relationship)}
+                    activeOpacity={0.85}
+                  >
+                    <Text
+                      style={[
+                        styles.relationshipText,
+                        selectedRelationship === relationship && styles.selectedRelationshipText,
+                      ]}
+                    >
+                      {relationship}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              <TouchableOpacity
+                style={[
+                  styles.nextButton,
+                  isRelationshipValid ? styles.activeButton : styles.disabledButton,
+                ]}
+                onPress={handleRelationshipNext}
+                disabled={!isRelationshipValid}
+              >
+                <Text
                   style={[
-                    styles.relationshipItem,
-                    selectedRelationship === relationship && styles.selectedRelationship
+                    styles.nextButtonText,
+                    !isRelationshipValid && styles.disabledButtonText,
                   ]}
-                  onPress={() => setSelectedRelationship(relationship)}
                 >
-                  <Text style={[
-                    styles.relationshipText,
-                    selectedRelationship === relationship && styles.selectedRelationshipText
-                  ]}>
-                    {relationship}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            
-            <TouchableOpacity
-              style={[styles.nextButton, isRelationshipValid && styles.activeButton]}
-              onPress={handleRelationshipNext}
-              disabled={!isRelationshipValid}
-            >
-              <Text style={[styles.nextButtonText, !isRelationshipValid && styles.disabledButtonText]}>
-                Next
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+                  Next
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
@@ -174,50 +207,56 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
   card: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 30,
+    backgroundColor: COLORS.light,
+    borderRadius: 28,
+    padding: 32,
+    paddingTop: 60,
     alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
+    marginHorizontal: 4,
+    position: 'relative',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.primary,
     textAlign: 'center',
     marginBottom: 16,
+    letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textDark,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 30,
+    opacity: 0.8,
   },
   nameInput: {
     width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 12,
+    height: 52,
+    borderWidth: 1.5,
+    borderColor: COLORS.secondary,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: '#f9fafb',
+    fontSize: 17,
+    backgroundColor: COLORS.inputBg,
+    color: COLORS.primary,
     marginBottom: 30,
   },
   dropdown: {
     width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 12,
+    height: 52,
+    borderWidth: 1.5,
+    borderColor: COLORS.secondary,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    backgroundColor: '#f9fafb',
+    backgroundColor: COLORS.inputBg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -225,29 +264,34 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     fontSize: 16,
-    color: '#333',
+    color: COLORS.primary,
   },
   placeholderText: {
     color: '#999',
   },
   nextButton: {
     width: '100%',
-    height: 50,
-    backgroundColor: '#6b7280',
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 8,
   },
   activeButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.accent, // Orange when enabled
+  },
+  disabledButton: {
+    backgroundColor: COLORS.secondary, // Light green when disabled
+    opacity: 0.6,
   },
   nextButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
+    fontSize: 17,
+    fontWeight: '700',
+    color: COLORS.textLight,
+    letterSpacing: 0.5,
   },
   disabledButtonText: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   keyboardAvoid: {
     flex: 1,
@@ -258,40 +302,48 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 40,
   },
   relationshipList: {
     maxHeight: 250,
     marginBottom: 20,
+    width: '100%',
   },
   relationshipItem: {
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
-    backgroundColor: '#f9fafb',
+    backgroundColor: COLORS.inputBg,
+    alignItems: 'center',
   },
   selectedRelationship: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: COLORS.secondary,
   },
   relationshipText: {
     fontSize: 16,
-    color: '#333',
+    color: COLORS.primary,
     textAlign: 'center',
   },
   selectedRelationshipText: {
-    color: 'white',
+    color: COLORS.textLight,
     fontWeight: '600',
   },
   backButton: {
     position: 'absolute',
-    top: 20,
-    left: 20,
+    top: 16,
+    left: 16,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: COLORS.inputBg,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 2,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-}); 
+});

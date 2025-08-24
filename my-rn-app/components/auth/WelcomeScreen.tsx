@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, ImageBackground } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface WelcomeScreenProps {
@@ -10,20 +10,22 @@ interface WelcomeScreenProps {
 export default function WelcomeScreen({ onContinue, onBackToLogin }: WelcomeScreenProps) {
   return (
     <TouchableOpacity style={styles.container} onPress={onContinue} activeOpacity={1}>
-      <LinearGradient
-        colors={['#8b5cf6', '#3b82f6']}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+      <ImageBackground
+        source={require('..\\assets\\backdrop.jpg')}
+        style={styles.container}
+        resizeMode="cover"
       >
-        <View style={styles.content}>
-          <View style={styles.emojiContainer}>
-            <Text style={styles.emoji}>👋</Text>
+        <View style={styles.card}>
+          {/* Logo Placeholder */}
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('..\\assets\\icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
           </View>
-          
-          <Text style={styles.title}>Hi, welcome to REACH app</Text>
-          <Text style={styles.subtitle}>We are so excited to have you here</Text>
-          
+          <Text style={styles.title}>Welcome to Reach Learning!</Text>
+          <Text style={styles.subtitle}>We are excited for you to start your journey with us</Text>
           <View style={styles.footer}>
             <Text style={styles.continueText}>Press anywhere to continue</Text>
             {onBackToLogin && (
@@ -33,7 +35,7 @@ export default function WelcomeScreen({ onContinue, onBackToLogin }: WelcomeScre
             )}
           </View>
         </View>
-      </LinearGradient>
+      </ImageBackground>
     </TouchableOpacity>
   );
 }
@@ -44,43 +46,56 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradient: {
-    flex: 1,
-  },
-  content: {
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 28,
+    padding: 32,
+    alignItems: 'center',
+    marginHorizontal: 24,
+    marginTop: height * 0.20,
+    marginBottom: height * 0.25,
+    shadowColor: '#006e34',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
     flex: 1,
     justifyContent: 'center',
+  },
+  logoContainer: {
+    marginBottom: 32,
     alignItems: 'center',
-    paddingHorizontal: 40,
+    justifyContent: 'center',
   },
-  emojiContainer: {
-    marginBottom: 60,
-  },
-  emoji: {
-    fontSize: 80,
+  logo: {
+    width: 80,
+    height: 80,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#006e34',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
+    letterSpacing: 0.5,
   },
   subtitle: {
-    fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 16,
+    color: '#222',
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 60,
+    lineHeight: 22,
+    marginBottom: 30,
+    opacity: 0.8,
   },
   footer: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 40,
     alignSelf: 'center',
+    width: '100%',
   },
   continueText: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#A6B84E',
     textAlign: 'center',
   },
   backToLoginButton: {
@@ -89,8 +104,8 @@ const styles = StyleSheet.create({
   },
   backToLoginText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#C83E0A',
     textAlign: 'center',
     textDecorationLine: 'underline',
   },
-}); 
+});
