@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, ScrollView, View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, StyleSheet, ScrollView } from "react-native";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CacheProvider, useCache } from "./contexts/CacheContext";
 import { TranslationProvider } from "./contexts/TranslationContext";
 import { testConnection } from "./lib/api";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AuthNavigator from "./components/auth/AuthNavigator";
+import SigningInRing from "./components/SigningInRing";
+import DraggableExplainButton from "./components/DraggableExplainButton";
 import Header from "./components/Header";
 import TabToggle from "./components/TabToggle";
 import WeeklyGoal from "./components/WeeklyGoal";
@@ -21,8 +24,9 @@ import TokensPage from "./components/TokensPage";
 
 function MainApp() {
   const [currentPage, setCurrentPage] = useState("Home");
-  const { user, loading } = useAuth();
+  const { user, loading, isSigningIn } = useAuth();
   const { loadInitialData, isLoading: cacheLoading } = useCache();
+  const screenRef = useRef<View>(null);
 
   // Load initial cache data when user logs in
   useEffect(() => {
@@ -34,10 +38,15 @@ function MainApp() {
       }
     };
     initializeApp();
-  }, [user]); // Remove loadInitialData from dependencies
+  }, [user, loadInitialData]);
 
-  // Show loading spinner while checking auth state or loading cache
-  if (loading || cacheLoading) {
+  // Show colorful loading ring ONLY when user clicks "Sign In"
+  if (isSigningIn) {
+    return <SigningInRing text="Signing In" />;
+  }
+
+  // Show basic loading only on initial app load (not after sign-in)
+  if (loading && !user) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#8b5cf6" />
@@ -82,17 +91,20 @@ function MainApp() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      <Header />
+    <GestureHandlerRootView style={styles.container}>
+      <View style={styles.container} ref={screenRef} collapsable={false}>
+        <StatusBar style="light" />
+        <Header />
 
-      {renderPage()}
+        {renderPage()}
 
-      <BottomNavigation
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    </View>
+        <BottomNavigation
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
+        <DraggableExplainButton screenRef={screenRef} />
+      </View>
+    </GestureHandlerRootView>
   );
 }
 
