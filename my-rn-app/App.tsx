@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
-import { View, ActivityIndicator, StyleSheet, ScrollView } from "react-native";
+import { View, ActivityIndicator, StyleSheet, ScrollView, ImageBackground } from "react-native";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CacheProvider, useCache } from "./contexts/CacheContext";
 import { TranslationProvider } from "./contexts/TranslationContext";
@@ -21,6 +21,17 @@ import CommunityPage from "./components/CommunityPage";
 import GamesPage from "./components/GamesPage";
 import AnalyticsPage from "./components/AnalyticsPage";
 import TokensPage from "./components/TokensPage";
+
+const COLORS = {
+  primary: "#006e34",
+  secondary: "#A6B84E",
+  accent: "#C83E0A",
+  light: "#F4F4F9",
+  textDark: "#222",
+  textLight: "#fff",
+  border: "#e5e7eb",
+  inputBg: "#F4F4F9",
+};
 
 function MainApp() {
   const [currentPage, setCurrentPage] = useState("Home");
@@ -49,7 +60,7 @@ function MainApp() {
   if (loading && !user) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#8b5cf6" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -92,18 +103,24 @@ function MainApp() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <View style={styles.container} ref={screenRef} collapsable={false}>
-        <StatusBar style="light" />
-        <Header />
+      <ImageBackground
+        source={require('./assets/backdrop.jpg')}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <View style={styles.innerContainer} ref={screenRef} collapsable={false}>
+          <StatusBar style="light" />
+          <Header />
 
-        {renderPage()}
+          {renderPage()}
 
-        <BottomNavigation
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-        />
-        <DraggableExplainButton screenRef={screenRef} />
-      </View>
+          <BottomNavigation
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+          <DraggableExplainButton screenRef={screenRef} />
+        </View>
+      </ImageBackground>
     </GestureHandlerRootView>
   );
 }
@@ -123,11 +140,15 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.light,
+  },
+  innerContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.78)', // semi-transparent overlay for readability
   },
   content: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "transparent",
   },
   spacer: {
     height: 20,
@@ -136,6 +157,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.accent,
   },
 });
