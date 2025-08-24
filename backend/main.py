@@ -29,6 +29,7 @@ from services.analytics.router import router as analytics_router
 from services.games.router import router as games_router
 from services.notifications.router import router as notifications_router
 from services.user.router import router as user_router
+from services.camera.router import router as camera_router
 
 # Import shared dependencies
 from core.config import settings
@@ -71,6 +72,7 @@ app.include_router(analytics_router, prefix=f"{API_V1_PREFIX}/analytics", tags=[
 app.include_router(games_router, prefix=f"{API_V1_PREFIX}/games", tags=["Games"])
 app.include_router(notifications_router, prefix=f"{API_V1_PREFIX}/notifications", tags=["Notifications"])
 app.include_router(user_router, prefix=f"{API_V1_PREFIX}/user", tags=["User Bundle"])
+app.include_router(camera_router, prefix=f"{API_V1_PREFIX}/camera", tags=["Camera"])
 
 # Global exception handler
 @app.exception_handler(Exception)
