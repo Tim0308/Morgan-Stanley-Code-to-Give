@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useCache } from "../contexts/CacheContext";
+import { useTranslation } from "../contexts/TranslationContext";
 
 interface Metric {
   value: string;
@@ -11,6 +12,7 @@ interface Metric {
 }
 
 export default function PerformanceMetrics() {
+  const { t } = useTranslation();
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,40 +26,43 @@ export default function PerformanceMetrics() {
     [children?.length]
   );
 
+  // Memoize metrics so they update when language changes
+  const defaultMetrics: Metric[] = useMemo(
+    () => [
+      {
+        value: "45",
+        label: t.readingSpeed,
+        unit: t.wpm,
+        color: "#3b82f6",
+      },
+      {
+        value: "87",
+        label: t.comprehensionAccuracy,
+        unit: "",
+        color: "#22c55e",
+      },
+      {
+        value: "8.5",
+        label: t.weeklyEngagementTime,
+        unit: "",
+        color: "#8b5cf6",
+      },
+      {
+        value: "23",
+        label: t.skillProgression,
+        unit: "",
+        color: "#f97316",
+      },
+    ],
+    [t]
+  );
+
   const loadPerformanceMetrics = useCallback(async () => {
     try {
       setError(null);
 
       // For now, since analytics endpoint is not implemented,
       // show default metrics until real data is available
-      const defaultMetrics: Metric[] = [
-        {
-          value: "45",
-          label: "Reading Speed",
-          unit: "WPM",
-          color: "#3b82f6",
-        },
-        {
-          value: "87",
-          label: "Comprehension Accuracy",
-          unit: "",
-          color: "#22c55e",
-        },
-        {
-          value: "8.5",
-          label: "Weekly Engagement Time",
-          unit: "",
-          color: "#8b5cf6",
-        },
-        {
-          value: "23",
-          label: "Skill Progression",
-          unit: "",
-          color: "#f97316",
-        },
-      ];
-
-      // Check if user has children from cache
       if (!hasChildren) {
         // No children, keep N/A values
         setMetrics(defaultMetrics);
@@ -69,35 +74,9 @@ export default function PerformanceMetrics() {
     } catch (err) {
       console.error("Error loading performance metrics:", err);
       setError("Failed to load performance metrics");
-      // Show N/A on error
-      setMetrics([
-        {
-          value: "45",
-          label: "Reading Speed",
-          unit: "WPM",
-          color: "#3b82f6",
-        },
-        {
-          value: "87%",
-          label: "Comprehension Accuracy",
-          unit: "",
-          color: "#22c55e",
-        },
-        {
-          value: "8.5h",
-          label: "Weekly Engagement Time",
-          unit: "",
-          color: "#8b5cf6",
-        },
-        {
-          value: "23%",
-          label: "Skill Progression",
-          unit: "",
-          color: "#f97316",
-        },
-      ]);
+      setMetrics(defaultMetrics);
     }
-  }, [hasChildren]);
+  }, [hasChildren, defaultMetrics]);
 
   useEffect(() => {
     loadPerformanceMetrics();
@@ -109,11 +88,11 @@ export default function PerformanceMetrics() {
         <View style={styles.card}>
           <View style={styles.header}>
             <Ionicons name="trending-up" size={20} color="#22c55e" />
-            <Text style={styles.title}>Performance Metrics</Text>
+            <Text style={styles.title}>{t.performanceMetrics}</Text>
           </View>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#8b5cf6" />
-            <Text style={styles.loadingText}>Loading metrics...</Text>
+            <Text style={styles.loadingText}>{t.loadingMetrics}</Text>
           </View>
         </View>
       </View>
@@ -125,7 +104,7 @@ export default function PerformanceMetrics() {
       <View style={styles.card}>
         <View style={styles.header}>
           <Ionicons name="trending-up" size={20} color="#22c55e" />
-          <Text style={styles.title}>Performance Metrics</Text>
+          <Text style={styles.title}>{t.performanceMetrics}</Text>
           {error && (
             <Ionicons name="warning-outline" size={16} color="#ef4444" />
           )}
@@ -146,7 +125,7 @@ export default function PerformanceMetrics() {
         </View>
 
         {error && (
-          <Text style={styles.errorText}>Metrics unavailable - {error}</Text>
+          <Text style={styles.errorText}>{t.metricsUnavailable} - {error}</Text>
         )}
       </View>
     </View>

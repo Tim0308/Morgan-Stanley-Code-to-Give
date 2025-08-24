@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from '../contexts/TranslationContext';
 
 
 const { width, height } = Dimensions.get('window');
@@ -23,6 +24,7 @@ interface VocabVentureGameProps {
 }
 
 export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentureGameProps) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState<'welcome' | 'camera' | 'result'>('welcome');
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,7 +60,7 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
     if (status === 'granted') {
       setGameState('camera');
     } else {
-      Alert.alert('Permission needed', 'Camera permission is required to play this game.');
+      Alert.alert(t.permissionNeeded, t.cameraPermissionRequired);
     }
   };
 
@@ -78,7 +80,7 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
       }
     } catch (error) {
       console.error('Error taking picture:', error);
-      Alert.alert('Error', 'Failed to take picture. Please try again.');
+      Alert.alert(t.error, t.failedToTakePicture);
     } finally {
       setLoading(false);
     }
@@ -100,7 +102,7 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
+      Alert.alert(t.error, t.failedToPickImage);
     } finally {
       setLoading(false);
     }
@@ -146,7 +148,7 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
       }
     } catch (error) {
       console.error('Error processing image:', error);
-      Alert.alert('Error', 'Failed to process image. Please try again.');
+      Alert.alert(t.error, t.failedToProcessImage);
     } finally {
       setLoading(false);
     }
@@ -170,8 +172,8 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
   const renderWelcomeScreen = () => (
     <View style={styles.container}>
       <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeTitle}>Welcome to VocabVenture!</Text>
-        <Text style={styles.welcomeSubtitle}>Today's word is:</Text>
+        <Text style={styles.welcomeTitle}>{t.welcomeToVocabVenture}</Text>
+        <Text style={styles.welcomeSubtitle}>{t.todaysWordIs}</Text>
         
         <Animated.View
           style={[
@@ -193,7 +195,7 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
 
         <TouchableOpacity style={styles.cameraButton} onPress={requestCameraPermission}>
           <Ionicons name="camera" size={24} color="white" />
-          <Text style={styles.cameraButtonText}>Open Camera</Text>
+          <Text style={styles.cameraButtonText}>{t.openCamera}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -206,18 +208,19 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
   const renderCameraScreen = () => (
     <View style={styles.container}>
       <View style={styles.cameraContainer}>
-        <Text style={styles.cameraTitle}>📸 Take a Picture</Text>
+        <Text style={styles.cameraTitle}>📸 {t.takePicture}</Text>
         <Text style={styles.instruction}>
-          Look around you and find a{' '}
-          <Text style={styles.wordHighlight}>{wordOfTheDay}</Text> in your surroundings!
+          {t.lookAroundFind.replace('{word}', '')}
+          <Text style={styles.wordHighlight}>{wordOfTheDay}</Text>
+          {t.lookAroundFind.includes('{word}') ? t.lookAroundFind.split('{word}')[1] : ''}
         </Text>
 
         <View style={styles.cameraPreview}>
           <View style={styles.cameraPlaceholder}>
             <Ionicons name="camera" size={80} color="#666" />
-            <Text style={styles.cameraPlaceholderText}>Camera Preview</Text>
+            <Text style={styles.cameraPlaceholderText}>{t.cameraPreview}</Text>
             <Text style={styles.cameraPlaceholderSubtext}>
-              Tap the buttons below to take a picture or pick from gallery
+              {t.tapButtonsBelow}
             </Text>
           </View>
         </View>
@@ -238,12 +241,12 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
 
         <TouchableOpacity style={styles.pickImageButton} onPress={pickImage}>
           <Ionicons name="images" size={20} color="white" />
-          <Text style={styles.pickImageText}>Pick from Gallery</Text>
+          <Text style={styles.pickImageText}>{t.pickFromGallery}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backButton} onPress={() => setGameState('welcome')}>
           <Ionicons name="arrow-back" size={20} color="white" />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>{t.back}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -261,7 +264,7 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
         </View>
 
         <Text style={styles.resultTitle}>
-          {gameResult?.is_correct ? 'Great Job!' : 'Try Again'}
+          {gameResult?.is_correct ? t.greatJob : t.tryAgain}
         </Text>
 
         <Text style={styles.feedback}>{gameResult?.feedback}</Text>
@@ -269,12 +272,12 @@ export default function VocabVentureGame({ onClose, onGameComplete }: VocabVentu
         <View style={styles.resultButtons}>
           {!gameResult?.is_correct && attempts < maxAttempts && (
             <TouchableOpacity style={styles.tryAgainButton} onPress={tryAgain}>
-              <Text style={styles.tryAgainText}>Try Again</Text>
+              <Text style={styles.tryAgainText}>{t.tryAgain}</Text>
             </TouchableOpacity>
           )}
           
           <TouchableOpacity style={styles.continueButton} onPress={continueGame}>
-            <Text style={styles.continueText}>Continue</Text>
+            <Text style={styles.continueText}>{t.continue}</Text>
           </TouchableOpacity>
         </View>
       </View>

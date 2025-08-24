@@ -10,8 +10,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { api, TokenBalance, ShopItem, TokenTransaction } from "../lib/api";
 import { useCache } from "../contexts/CacheContext";
+import { useTranslation } from "../contexts/TranslationContext";
 
 export default function TokensPage() {
+  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState("Shop");
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [tokenHistory, setTokenHistory] = useState<TokenTransaction[]>([]);
@@ -137,7 +139,7 @@ export default function TokensPage() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.pageTitle}>Tokens</Text>
+      <Text style={styles.pageTitle}>{t.tokens}</Text>
 
       {/* Token Balance Section */}
       <View style={styles.balanceCard}>
@@ -147,19 +149,19 @@ export default function TokensPage() {
             <Text style={styles.balanceAmount}>
               {tokenBalance?.balance || 0}
             </Text>
-            <Text style={styles.balanceLabel}>Current Balance</Text>
+            <Text style={styles.balanceLabel}>{t.currentBalance}</Text>
           </View>
           <View style={styles.weeklyEarned}>
             <Text style={styles.weeklyAmount}>
               +{tokenBalance?.weekly_earned || 0}
             </Text>
-            <Text style={styles.weeklyLabel}>This Week</Text>
+            <Text style={styles.weeklyLabel}>{t.thisWeek}</Text>
           </View>
         </View>
 
         <View style={styles.totalEarned}>
           <Text style={styles.totalLabel}>
-            Total Earned: {tokenBalance?.total_earned || 0} tokens
+            {t.totalEarned}: {tokenBalance?.total_earned || 0} {t.tokens}
           </Text>
         </View>
       </View>
@@ -176,7 +178,7 @@ export default function TokensPage() {
               selectedTab === "Shop" && styles.selectedTabText,
             ]}
           >
-            Shop
+            {t.shop}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -189,7 +191,7 @@ export default function TokensPage() {
               selectedTab === "History" && styles.selectedTabText,
             ]}
           >
-            History
+            {t.history}
           </Text>
         </TouchableOpacity>
       </View>
@@ -200,9 +202,9 @@ export default function TokensPage() {
           {shopItems.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="storefront-outline" size={48} color="#9ca3af" />
-              <Text style={styles.emptyStateText}>No items available</Text>
+              <Text style={styles.emptyStateText}>{t.noItemsAvailable}</Text>
               <Text style={styles.emptyStateSubtext}>
-                Check back later for new rewards!
+                {t.checkBackLater}
               </Text>
             </View>
           ) : (

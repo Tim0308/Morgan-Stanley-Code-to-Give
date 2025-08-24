@@ -2,8 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Svg, Path, Line, Text as SvgText } from 'react-native-svg';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function AnalyticsPage() {
+  const { t } = useTranslation();
   const renderDistributionChart = (score: number, color: string, subject: string) => {
     const width = 300;
     const height = 180;
@@ -52,8 +54,8 @@ export default function AnalyticsPage() {
 
     return (
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>{subject} Performance</Text>
-        <Text style={styles.positionText}>Your Child's Position: {score}/100</Text>
+        <Text style={styles.chartTitle}>{subject} {t.performance}</Text>
+        <Text style={styles.positionText}>{t.yourChildPosition}: {score}/100</Text>
         
         <Svg width={width} height={height} style={styles.chart}>
           {/* Grid lines - vertical */}
@@ -141,7 +143,7 @@ export default function AnalyticsPage() {
         
         <View style={styles.scoreIndicator}>
           <View style={styles.scoreDot} />
-          <Text style={styles.scoreText}>Your Child (Score: {score})</Text>
+          <Text style={styles.scoreText}>{t.yourChildScore}: {score})</Text>
         </View>
       </View>
     );
@@ -151,7 +153,7 @@ export default function AnalyticsPage() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Grade Analytics</Text>
+        <Text style={styles.pageTitle}>{t.gradeAnalytics}</Text>
         <Ionicons name="trending-up" size={24} color="#666" />
       </View>
 
@@ -159,29 +161,29 @@ export default function AnalyticsPage() {
       <View style={styles.metricsCard}>
         <View style={styles.metricsHeader}>
           <Ionicons name="pulse" size={20} color="#3b82f6" />
-          <Text style={styles.metricsTitle}>Performance Metrics</Text>
+          <Text style={styles.metricsTitle}>{t.performanceMetrics}</Text>
         </View>
         
         <View style={styles.metricsGrid}>
           <View style={styles.metricItem}>
             <Text style={[styles.metricValue, { color: '#3b82f6' }]}>45</Text>
-            <Text style={styles.metricLabel}>Reading Speed</Text>
-            <Text style={styles.metricUnit}>WPM</Text>
+            <Text style={styles.metricLabel}>{t.readingSpeed}</Text>
+            <Text style={styles.metricUnit}>{t.wpm}</Text>
           </View>
           
           <View style={styles.metricItem}>
             <Text style={[styles.metricValue, { color: '#22c55e' }]}>87%</Text>
-            <Text style={styles.metricLabel}>Comprehension Accuracy</Text>
+            <Text style={styles.metricLabel}>{t.comprehensionAccuracy}</Text>
           </View>
           
           <View style={styles.metricItem}>
             <Text style={[styles.metricValue, { color: '#8b5cf6' }]}>8.5h</Text>
-            <Text style={styles.metricLabel}>Weekly Engagement Time</Text>
+            <Text style={styles.metricLabel}>{t.weeklyEngagementTime}</Text>
           </View>
           
           <View style={styles.metricItem}>
             <Text style={[styles.metricValue, { color: '#f97316' }]}>23%</Text>
-            <Text style={styles.metricLabel}>Skill Progression</Text>
+            <Text style={styles.metricLabel}>{t.skillProgression}</Text>
           </View>
         </View>
       </View>
@@ -190,13 +192,13 @@ export default function AnalyticsPage() {
       <View style={styles.superappCard}>
         <View style={styles.superappHeader}>
           <Ionicons name="apps" size={20} color="#3b82f6" />
-          <Text style={styles.superappTitle}>SuperAPP Progress</Text>
+          <Text style={styles.superappTitle}>{t.superAppProgress}</Text>
         </View>
         
         <View style={styles.connectionStatus}>
           <View style={styles.connectedIndicator}>
             <View style={styles.greenDot} />
-            <Text style={styles.connectedText}>Connected</Text>
+            <Text style={styles.connectedText}>{t.connected}</Text>
           </View>
           <View style={styles.pointsContainer}>
             <Ionicons name="star" size={16} color="#f59e0b" />
@@ -206,7 +208,7 @@ export default function AnalyticsPage() {
         
         <View style={styles.progressRow}>
           <View style={styles.progressItem}>
-            <Text style={styles.progressLabel}>Math Progress</Text>
+            <Text style={styles.progressLabel}>{t.mathProgress}</Text>
             <Text style={styles.progressLevel}>Level 5</Text>
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: '75%' }]} />
@@ -214,7 +216,7 @@ export default function AnalyticsPage() {
           </View>
           
           <View style={styles.progressItem}>
-            <Text style={styles.progressLabel}>Science Progress</Text>
+            <Text style={styles.progressLabel}>{t.scienceProgress}</Text>
             <Text style={styles.progressLevel}>Level 3</Text>
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: '45%' }]} />
@@ -224,15 +226,15 @@ export default function AnalyticsPage() {
         
         <TouchableOpacity style={styles.openButton}>
           <Ionicons name="open-outline" size={16} color="#666" />
-          <Text style={styles.openButtonText}>Open SuperAPP</Text>
+          <Text style={styles.openButtonText}>{t.openSuperapp}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Reading Performance Chart */}
-      {renderDistributionChart(85, '#8b5cf6', 'Reading')}
+      {renderDistributionChart(85, '#8b5cf6', t.reading)}
 
       {/* Writing Performance Chart */}
-      {renderDistributionChart(82, '#22c55e', 'Writing')}
+      {renderDistributionChart(82, '#22c55e', t.writing)}
 
       <View style={styles.spacer} />
     </ScrollView>

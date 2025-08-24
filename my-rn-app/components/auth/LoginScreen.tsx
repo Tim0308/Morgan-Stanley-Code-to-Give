@@ -1,20 +1,10 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Keyboard,
-  TouchableWithoutFeedback,
-  Alert,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../../contexts/AuthContext";
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from '../../contexts/TranslationContext';
+import LanguageDropdown from '../LanguageDropdown';
 
 interface LoginScreenProps {
   onSignUpPress: () => void;
@@ -25,10 +15,11 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { signIn } = useAuth();
+  const { t } = useTranslation();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please enter both email and password");
+      Alert.alert(t.error, t.enterEmailPassword);
       return;
     }
 
@@ -43,8 +34,8 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
       await signIn(loginEmail, password.trim());
     } catch (error: any) {
       Alert.alert(
-        "Login Failed",
-        error.message || "Invalid email or password. Please try again."
+        t.loginFailed,
+        error.message || t.invalidCredentials
       );
     }
   };
@@ -68,10 +59,15 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
+            {/* Language Dropdown */}
+            <View style={styles.languageContainer}>
+              <LanguageDropdown showOnAuth={true} />
+            </View>
+
             <View style={styles.card}>
               <View style={styles.header}>
-                <Text style={styles.welcomeBack}>Welcome back!</Text>
-                <Text style={styles.title}>Sign in to your account</Text>
+                <Text style={styles.welcomeBack}>{t.welcomeBack}</Text>
+                <Text style={styles.title}>{t.signInToAccount}</Text>
               </View>
 
               <View style={styles.form}>
@@ -84,7 +80,7 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
                   />
                   <TextInput
                     style={styles.input}
-                    placeholder="Email address or phone number"
+                    placeholder={t.emailOrPhone}
                     placeholderTextColor="#999"
                     value={email}
                     onChangeText={setEmail}
@@ -103,7 +99,7 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
                   />
                   <TextInput
                     style={styles.input}
-                    placeholder="Password"
+                    placeholder={t.password}
                     placeholderTextColor="#999"
                     value={password}
                     onChangeText={setPassword}
@@ -129,20 +125,15 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
                 onPress={handleLogin}
                 disabled={!isValid}
               >
-                <Text
-                  style={[
-                    styles.loginButtonText,
-                    !isValid && styles.disabledButtonText,
-                  ]}
-                >
-                  Sign In
+                <Text style={[styles.loginButtonText, (!isValid || loading) && styles.disabledButtonText]}>
+                  {loading ? `${t.signIn}...` : t.signIn}
                 </Text>
               </TouchableOpacity>
 
               <View style={styles.footer}>
-                <Text style={styles.signUpText}>Don't have an account? </Text>
+                <Text style={styles.signUpText}>{t.dontHaveAccount} </Text>
                 <TouchableOpacity onPress={onSignUpPress}>
-                  <Text style={styles.signUpLink}>Sign up here</Text>
+                  <Text style={styles.signUpLink}>{t.signUp}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -168,6 +159,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 20,
     paddingVertical: 40,
+  },
+  languageContainer: {
+    position: 'absolute',
+    top: -20,
+    right: 0,
+    zIndex: 1000,
   },
   card: {
     backgroundColor: "white",

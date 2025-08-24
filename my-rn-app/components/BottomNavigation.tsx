@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface BottomNavigationProps {
   currentPage: string;
@@ -8,14 +9,15 @@ interface BottomNavigationProps {
 }
 
 export default function BottomNavigation({ currentPage, onPageChange }: BottomNavigationProps) {
+  const { t } = useTranslation();
 
   const tabs = [
-    { name: 'Home', icon: 'home', label: 'Home' },
-    { name: 'Learn', icon: 'book', label: 'Learn' },
-    { name: 'Community', icon: 'people', label: 'Community' },
-    { name: 'Games', icon: 'game-controller', label: 'Games' },
-    { name: 'Analytics', icon: 'bar-chart', label: 'Analytics' },
-    { name: 'Tokens', icon: 'diamond', label: 'tokens' },
+    { name: 'Home', icon: 'home', label: t.home },
+    { name: 'Learn', icon: 'book', label: t.learn },
+    { name: 'Community', icon: 'people', label: t.community },
+    { name: 'Games', icon: 'game-controller', label: t.games },
+    { name: 'Analytics', icon: 'bar-chart', label: t.analytics },
+    { name: 'Tokens', icon: 'diamond', label: t.tokens },
   ];
 
   return (

@@ -1,13 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function CertificatesEarned() {
+  const { t } = useTranslation();
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Ionicons name="trophy" size={20} color="#f59e0b" />
-        <Text style={styles.title}>Certificates Earned</Text>
+        <Text style={styles.title}>{t.certificatesEarned}</Text>
       </View>
       
       <View style={styles.certificateCard}>
@@ -23,8 +26,8 @@ export default function CertificatesEarned() {
             <Ionicons name="trophy" size={40} color="#f59e0b" />
           </View>
           
-          <Text style={styles.certificateTitle}>Alphabet Master</Text>
-          <Text style={styles.certificateSubtitle}>Certificate of Achievement</Text>
+          <Text style={styles.certificateTitle}>{t.alphabetMaster}</Text>
+          <Text style={styles.certificateSubtitle}>{t.certificateOfAchievement}</Text>
           
           <View style={styles.certificateFooter}>
             <Text style={styles.recipientName}>Emma Chen • 2025</Text>
@@ -33,7 +36,7 @@ export default function CertificatesEarned() {
       </View>
       
       <TouchableOpacity style={styles.loadMoreButton}>
-        <Text style={styles.loadMoreText}>Load More (5 more)</Text>
+        <Text style={styles.loadMoreText}>{t.loadMore} (5 {t.more})</Text>
       </TouchableOpacity>
     </View>
   );

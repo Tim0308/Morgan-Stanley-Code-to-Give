@@ -12,6 +12,7 @@ from models.community import (
     Post, PostCreate, PostWithAuthor,
     Comment, CommentCreate, CommentWithAuthor,
     ReactionCreate, ExpertProfile, FeedResponse,
+    Thread, ThreadCreate, Message, MessageCreate, MessageWithAuthor,
     Report, ReportCreate
 )
 from models.base import PostType
@@ -163,4 +164,149 @@ async def create_report(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create report"
+        )
+
+
+@router.get("/posts/{post_id}", response_model=PostWithAuthor)
+async def get_post_by_id(
+    post_id: str,
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """Get a single post by ID"""
+    try:
+        service = CommunityService()
+        post = await service.get_post_by_id(post_id, current_user.user_id)
+        if not post:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Post not found"
+            )
+        return post
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get post by ID: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve post"
+        )
+
+
+@router.get("/posts/{post_id}/comments", response_model=List[CommentWithAuthor])
+async def get_post_comments(
+    post_id: str,
+    current_user: AuthUser = Depends(get_current_user),
+    limit: int = Query(20, ge=1, le=100)
+):
+    """Get comments for a specific post"""
+    try:
+        service = CommunityService()
+        return await service.get_post_comments(post_id, limit)
+    except Exception as e:
+        logger.error(f"Failed to get post comments: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve comments"
+        )
+
+
+@router.post("/threads", response_model=Thread)
+async def create_thread(
+    thread_data: ThreadCreate,
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """Create a new chat thread"""
+    try:
+        service = CommunityService()
+        return await service.create_thread(current_user.user_id, thread_data)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Failed to create thread: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create thread"
+        )
+
+
+@router.post("/messages", response_model=MessageWithAuthor)
+async def send_message(
+    message_data: MessageCreate,
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """Send a message in a chat thread"""
+    try:
+        service = CommunityService()
+        return await service.send_message(current_user.user_id, message_data)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Failed to send message: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send message"
+        )
+
+
+@router.get("/threads/{thread_id}/messages", response_model=List[MessageWithAuthor])
+async def get_thread_messages(
+    thread_id: str,
+    current_user: AuthUser = Depends(get_current_user),
+    limit: int = Query(50, ge=1, le=100)
+):
+    """Get messages from a chat thread"""
+    try:
+        service = CommunityService()
+        return await service.get_thread_messages(thread_id, current_user.user_id, limit)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Failed to get thread messages: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve messages"
+        )
+
+
+@router.get("/forums/{category}", response_model=List[PostWithAuthor])
+async def get_forums_by_category(
+    category: str,
+    current_user: AuthUser = Depends(get_current_user),
+    limit: int = Query(20, ge=1, le=50)
+):
+    """Get forum posts by category"""
+    try:
+        service = CommunityService()
+        return await service.get_forums_by_category(category, current_user.user_id, limit)
+    except Exception as e:
+        logger.error(f"Failed to get forums by category: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve forum posts"
+        )
+
+
+@router.get("/categories")
+async def get_categories(
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """Get available forum categories"""
+    try:
+        service = CommunityService()
+        categories = await service.get_categories()
+        return {"categories": categories}
+    except Exception as e:
+        logger.error(f"Failed to get categories: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve categories"
         ) 
