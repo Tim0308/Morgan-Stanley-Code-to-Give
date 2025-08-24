@@ -26,7 +26,7 @@ if "%NGROK_URL%"=="" (
     echo ngrok not running. Starting ngrok...
     start "ngrok" ngrok http 8000 > ngrok.log 2>&1
     echo Waiting for ngrok to start...
-    timeout /t 10 >nul
+    timeout /t 6 >nul
     for /f "delims=" %%i in ('curl -s http://127.0.0.1:4040/api/tunnels ^| python -c "import sys, json; data=json.load(sys.stdin); print(data['tunnels'][0]['public_url']) if data.get('tunnels') else print('')"') do set NGROK_URL=%%i
 )
 if "%NGROK_URL%"=="" (
@@ -42,5 +42,5 @@ echo Setting API URL environment variable...
 echo Starting React Native app...
 pushd my-rn-app
 set EXPO_PUBLIC_API_URL=%NGROK_URL%
-start "ReactNative" cmd /c "npx expo start --tunnel"
+start "ReactNative" cmd /c "npx expo start --tunnel || timeout /t 60"
 popd
