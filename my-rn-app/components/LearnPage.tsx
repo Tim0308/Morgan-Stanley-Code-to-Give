@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import * as MediaLibrary from "expo-media-library";
 import { api, BookletWithModules, UserProfile } from "../lib/api";
 import { useCache } from "../contexts/CacheContext";
 import { useTranslation } from "../contexts/TranslationContext";
+import DraggableExplainButton from "./DraggableExplainButton";
 
 interface Task {
   type: "pen-paper" | "app";
@@ -47,6 +48,20 @@ export default function LearnPage() {
   const [uploadingProof, setUploadingProof] = useState<string | null>(null);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [assignmentModalVisible, setAssignmentModalVisible] = useState(false);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<
+    string | null
+  >(null);
+  const [inAppTaskModalVisible, setInAppTaskModalVisible] = useState(false);
+  const [selectedInAppTaskId, setSelectedInAppTaskId] = useState<string | null>(
+    null
+  );
+  const [currentTaskStep, setCurrentTaskStep] = useState(0);
+
+  // Create ref for assignment modal to capture for AI
+  const assignmentModalRef = useRef<View>(null);
+  // Create ref for in-app task modal to capture for AI
+  const inAppTaskModalRef = useRef<View>(null);
 
   // Use cache instead of local state
   const {
@@ -89,51 +104,55 @@ export default function LearnPage() {
   };
 
   const handleCameraAction = async (activityId: string, taskType: string) => {
-    if (taskType !== "pen-paper") return;
+    if (taskType === "pen-paper") {
+      // Handle pen-paper tasks
+      try {
+        // Check if proof already exists
+        const existingProof = getExistingProofUrl(activityId);
 
-    try {
-      // Check if proof already exists
-      const existingProof = getExistingProofUrl(activityId);
-
-      if (existingProof) {
-        // Show options to view or delete existing proof
-        Alert.alert(
-          t.proofAlreadyUploaded,
-          t.proofAlreadyUploadedMsg,
-          [
-            { text: t.cancel, style: "cancel" },
-            {
-              text: t.viewImage,
-              onPress: () => viewProofImage(existingProof),
-            },
-            {
-              text: t.deleteUploadNew,
-              style: "destructive",
-              onPress: () => deleteProofImage(activityId),
-            },
-          ]
-        );
-      } else {
-        // Show upload options
-        Alert.alert(
-          t.uploadProofOfWork,
-          t.uploadProofMsg,
-          [
-            { text: t.cancel, style: "cancel" },
-            {
-              text: t.takePhoto,
-              onPress: () => openCamera(activityId),
-            },
-            {
-              text: t.chooseFromGallery,
-              onPress: () => openImagePicker(activityId),
-            },
-          ]
-        );
+        if (existingProof) {
+          // Show options to view or delete existing proof
+          Alert.alert(
+            "Proof Already Uploaded",
+            "You have already uploaded proof for this task. What would you like to do?",
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "View Image",
+                onPress: () => viewProofImage(existingProof),
+              },
+              {
+                text: "Delete & Upload New",
+                style: "destructive",
+                onPress: () => deleteProofImage(activityId),
+              },
+            ]
+          );
+        } else {
+          // Show camera options
+          Alert.alert(
+            "Upload Proof",
+            "Please take a photo or choose from gallery to upload proof of your work.",
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Take Photo",
+                onPress: () => openCamera(activityId),
+              },
+              {
+                text: "Choose from Gallery",
+                onPress: () => openImagePicker(activityId),
+              },
+            ]
+          );
+        }
+      } catch (error) {
+        console.error("Camera action error:", error);
+        Alert.alert("Error", "Could not process request. Please try again.");
       }
-    } catch (error) {
-      console.error("Camera action error:", error);
-      Alert.alert(t.error, t.couldNotProcessRequest);
+    } else if (taskType === "app") {
+      // Handle in-app tasks
+      handleInAppTaskStart(activityId);
     }
   };
 
@@ -143,10 +162,7 @@ export default function LearnPage() {
       const cameraPermission =
         await ImagePicker.requestCameraPermissionsAsync();
       if (cameraPermission.status !== "granted") {
-        Alert.alert(
-          t.permissionRequired,
-          t.cameraAccessNeeded
-        );
+        Alert.alert(t.permissionRequired, t.cameraAccessNeeded);
         return;
       }
 
@@ -173,10 +189,7 @@ export default function LearnPage() {
       const mediaPermission =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (mediaPermission.status !== "granted") {
-        Alert.alert(
-          t.permissionRequired,
-          t.photoLibraryAccessNeeded
-        );
+        Alert.alert(t.permissionRequired, t.photoLibraryAccessNeeded);
         return;
       }
 
@@ -368,6 +381,132 @@ export default function LearnPage() {
       );
     } finally {
       setUploadingProof(null);
+    }
+  };
+
+  // Function to view assignment
+  const handleViewAssignment = (activityId: string) => {
+    setSelectedAssignmentId(activityId);
+    setAssignmentModalVisible(true);
+  };
+
+  // Function to get assignment image based on activity ID
+  const getAssignmentImage = (activityId: string) => {
+    // For demo purposes, return the demo image for all pen & paper activities
+    // In a real app, you'd map specific activity IDs to their corresponding assignment images
+    return require("./LearnPage_material_demo/pen_paper_work1.jpg");
+  };
+
+  // Mock data for in-app color learning task
+  const getColorLearningTasks = () => {
+    return [
+      {
+        step: 1,
+        title: "Learn Primary Colors",
+        instruction: "Tap on each primary color below to learn about them!",
+        colors: [
+          {
+            name: "Red",
+            hex: "#FF0000",
+            description: "Red is the color of fire and blood.",
+          },
+          {
+            name: "Blue",
+            hex: "#0000FF",
+            description: "Blue is the color of the sky and ocean.",
+          },
+          {
+            name: "Yellow",
+            hex: "#FFFF00",
+            description: "Yellow is the color of the sun and bananas.",
+          },
+        ],
+        completed: false,
+      },
+      {
+        step: 2,
+        title: "Learn Secondary Colors",
+        instruction:
+          "These colors are made by mixing two primary colors together!",
+        colors: [
+          {
+            name: "Green",
+            hex: "#00FF00",
+            description:
+              "Green = Blue + Yellow. It's the color of grass and leaves.",
+          },
+          {
+            name: "Orange",
+            hex: "#FFA500",
+            description:
+              "Orange = Red + Yellow. It's the color of oranges and carrots.",
+          },
+          {
+            name: "Purple",
+            hex: "#800080",
+            description:
+              "Purple = Red + Blue. It's the color of grapes and violets.",
+          },
+        ],
+        completed: false,
+      },
+      {
+        step: 3,
+        title: "Color Mixing Quiz",
+        instruction: "Can you match the colors correctly?",
+        questions: [
+          {
+            question: "What color do you get when you mix Red + Yellow?",
+            answer: "Orange",
+            options: ["Green", "Orange", "Purple"],
+          },
+          {
+            question: "What color do you get when you mix Blue + Yellow?",
+            answer: "Green",
+            options: ["Orange", "Green", "Purple"],
+          },
+          {
+            question: "What color do you get when you mix Red + Blue?",
+            answer: "Purple",
+            options: ["Green", "Orange", "Purple"],
+          },
+        ],
+        completed: false,
+      },
+    ];
+  };
+
+  // Handle in-app task start
+  const handleInAppTaskStart = (activityId: string) => {
+    // For demo, we'll assume this is the color learning task
+    if (activityId.includes("colors") || activityId === "activity_1" || true) {
+      // Always true for demo
+      setSelectedInAppTaskId(activityId);
+      setCurrentTaskStep(0);
+      setInAppTaskModalVisible(true);
+    }
+  };
+
+  // Handle task step completion
+  const completeCurrentStep = () => {
+    const tasks = getColorLearningTasks();
+    if (currentTaskStep < tasks.length - 1) {
+      setCurrentTaskStep(currentTaskStep + 1);
+    } else {
+      // Task completed
+      Alert.alert(
+        "Congratulations! 🎉",
+        "You've completed the color learning activity! Great job!",
+        [
+          {
+            text: "Finish",
+            onPress: () => {
+              setInAppTaskModalVisible(false);
+              setCurrentTaskStep(0);
+            },
+          },
+        ]
+      );
     }
   };
 
@@ -636,34 +775,57 @@ export default function LearnPage() {
                             </View>
                           )}
                         </View>
-                        <TouchableOpacity
-                          style={[
-                            styles.taskAction,
-                            task.hasProof &&
-                              task.type === "pen-paper" &&
-                              styles.taskActionWithProof,
-                          ]}
-                          onPress={() => handleCameraAction(item.id, task.type)}
-                          disabled={uploadingProof === item.id}
-                        >
-                          {uploadingProof === item.id ? (
-                            <ActivityIndicator size="small" color="#1a1a2e" />
-                          ) : (
-                            <Ionicons
-                              name={
-                                task.hasProof && task.type === "pen-paper"
-                                  ? "image" // Show image icon when proof exists
-                                  : (task.actionIcon as any)
-                              }
-                              size={16}
-                              color={
-                                task.hasProof && task.type === "pen-paper"
-                                  ? "#22c55e" // Green for existing proof
-                                  : "#1a1a2e"
-                              }
-                            />
+
+                        <View style={styles.taskActions}>
+                          {/* View Assignment Button for Pen & Paper tasks - Hide when proof is uploaded */}
+                          {task.type === "pen-paper" && !task.hasProof && (
+                            <TouchableOpacity
+                              style={styles.viewAssignmentButton}
+                              onPress={() => handleViewAssignment(item.id)}
+                            >
+                              <Ionicons
+                                name="eye-outline"
+                                size={16}
+                                color="#8b5cf6"
+                              />
+                              <Text style={styles.viewAssignmentText}>
+                                View
+                              </Text>
+                            </TouchableOpacity>
                           )}
-                        </TouchableOpacity>
+
+                          {/* Main Action Button */}
+                          <TouchableOpacity
+                            style={[
+                              styles.taskAction,
+                              task.hasProof &&
+                                task.type === "pen-paper" &&
+                                styles.taskActionWithProof,
+                            ]}
+                            onPress={() =>
+                              handleCameraAction(item.id, task.type)
+                            }
+                            disabled={uploadingProof === item.id}
+                          >
+                            {uploadingProof === item.id ? (
+                              <ActivityIndicator size="small" color="#1a1a2e" />
+                            ) : (
+                              <Ionicons
+                                name={
+                                  task.hasProof && task.type === "pen-paper"
+                                    ? "image" // Show image icon when proof exists
+                                    : (task.actionIcon as any)
+                                }
+                                size={16}
+                                color={
+                                  task.hasProof && task.type === "pen-paper"
+                                    ? "#22c55e" // Green for existing proof
+                                    : "#1a1a2e"
+                                }
+                              />
+                            )}
+                          </TouchableOpacity>
+                        </View>
                       </View>
                     ))}
                   </View>
@@ -857,6 +1019,224 @@ export default function LearnPage() {
               <Text style={styles.modalActionText}>Close</Text>
             </TouchableOpacity>
           </View>
+        </View>
+      </Modal>
+
+      {/* Assignment Viewer Modal */}
+      <Modal
+        visible={assignmentModalVisible}
+        transparent={false}
+        animationType="slide"
+        onRequestClose={() => setAssignmentModalVisible(false)}
+        statusBarTranslucent={true}
+      >
+        <View
+          style={styles.modalContainer}
+          ref={assignmentModalRef}
+          collapsable={false}
+        >
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Assignment to Complete</Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setAssignmentModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Assignment Image */}
+          <View style={styles.imageContainer}>
+            {selectedAssignmentId ? (
+              <Image
+                source={getAssignmentImage(selectedAssignmentId)}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
+            ) : (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#8b5cf6" />
+                <Text>Loading assignment...</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Modal Footer with Actions */}
+          <View style={styles.modalFooter}>
+            <View style={styles.assignmentFooterContent}>
+              <View style={styles.assignmentInstructions}>
+                <Ionicons name="information-circle" size={20} color="#8b5cf6" />
+                <Text style={styles.instructionText}>
+                  Have your child complete this worksheet, then take a photo to
+                  upload as proof of work.
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.modalActionButton}
+                onPress={() => setAssignmentModalVisible(false)}
+              >
+                <Text style={styles.modalActionText}>Got It</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* AI Explain Button for Assignment Modal */}
+          <DraggableExplainButton screenRef={assignmentModalRef} />
+        </View>
+      </Modal>
+
+      {/* In-App Color Learning Task Modal */}
+      <Modal
+        visible={inAppTaskModalVisible}
+        transparent={false}
+        animationType="slide"
+        onRequestClose={() => setInAppTaskModalVisible(false)}
+        statusBarTranslucent={true}
+      >
+        <View
+          style={styles.modalContainer}
+          ref={inAppTaskModalRef}
+          collapsable={false}
+        >
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>
+              {getColorLearningTasks()[currentTaskStep]?.title ||
+                "Color Learning"}
+            </Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setInAppTaskModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Task Content */}
+          <ScrollView
+            style={styles.taskContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {getColorLearningTasks()[currentTaskStep] && (
+              <View style={styles.taskStepContainer}>
+                <Text style={styles.taskInstruction}>
+                  {getColorLearningTasks()[currentTaskStep].instruction}
+                </Text>
+
+                {/* Step 1 & 2: Color Learning */}
+                {(currentTaskStep === 0 || currentTaskStep === 1) && (
+                  <View style={styles.colorsGrid}>
+                    {getColorLearningTasks()[currentTaskStep].colors?.map(
+                      (color, index) => (
+                        <TouchableOpacity key={index} style={styles.colorCard}>
+                          <View
+                            style={[
+                              styles.colorCircle,
+                              { backgroundColor: color.hex },
+                            ]}
+                          />
+                          <Text style={styles.colorName}>{color.name}</Text>
+                          <Text style={styles.colorDescription}>
+                            {color.description}
+                          </Text>
+                        </TouchableOpacity>
+                      )
+                    )}
+                  </View>
+                )}
+
+                {/* Step 3: Quiz */}
+                {currentTaskStep === 2 && (
+                  <View style={styles.quizContainer}>
+                    {getColorLearningTasks()[currentTaskStep].questions?.map(
+                      (question, index) => (
+                        <View key={index} style={styles.questionCard}>
+                          <Text style={styles.questionText}>
+                            {question.question}
+                          </Text>
+                          <View style={styles.optionsContainer}>
+                            {question.options.map((option, optIndex) => (
+                              <TouchableOpacity
+                                key={optIndex}
+                                style={[
+                                  styles.optionButton,
+                                  option === question.answer &&
+                                    styles.correctOption,
+                                ]}
+                                onPress={() => {
+                                  if (option === question.answer) {
+                                    Alert.alert(
+                                      "Correct! 🎉",
+                                      `Yes! ${question.answer} is the right answer!`
+                                    );
+                                  } else {
+                                    Alert.alert(
+                                      "Try Again",
+                                      `Not quite. The correct answer is ${question.answer}.`
+                                    );
+                                  }
+                                }}
+                              >
+                                <Text
+                                  style={[
+                                    styles.optionText,
+                                    option === question.answer &&
+                                      styles.correctOptionText,
+                                  ]}
+                                >
+                                  {option}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </View>
+                        </View>
+                      )
+                    )}
+                  </View>
+                )}
+
+                {/* Progress Indicator */}
+                <View style={styles.progressContainer}>
+                  <Text style={styles.progressText}>
+                    Step {currentTaskStep + 1} of{" "}
+                    {getColorLearningTasks().length}
+                  </Text>
+                  <View style={styles.progressBar}>
+                    <View
+                      style={[
+                        styles.progressFill,
+                        {
+                          width: `${
+                            ((currentTaskStep + 1) /
+                              getColorLearningTasks().length) *
+                            100
+                          }%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+          </ScrollView>
+
+          {/* Modal Footer with Actions */}
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={styles.modalActionButton}
+              onPress={completeCurrentStep}
+            >
+              <Text style={styles.modalActionText}>
+                {currentTaskStep === getColorLearningTasks().length - 1
+                  ? "Complete Task"
+                  : "Next Step"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* AI Explain Button for In-App Task Modal */}
+          <DraggableExplainButton screenRef={inAppTaskModalRef} />
         </View>
       </Modal>
     </>
@@ -1170,6 +1550,25 @@ const styles = StyleSheet.create({
   taskAction: {
     padding: 4,
   },
+  taskActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  viewAssignmentButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3e8ff",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 4,
+  },
+  viewAssignmentText: {
+    fontSize: 12,
+    color: "#8b5cf6",
+    fontWeight: "500",
+  },
   taskActionWithProof: {
     backgroundColor: "rgba(34, 197, 94, 0.1)",
     borderRadius: 6,
@@ -1328,5 +1727,146 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  assignmentFooterContent: {
+    gap: 16,
+  },
+  assignmentInstructions: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#f8f9fa",
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  instructionText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+  },
+
+  // In-App Task Modal Styles
+  taskContent: {
+    flex: 1,
+    padding: 16,
+  },
+  taskStepContainer: {
+    flex: 1,
+  },
+  taskInstruction: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  colorsGrid: {
+    gap: 16,
+    marginBottom: 24,
+  },
+  colorCard: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    marginBottom: 16,
+  },
+  colorCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 12,
+    borderWidth: 3,
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  colorName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  colorDescription: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  quizContainer: {
+    gap: 20,
+    marginBottom: 24,
+  },
+  questionCard: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  questionText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  optionsContainer: {
+    gap: 8,
+  },
+  optionButton: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  correctOption: {
+    backgroundColor: "#dcfce7",
+    borderColor: "#22c55e",
+  },
+  optionText: {
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  correctOptionText: {
+    color: "#22c55e",
+    fontWeight: "600",
+  },
+  progressContainer: {
+    alignItems: "center",
+    marginTop: 24,
+  },
+  progressText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 8,
+  },
+  progressBar: {
+    width: "100%",
+    height: 4,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#8b5cf6",
+    borderRadius: 2,
   },
 });

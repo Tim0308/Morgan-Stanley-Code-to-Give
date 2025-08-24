@@ -197,8 +197,8 @@ const DraggableExplainButton: React.FC<ExplainButtonProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    zIndex: 1000,
-    elevation: 5,
+    zIndex: 9999,
+    elevation: 10,
   },
   button: {
     width: 56,
