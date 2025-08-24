@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from '../../contexts/TranslationContext';
-import LanguageDropdown from '../LanguageDropdown';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Alert,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "../../contexts/TranslationContext";
+import LanguageDropdown from "../LanguageDropdown";
 
 interface LoginScreenProps {
   onSignUpPress: () => void;
@@ -14,7 +26,7 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, isSigningIn } = useAuth();
   const { t } = useTranslation();
 
   const handleLogin = async () => {
@@ -33,10 +45,7 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
 
       await signIn(loginEmail, password.trim());
     } catch (error: any) {
-      Alert.alert(
-        t.loginFailed,
-        error.message || t.invalidCredentials
-      );
+      Alert.alert(t.loginFailed, error.message || t.invalidCredentials);
     }
   };
 
@@ -125,8 +134,13 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
                 onPress={handleLogin}
                 disabled={!isValid}
               >
-                <Text style={[styles.loginButtonText, (!isValid || loading) && styles.disabledButtonText]}>
-                  {loading ? `${t.signIn}...` : t.signIn}
+                <Text
+                  style={[
+                    styles.loginButtonText,
+                    (!isValid || isSigningIn) && styles.disabledButtonText,
+                  ]}
+                >
+                  {isSigningIn ? `${t.signIn}...` : t.signIn}
                 </Text>
               </TouchableOpacity>
 
@@ -161,7 +175,7 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   languageContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: -20,
     right: 0,
     zIndex: 1000,

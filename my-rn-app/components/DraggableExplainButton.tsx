@@ -1,23 +1,32 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Alert, ActivityIndicator, Dimensions } from 'react-native';
-import { captureRef } from 'react-native-view-shot';
-import { explainScreenshot } from '../lib/api';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import React, { useRef, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Dimensions,
+} from "react-native";
+import { captureRef } from "react-native-view-shot";
+import { explainScreenshot } from "../lib/api";
+import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   runOnJS,
   withSpring,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface ExplainButtonProps {
   screenRef: React.RefObject<View | null>;
 }
 
-const DraggableExplainButton: React.FC<ExplainButtonProps> = ({ screenRef }) => {
+const DraggableExplainButton: React.FC<ExplainButtonProps> = ({
+  screenRef,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Button position - start at bottom right
@@ -25,79 +34,93 @@ const DraggableExplainButton: React.FC<ExplainButtonProps> = ({ screenRef }) => 
   const translateY = useSharedValue(screenHeight - 150);
 
   const handleExplain = async () => {
-    console.log('🔍 ExplainButton: Starting screenshot capture process...');
-    
+    console.log("🔍 ExplainButton: Starting screenshot capture process...");
+
     // Detailed logging for debugging
-    console.log('📱 ExplainButton: Checking screenRef...');
-    console.log('📱 ExplainButton: screenRef exists:', !!screenRef);
-    console.log('📱 ExplainButton: screenRef.current exists:', !!screenRef?.current);
-    
+    console.log("📱 ExplainButton: Checking screenRef...");
+    console.log("📱 ExplainButton: screenRef exists:", !!screenRef);
+    console.log(
+      "📱 ExplainButton: screenRef.current exists:",
+      !!screenRef?.current
+    );
+
     if (!screenRef) {
-      console.error('❌ ExplainButton: screenRef is null or undefined');
-      Alert.alert('Error', 'Screen reference is missing');
+      console.error("❌ ExplainButton: screenRef is null or undefined");
+      Alert.alert("Error", "Screen reference is missing");
       return;
     }
 
     if (!screenRef.current) {
-      console.error('❌ ExplainButton: screenRef.current is null or undefined');
-      Alert.alert('Error', 'Unable to capture screen - view not found');
+      console.error("❌ ExplainButton: screenRef.current is null or undefined");
+      Alert.alert("Error", "Unable to capture screen - view not found");
       return;
     }
 
     setIsLoading(true);
-    console.log('⏳ ExplainButton: Setting loading to true');
+    console.log("⏳ ExplainButton: Setting loading to true");
 
     try {
-      console.log('📸 ExplainButton: Starting screen capture...');
-      
+      console.log("📸 ExplainButton: Starting screen capture...");
+
       // Capture screenshot using the provided screenRef
       const uri = await captureRef(screenRef, {
-        format: 'png',
+        format: "png",
         quality: 0.8,
-        result: 'base64'
+        result: "base64",
       });
 
       if (!uri) {
-        console.error('❌ ExplainButton: Screenshot capture returned empty result');
-        Alert.alert('Screenshot Error', 'Failed to capture screenshot');
+        console.error(
+          "❌ ExplainButton: Screenshot capture returned empty result"
+        );
+        Alert.alert("Screenshot Error", "Failed to capture screenshot");
         return;
       }
 
-      console.log('✅ ExplainButton: Screenshot captured successfully');
-      console.log('📊 ExplainButton: Screenshot data length:', uri.length);
+      console.log("✅ ExplainButton: Screenshot captured successfully");
+      console.log("📊 ExplainButton: Screenshot data length:", uri.length);
 
-      console.log('🚀 ExplainButton: Sending to AI service...');
+      console.log("🚀 ExplainButton: Sending to AI service...");
 
       // Send to backend for AI analysis
       const explanation = await explainScreenshot(uri);
-      
-      console.log('✅ ExplainButton: AI explanation received');
-      console.log('📝 ExplainButton: Explanation length:', explanation?.length || 0);
-      
+
+      console.log("✅ ExplainButton: AI explanation received");
+      console.log(
+        "📝 ExplainButton: Explanation length:",
+        explanation?.length || 0
+      );
+
       // Show explanation in alert (you can customize this to show in a modal)
-      Alert.alert('AI Explanation', explanation || 'No explanation received', [{ text: 'OK' }]);
+      Alert.alert("AI Explanation", explanation || "No explanation received", [
+        { text: "OK" },
+      ]);
     } catch (error: any) {
-      console.error('❌ ExplainButton: Full error details:', {
+      console.error("❌ ExplainButton: Full error details:", {
         error,
         type: typeof error,
         name: error?.name,
         message: error?.message,
         stack: error?.stack,
-        isString: typeof error === 'string' ? error : 'not a string'
+        isString: typeof error === "string" ? error : "not a string",
       });
 
-      let errorMessage = 'An unexpected error occurred. Please try again.';
-      
-      if (error?.message?.includes('reactTag')) {
-        errorMessage = 'Unable to capture screen. Please try again.';
-      } else if (error?.message?.includes('network') || error?.message?.includes('API')) {
-        errorMessage = 'Network error. Please check your connection and try again.';
+      let errorMessage = "An unexpected error occurred. Please try again.";
+
+      if (error?.message?.includes("reactTag")) {
+        errorMessage = "Unable to capture screen. Please try again.";
+      } else if (
+        error?.message?.includes("network") ||
+        error?.message?.includes("API")
+      ) {
+        errorMessage =
+          "Network error. Please check your connection and try again.";
       }
-      
-      Alert.alert('Error', errorMessage);
+
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsLoading(false);
-      console.log('🏁 ExplainButton: Process completed');
+      console.log("🏁 ExplainButton: Process completed");
     }
   };
 
@@ -131,7 +154,8 @@ const DraggableExplainButton: React.FC<ExplainButtonProps> = ({ screenRef }) => 
       // Keep within vertical bounds
       if (finalY < margin) {
         finalY = margin;
-      } else if (finalY > screenHeight - buttonSize - margin - 100) { // Account for bottom nav
+      } else if (finalY > screenHeight - buttonSize - margin - 100) {
+        // Account for bottom nav
         finalY = screenHeight - buttonSize - margin - 100;
       }
 
@@ -172,7 +196,7 @@ const DraggableExplainButton: React.FC<ExplainButtonProps> = ({ screenRef }) => 
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: 1000,
     elevation: 5,
   },
@@ -180,10 +204,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -193,9 +217,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

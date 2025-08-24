@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # OpenAI Configuration
     OPENAI_API_KEY: str = "a97fe937957949079c02267ba32a86dd"
     
+    # Hugging Face Configuration
+    HF_TOKEN: str = ""
+    
     # Frontend API URL
     EXPO_PUBLIC_API_URL: str = "http://192.168.1.100:8000"
     

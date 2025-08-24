@@ -63,7 +63,7 @@ export default function Header() {
     
     const firstChild = userProfile.children[0];
     const school = firstChild.class?.name || 'Sunny Hill';
-    const grade = firstChild.class?.grade || firstChild.grade || 'N/A';
+    const grade = firstChild.class?.grade || firstChild.grade || 'K3';
     
     return { school, grade };
   };

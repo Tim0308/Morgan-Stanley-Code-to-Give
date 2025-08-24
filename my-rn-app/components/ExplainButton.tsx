@@ -10,7 +10,7 @@
 //   runOnJS,
 //   withSpring,
 // } from 'react-native-reanimated';
-//   withSpring 
+//   withSpring
 // } from 'react-native-reanimated';
 // import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
@@ -23,12 +23,12 @@
 
 //   const handleExplain = async () => {
 //     console.log('🔍 ExplainButton: Starting screenshot capture process...');
-    
+
 //     // Detailed logging for debugging
 //     console.log('📱 ExplainButton: Checking screenRef...');
 //     console.log('📱 ExplainButton: screenRef exists:', !!screenRef);
 //     console.log('📱 ExplainButton: screenRef.current exists:', !!screenRef?.current);
-    
+
 //     if (!screenRef) {
 //       console.error('❌ ExplainButton: screenRef is null or undefined');
 //       Alert.alert('Error', 'Screen reference is missing');
@@ -73,10 +73,10 @@
 
 //       // Send to backend for AI analysis
 //       const explanation = await explainScreenshot(uri);
-      
+
 //       console.log('✅ ExplainButton: AI explanation received');
 //       console.log('📝 ExplainButton: Explanation length:', explanation?.length || 0);
-      
+
 //       // Show explanation in alert (you can customize this to show in a modal)
 //       Alert.alert('AI Explanation', explanation || 'No explanation received', [{ text: 'OK' }]);
 //     } catch (error: any) {
@@ -90,13 +90,13 @@
 //       });
 
 //       let errorMessage = 'An unexpected error occurred. Please try again.';
-      
+
 //       if (error?.message?.includes('reactTag')) {
 //         errorMessage = 'Unable to capture screen. Please try again.';
 //       } else if (error?.message?.includes('network') || error?.message?.includes('API')) {
 //         errorMessage = 'Network error. Please check your connection and try again.';
 //       }
-      
+
 //       Alert.alert('Error', errorMessage);
 //     } finally {
 //       setIsLoading(false);
@@ -105,8 +105,8 @@
 //   };
 
 //   return (
-//     <TouchableOpacity 
-//       style={styles.explainButton} 
+//     <TouchableOpacity
+//       style={styles.explainButton}
 //       onPress={handleExplain}
 //       disabled={isLoading}
 //     >
