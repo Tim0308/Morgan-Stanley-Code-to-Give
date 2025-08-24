@@ -31,7 +31,7 @@ export default function LanguageDropdown({
 
   const languageOptions: LanguageOption[] = [
     { code: 'EN', label: 'English', flag: '🇺🇸' },
-    { code: 'ZH', label: '繁體中文', flag: '🇹🇼' },
+    { code: 'ZH', label: '繁體中文', flag: '🇭🇰' },
   ];
 
   const currentLanguage = languageOptions.find(lang => lang.code === language) || languageOptions[0];

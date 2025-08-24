@@ -86,6 +86,8 @@ interface Translations {
   noPendingHomework: string;
   showMoreAssignments: string;
   showMoreMaterials: string;
+  materialsWillAppearHere: string;
+  noMaterialsAvailable: string;
   pending: string;
   overdue: string;
   submitted: string;
@@ -105,6 +107,9 @@ interface Translations {
   
   // Community page
   childrenAchievements: string;
+  photoAttached: string;
+  videoAttached: string;
+  showComments: string;
   forums: string;
   chats: string;
   experts: string;
@@ -260,6 +265,8 @@ const translations: Record<Language, Translations> = {
     noPendingHomework: 'No pending homework at the moment',
     showMoreAssignments: 'Show More Assignments',
     showMoreMaterials: 'Show More Materials',
+    noMaterialsAvailable: 'No materials available',
+    materialsWillAppearHere: 'Learning materials will appear here.',
     pending: 'Pending',
     overdue: 'Overdue',
     submitted: 'Submitted',
@@ -279,6 +286,9 @@ const translations: Record<Language, Translations> = {
     
     // Community page
     childrenAchievements: 'Children Achievements',
+    photoAttached: 'Photo attached',
+    videoAttached: 'Video attached',
+    showComments: 'Show Comments',
     forums: 'Forums',
     chats: 'Chats',
     experts: 'Expert Parents',
@@ -429,6 +439,8 @@ const translations: Record<Language, Translations> = {
     noPendingHomework: '目前沒有待處理的作業',
     showMoreAssignments: '顯示更多作業',
     showMoreMaterials: '顯示更多教材',
+    noMaterialsAvailable: '沒有可用的教材',
+    materialsWillAppearHere: '相關教材將顯示在此處。',
     pending: '待處理',
     overdue: '逾期',
     submitted: '已提交',
@@ -447,7 +459,10 @@ const translations: Record<Language, Translations> = {
     couldNotProcessRequest: '無法處理請求。請重試。',
     
     // Community page
-    childrenAchievements: '兒童成就',
+    childrenAchievements: '孩子成就',
+    photoAttached: '已附加照片',
+    videoAttached: '已附加影片',
+    showComments: '顯示留言',
     forums: '論壇',
     chats: '聊天',
     experts: '專家家長',

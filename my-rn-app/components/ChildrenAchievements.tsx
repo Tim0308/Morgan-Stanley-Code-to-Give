@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { api, CommunityPost } from '../lib/api';
+import { useTranslation } from '../contexts/TranslationContext';
 
 interface Achievement {
   id: string;
@@ -15,6 +16,7 @@ interface Achievement {
 }
 
 export default function ChildrenAchievements() {
+  const { t } = useTranslation();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +60,7 @@ export default function ChildrenAchievements() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Ionicons name="trophy" size={20} color="#f59e0b" />
-        <Text style={styles.title}>Children Achievements</Text>
+        <Text style={styles.title}>{t.childrenAchievements}</Text>
       </View>
       
       {achievements.map((achievement) => (
@@ -91,7 +93,7 @@ export default function ChildrenAchievements() {
                   color="#9ca3af" 
                 />
                 <Text style={styles.mediaText}>
-                  {achievement.mediaType === 'photo' ? 'Photo attached' : 'Video attached'}
+                  {achievement.mediaType === 'photo' ? t.photoAttached : t.videoAttached}
                 </Text>
               </View>
             </View>
@@ -105,7 +107,7 @@ export default function ChildrenAchievements() {
             
             <TouchableOpacity style={styles.commentButton}>
               <Ionicons name="chatbubble-outline" size={20} color="#666" />
-              <Text style={styles.commentText}>Show Comments</Text>
+              <Text style={styles.commentText}>{t.showComments}</Text>
             </TouchableOpacity>
             
             <Text style={styles.timeAgo}>{achievement.timeAgo}</Text>
@@ -238,4 +240,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9ca3af',
   },
-}); 
+});

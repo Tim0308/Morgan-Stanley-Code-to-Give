@@ -168,17 +168,17 @@ export default function AnalyticsPage() {
           <View style={styles.metricItem}>
             <Text style={[styles.metricValue, { color: '#3b82f6' }]}>45</Text>
             <Text style={styles.metricLabel}>{t.readingSpeed}</Text>
-            <Text style={styles.metricUnit}>WPM</Text>
+            <Text style={styles.metricUnit}>{t.wpm}</Text>
           </View>
           
           <View style={styles.metricItem}>
             <Text style={[styles.metricValue, { color: '#22c55e' }]}>87%</Text>
-            <Text style={styles.metricLabel}>Comprehension Accuracy</Text>
+            <Text style={styles.metricLabel}>{t.comprehensionAccuracy}</Text>
           </View>
           
           <View style={styles.metricItem}>
             <Text style={[styles.metricValue, { color: '#8b5cf6' }]}>8.5h</Text>
-            <Text style={styles.metricLabel}>Weekly Engagement Time</Text>
+            <Text style={styles.metricLabel}>{t.weeklyEngagementTime}</Text>
           </View>
           
           <View style={styles.metricItem}>

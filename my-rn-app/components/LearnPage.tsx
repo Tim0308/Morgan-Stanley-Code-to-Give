@@ -747,10 +747,10 @@ export default function LearnPage() {
               <View style={styles.emptyState}>
                 <Ionicons name="library-outline" size={48} color="#9ca3af" />
                 <Text style={styles.emptyStateText}>
-                  No materials available
+                  {t.noMaterialsAvailable}
                 </Text>
                 <Text style={styles.emptyStateSubtext}>
-                  Learning materials will appear here
+                  {t.materialsWillAppearHere}
                 </Text>
               </View>
             ) : (
