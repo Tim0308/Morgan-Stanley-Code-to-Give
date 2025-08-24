@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { api, BookletProgress as BookletProgressType } from "../lib/api";
 import { useCache } from "../contexts/CacheContext";
+import { useTranslation } from "../contexts/TranslationContext";
 
 interface ProgressItemProps {
   title: string;
@@ -27,12 +28,14 @@ function ProgressItem({
   timeRemaining,
   progress,
 }: ProgressItemProps) {
+  const { t } = useTranslation();
+  
   return (
     <View style={styles.progressItem}>
       <View style={styles.progressHeader}>
         <Text style={styles.progressTitle}>{title}</Text>
         <Text style={styles.progressStats}>
-          {completed}/{total} modules completed
+          {completed}/{total} {t.modulesCompleted}
         </Text>
       </View>
 
@@ -44,7 +47,7 @@ function ProgressItem({
 
       <View style={styles.progressFooter}>
         <Text style={styles.currentModule}>
-          Current Module: {currentModule}
+          {t.currentModule}: {currentModule}
         </Text>
         <Text style={styles.timeRemaining}>{timeRemaining}</Text>
       </View>
@@ -53,11 +56,12 @@ function ProgressItem({
 }
 
 export default function BookletProgress() {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progressData, setProgressData] = useState<ProgressItemProps[]>([
     // Default data to prevent undefined errors
     {
-      title: "Loading...",
+      title: t.loading,
       completed: 0,
       total: 0,
       currentModule: 0,

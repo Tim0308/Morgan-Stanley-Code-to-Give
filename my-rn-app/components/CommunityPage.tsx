@@ -1,35 +1,26 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { ChildrenAchievements, Forums, Chats, Experts } from './index';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function CommunityPage() {
-  const [selectedTab, setSelectedTab] = useState('Children Achievements');
-
+  const { t } = useTranslation();
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  
   const tabs = [
-    'Children Achievements',
-    'Forums',
-    'Chats',
-    'Experts'
+    { key: 'childrenAchievements', label: t.childrenAchievements, component: <ChildrenAchievements /> },
+    { key: 'forums', label: t.forums, component: <Forums /> },
+    { key: 'chats', label: t.chats, component: <Chats /> },
+    { key: 'experts', label: t.experts, component: <Experts /> }
   ];
 
   const renderContent = () => {
-    switch (selectedTab) {
-      case 'Children Achievements':
-        return <ChildrenAchievements />;
-      case 'Forums':
-        return <Forums />;
-      case 'Chats':
-        return <Chats />;
-      case 'Experts':
-        return <Experts />;
-      default:
-        return <ChildrenAchievements />;
-    }
+    return tabs[selectedTabIndex].component;
   };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.pageTitle}>Community</Text>
+      <Text style={styles.pageTitle}>{t.community}</Text>
       
       {/* Tab Navigation */}
       <ScrollView 
@@ -38,22 +29,22 @@ export default function CommunityPage() {
         style={styles.tabScrollView}
         contentContainerStyle={styles.tabContainer}
       >
-        {tabs.map((tab) => (
+        {tabs.map((tab, index) => (
           <TouchableOpacity
-            key={tab}
+            key={tab.key}
             style={[
               styles.tab,
-              selectedTab === tab && styles.selectedTab,
+              selectedTabIndex === index && styles.selectedTab,
             ]}
-            onPress={() => setSelectedTab(tab)}
+            onPress={() => setSelectedTabIndex(index)}
           >
             <Text
               style={[
                 styles.tabText,
-                selectedTab === tab && styles.selectedTabText,
+                selectedTabIndex === index && styles.selectedTabText,
               ]}
             >
-              {tab}
+              {tab.label}
             </Text>
           </TouchableOpacity>
         ))}

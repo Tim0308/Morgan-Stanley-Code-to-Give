@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { api, BookletWithModules, UserProfile } from "../lib/api";
 import { useCache } from "../contexts/CacheContext";
+import { useTranslation } from "../contexts/TranslationContext";
 
 interface Task {
   type: "pen-paper" | "app";
@@ -58,6 +59,8 @@ export default function LearnPage() {
     error: cacheError,
   } = useCache();
 
+  const { t } = useTranslation();
+
   // Get data from cache
   const userProfile = getUserProfile();
   const children = getChildren();
@@ -95,16 +98,16 @@ export default function LearnPage() {
       if (existingProof) {
         // Show options to view or delete existing proof
         Alert.alert(
-          "Proof Already Uploaded",
-          "You have already uploaded proof for this activity. What would you like to do?",
+          t.proofAlreadyUploaded,
+          t.proofAlreadyUploadedMsg,
           [
-            { text: "Cancel", style: "cancel" },
+            { text: t.cancel, style: "cancel" },
             {
-              text: "View Image",
+              text: t.viewImage,
               onPress: () => viewProofImage(existingProof),
             },
             {
-              text: "Delete & Upload New",
+              text: t.deleteUploadNew,
               style: "destructive",
               onPress: () => deleteProofImage(activityId),
             },
@@ -113,16 +116,16 @@ export default function LearnPage() {
       } else {
         // Show upload options
         Alert.alert(
-          "Upload Proof of Work",
-          "Take a photo of your completed pen & paper work to submit proof.",
+          t.uploadProofOfWork,
+          t.uploadProofMsg,
           [
-            { text: "Cancel", style: "cancel" },
+            { text: t.cancel, style: "cancel" },
             {
-              text: "Take Photo",
+              text: t.takePhoto,
               onPress: () => openCamera(activityId),
             },
             {
-              text: "Choose from Gallery",
+              text: t.chooseFromGallery,
               onPress: () => openImagePicker(activityId),
             },
           ]
@@ -130,7 +133,7 @@ export default function LearnPage() {
       }
     } catch (error) {
       console.error("Camera action error:", error);
-      Alert.alert("Error", "Could not process request. Please try again.");
+      Alert.alert(t.error, t.couldNotProcessRequest);
     }
   };
 
@@ -141,8 +144,8 @@ export default function LearnPage() {
         await ImagePicker.requestCameraPermissionsAsync();
       if (cameraPermission.status !== "granted") {
         Alert.alert(
-          "Permission Required",
-          "Camera access is needed to take photos of your completed work."
+          t.permissionRequired,
+          t.cameraAccessNeeded
         );
         return;
       }
@@ -160,7 +163,7 @@ export default function LearnPage() {
       }
     } catch (error) {
       console.error("Camera error:", error);
-      Alert.alert("Error", "Failed to open camera. Please try again.");
+      Alert.alert(t.error, "Failed to open camera. Please try again.");
     }
   };
 
@@ -171,8 +174,8 @@ export default function LearnPage() {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (mediaPermission.status !== "granted") {
         Alert.alert(
-          "Permission Required",
-          "Photo library access is needed to select images."
+          t.permissionRequired,
+          t.photoLibraryAccessNeeded
         );
         return;
       }
@@ -190,7 +193,7 @@ export default function LearnPage() {
       }
     } catch (error) {
       console.error("Image picker error:", error);
-      Alert.alert("Error", "Failed to open image picker. Please try again.");
+      Alert.alert(t.error, "Failed to open image picker. Please try again.");
     }
   };
 
@@ -470,7 +473,7 @@ export default function LearnPage() {
   return (
     <>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.pageTitle}>Learn</Text>
+        <Text style={styles.pageTitle}>{t.learn}</Text>
 
         {/* Homework/Materials Toggle */}
         <View style={styles.tabContainer}>
@@ -487,7 +490,7 @@ export default function LearnPage() {
                 selectedTab === "Homework" && styles.selectedTabText,
               ]}
             >
-              Homework
+              {t.homework}
             </Text>
           </TouchableOpacity>
 
@@ -504,7 +507,7 @@ export default function LearnPage() {
                 selectedTab === "Materials" && styles.selectedTabText,
               ]}
             >
-              Materials
+              {t.materials}
             </Text>
           </TouchableOpacity>
         </View>
@@ -513,7 +516,7 @@ export default function LearnPage() {
           <View>
             {/* Homework Calendar Section */}
             <View style={styles.calendarSection}>
-              <Text style={styles.calendarTitle}>Homework Calendar</Text>
+              <Text style={styles.calendarTitle}>{t.homeworkCalendar}</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -562,15 +565,15 @@ export default function LearnPage() {
             {/* Current Work Section */}
             <View style={styles.sectionHeader}>
               <Ionicons name="timer-outline" size={20} color="#f97316" />
-              <Text style={styles.sectionTitle}>Current Work</Text>
+              <Text style={styles.sectionTitle}>{t.currentWork}</Text>
             </View>
 
             {currentWork.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="checkmark-circle" size={48} color="#22c55e" />
-                <Text style={styles.emptyStateText}>All caught up!</Text>
+                <Text style={styles.emptyStateText}>{t.allCaughtUp}</Text>
                 <Text style={styles.emptyStateSubtext}>
-                  No pending homework at the moment
+                  {t.noPendingHomework}
                 </Text>
               </View>
             ) : (
@@ -685,7 +688,7 @@ export default function LearnPage() {
                   onPress={() => setShowCompletedWork(!showCompletedWork)}
                 >
                   <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
-                  <Text style={styles.sectionTitle}>Completed Work</Text>
+                  <Text style={styles.sectionTitle}>{t.completedWork}</Text>
                   <View style={styles.sectionToggle}>
                     <Text style={styles.completedCount}>
                       ({completedWork.length - 3})

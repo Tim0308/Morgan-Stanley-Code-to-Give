@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import VocabVentureGame from './VocabVentureGame';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function GamesPage() {
+  const { t } = useTranslation();
   const [showVocabVenture, setShowVocabVenture] = useState(false);
 
   const handleGameComplete = (result: any) => {
@@ -15,17 +17,17 @@ export default function GamesPage() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Games</Text>
+        <Text style={styles.pageTitle}>{t.games}</Text>
         <Ionicons name="game-controller" size={24} color="#666" />
       </View>
 
       {/* Weekly Challenge */}
       <View style={styles.weeklyChallenge}>
         <View style={styles.challengeHeader}>
-          <Text style={styles.challengeTitle}>Weekly Challenge</Text>
+          <Text style={styles.challengeTitle}>{t.weeklyChallenge}</Text>
           <View style={styles.completedGames}>
             <Text style={styles.completedNumber}>5</Text>
-            <Text style={styles.completedText}>games completed</Text>
+            <Text style={styles.completedText}>{t.gamesCompleted}</Text>
           </View>
         </View>
 
@@ -43,8 +45,8 @@ export default function GamesPage() {
           </Text>
 
           <View style={styles.progressSection}>
-            <Text style={styles.progressLabel}>Progress</Text>
-            <Text style={styles.progressText}>4/7 days</Text>
+            <Text style={styles.progressLabel}>{t.progress}</Text>
+            <Text style={styles.progressText}>4/7 {t.days}</Text>
           </View>
 
           <View style={styles.progressBar}>
@@ -75,7 +77,7 @@ export default function GamesPage() {
 
       {/* Extra Games */}
       <View style={styles.extraGames}>
-        <Text style={styles.sectionTitle}>Extra Games</Text>
+        <Text style={styles.sectionTitle}>{t.extraGames}</Text>
 
         <View style={styles.gameCard}>
           <View style={styles.gameIcon}>

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { api, WeeklyProgress } from '../lib/api';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function WeeklyGoal() {
   const [completed, setCompleted] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadWeeklyProgress();
@@ -44,7 +46,7 @@ export default function WeeklyGoal() {
       }
     } catch (err) {
       console.error('Error loading weekly progress:', err);
-      setError('Failed to load weekly goal');
+      setError(`${t.failed} ${t.weeklyGoal.toLowerCase()}`);
       // Show empty state on error
       setCompleted(0);
       setTotal(0);
@@ -64,12 +66,12 @@ export default function WeeklyGoal() {
               <View style={styles.iconContainer}>
                 <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
               </View>
-              <Text style={styles.title}>Weekly Goal</Text>
+              <Text style={styles.title}>{t.weeklyGoal}</Text>
             </View>
           </View>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#8b5cf6" />
-            <Text style={styles.loadingText}>Loading...</Text>
+            <Text style={styles.loadingText}>{t.loading}</Text>
           </View>
         </View>
       </View>
@@ -85,7 +87,7 @@ export default function WeeklyGoal() {
               <View style={styles.iconContainer}>
                 <Ionicons name="warning-outline" size={20} color="#ef4444" />
               </View>
-              <Text style={styles.title}>Weekly Goal</Text>
+              <Text style={styles.title}>{t.weeklyGoal}</Text>
             </View>
             <TouchableOpacity onPress={loadWeeklyProgress}>
               <Ionicons name="refresh" size={20} color="#666" />
@@ -105,7 +107,7 @@ export default function WeeklyGoal() {
             <View style={styles.iconContainer}>
               <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
             </View>
-            <Text style={styles.title}>Weekly Goal</Text>
+            <Text style={styles.title}>{t.weeklyGoal}</Text>
           </View>
           <TouchableOpacity>
             <Ionicons name="chevron-forward" size={20} color="#666" />
@@ -114,7 +116,7 @@ export default function WeeklyGoal() {
         
         <View style={styles.progressContainer}>
           <Text style={styles.progressText}>
-            {total > 0 ? `${completed}/${total} activities completed` : 'No activities this week'}
+            {total > 0 ? `${completed}/${total} ${t.activities} ${t.completed}` : t.noActivitiesThisWeek}
           </Text>
           <Text style={styles.percentageText}>{percentage}%</Text>
         </View>

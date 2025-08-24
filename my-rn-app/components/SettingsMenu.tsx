@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const MENU_WIDTH = screenWidth * 0.75; // 75% of screen width
@@ -31,6 +32,7 @@ interface SettingsMenuProps {
 export default function SettingsMenu({ visible, onClose, userProfile, onProfileUpdated, onEditProfilePress }: SettingsMenuProps) {
   const slideAnim = React.useRef(new Animated.Value(-MENU_WIDTH)).current;
   const { signOut } = useAuth();
+  const { t } = useTranslation();
 
 
   React.useEffect(() => {
@@ -55,7 +57,7 @@ export default function SettingsMenu({ visible, onClose, userProfile, onProfileU
   const menuItems = [
     {
       id: 'profile',
-      title: 'Edit Profile',
+      title: t.editProfile,
       icon: 'person-outline',
       onPress: () => {
 
@@ -65,7 +67,7 @@ export default function SettingsMenu({ visible, onClose, userProfile, onProfileU
     },
     {
       id: 'settings',
-      title: 'Settings',
+      title: t.settings,
       icon: 'settings-outline',
       onPress: () => {
         console.log('Settings pressed');
@@ -74,7 +76,7 @@ export default function SettingsMenu({ visible, onClose, userProfile, onProfileU
     },
     {
       id: 'notifications',
-      title: 'Notifications',
+      title: t.notifications,
       icon: 'notifications-outline',
       onPress: () => {
         console.log('Notifications pressed');
@@ -83,7 +85,7 @@ export default function SettingsMenu({ visible, onClose, userProfile, onProfileU
     },
     {
       id: 'privacy',
-      title: 'Privacy & Security',
+      title: t.privacySecurity,
       icon: 'shield-outline',
       onPress: () => {
         console.log('Privacy pressed');
@@ -92,7 +94,7 @@ export default function SettingsMenu({ visible, onClose, userProfile, onProfileU
     },
     {
       id: 'help',
-      title: 'Help & Support',
+      title: t.helpSupport,
       icon: 'help-circle-outline',
       onPress: () => {
         console.log('Help pressed');
@@ -101,7 +103,7 @@ export default function SettingsMenu({ visible, onClose, userProfile, onProfileU
     },
     {
       id: 'about',
-      title: 'About',
+      title: t.about,
       icon: 'information-circle-outline',
       onPress: () => {
         console.log('About pressed');
@@ -110,19 +112,19 @@ export default function SettingsMenu({ visible, onClose, userProfile, onProfileU
     },
     {
       id: 'logout',
-      title: 'Log Out',
+      title: t.logOut,
       icon: 'log-out-outline',
       onPress: () => {
         Alert.alert(
-          'Log Out',
-          'Are you sure you want to log out?',
+          t.logOutConfirmTitle,
+          t.logOutConfirmMessage,
           [
             {
-              text: 'Cancel',
+              text: t.cancel,
               style: 'cancel',
             },
             {
-              text: 'Log Out',
+              text: t.logOut,
               style: 'destructive',
               onPress: async () => {
                 try {

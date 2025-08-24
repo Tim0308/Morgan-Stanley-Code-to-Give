@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { api, UserProfile } from '../lib/api';
+import { useTranslation } from '../contexts/TranslationContext';
 import SettingsMenu from './SettingsMenu';
 import EditProfile from './EditProfile';
+import LanguageDropdown from './LanguageDropdown';
 
 export default function Header() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -11,6 +13,7 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadUserData();
@@ -55,7 +58,7 @@ export default function Header() {
 
   const getSchoolInfo = () => {
     if (!userProfile?.children || userProfile.children.length === 0) {
-      return { school: 'No School', grade: 'N/A' };
+      return { school: t.noSchool, grade: 'N/A' };
     }
     
     const firstChild = userProfile.children[0];
@@ -72,7 +75,7 @@ export default function Header() {
       <View style={styles.header}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="small" color="white" />
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={styles.loadingText}>{t.loading}</Text>
         </View>
       </View>
     );
@@ -112,10 +115,7 @@ export default function Header() {
         </View>
         
         <View style={styles.rightSection}>
-          <TouchableOpacity style={styles.languageButton}>
-            <Text style={styles.languageText}>EN</Text>
-            <Ionicons name="chevron-down" size={16} color="#333" />
-          </TouchableOpacity>
+          <LanguageDropdown style={styles.languageDropdown} />
           
           <TouchableOpacity style={styles.notificationButton}>
             <Ionicons name="notifications-outline" size={24} color="white" />
@@ -256,6 +256,9 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  languageDropdown: {
+    marginRight: 12,
   },
   languageButton: {
     backgroundColor: 'white',

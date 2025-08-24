@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, ScrollView, View, ActivityIndicator } from "react-native";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CacheProvider, useCache } from "./contexts/CacheContext";
+import { TranslationProvider } from "./contexts/TranslationContext";
 import { testConnection } from "./lib/api";
 import AuthNavigator from "./components/auth/AuthNavigator";
 import Header from "./components/Header";
@@ -97,11 +98,13 @@ function MainApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <CacheProvider>
-        <MainApp />
-      </CacheProvider>
-    </AuthProvider>
+    <TranslationProvider>
+      <AuthProvider>
+        <CacheProvider>
+          <MainApp />
+        </CacheProvider>
+      </AuthProvider>
+    </TranslationProvider>
   );
 }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useCache } from "../contexts/CacheContext";
+import { useTranslation } from "../contexts/TranslationContext";
 
 interface Metric {
   value: string;
@@ -11,6 +12,7 @@ interface Metric {
 }
 
 export default function PerformanceMetrics() {
+  const { t } = useTranslation();
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,25 +35,25 @@ export default function PerformanceMetrics() {
       const defaultMetrics: Metric[] = [
         {
           value: "45",
-          label: "Reading Speed",
-          unit: "WPM",
+          label: t.readingSpeed,
+          unit: t.wpm,
           color: "#3b82f6",
         },
         {
           value: "87",
-          label: "Comprehension Accuracy",
+          label: t.comprehensionAccuracy,
           unit: "",
           color: "#22c55e",
         },
         {
           value: "8.5",
-          label: "Weekly Engagement Time",
+          label: t.weeklyEngagementTime,
           unit: "",
           color: "#8b5cf6",
         },
         {
           value: "23",
-          label: "Skill Progression",
+          label: t.skillProgression,
           unit: "",
           color: "#f97316",
         },
@@ -73,25 +75,25 @@ export default function PerformanceMetrics() {
       setMetrics([
         {
           value: "45",
-          label: "Reading Speed",
-          unit: "WPM",
+          label: t.readingSpeed,
+          unit: t.wpm,
           color: "#3b82f6",
         },
         {
           value: "87%",
-          label: "Comprehension Accuracy",
+          label: t.comprehensionAccuracy,
           unit: "",
           color: "#22c55e",
         },
         {
           value: "8.5h",
-          label: "Weekly Engagement Time",
+          label: t.weeklyEngagementTime,
           unit: "",
           color: "#8b5cf6",
         },
         {
           value: "23%",
-          label: "Skill Progression",
+          label: t.skillProgression,
           unit: "",
           color: "#f97316",
         },
@@ -109,11 +111,11 @@ export default function PerformanceMetrics() {
         <View style={styles.card}>
           <View style={styles.header}>
             <Ionicons name="trending-up" size={20} color="#22c55e" />
-            <Text style={styles.title}>Performance Metrics</Text>
+            <Text style={styles.title}>{t.performanceMetrics}</Text>
           </View>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#8b5cf6" />
-            <Text style={styles.loadingText}>Loading metrics...</Text>
+            <Text style={styles.loadingText}>{t.loadingMetrics}</Text>
           </View>
         </View>
       </View>
@@ -125,7 +127,7 @@ export default function PerformanceMetrics() {
       <View style={styles.card}>
         <View style={styles.header}>
           <Ionicons name="trending-up" size={20} color="#22c55e" />
-          <Text style={styles.title}>Performance Metrics</Text>
+          <Text style={styles.title}>{t.performanceMetrics}</Text>
           {error && (
             <Ionicons name="warning-outline" size={16} color="#ef4444" />
           )}
@@ -146,7 +148,7 @@ export default function PerformanceMetrics() {
         </View>
 
         {error && (
-          <Text style={styles.errorText}>Metrics unavailable - {error}</Text>
+          <Text style={styles.errorText}>{t.metricsUnavailable} - {error}</Text>
         )}
       </View>
     </View>
