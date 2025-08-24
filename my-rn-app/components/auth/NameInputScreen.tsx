@@ -21,7 +21,7 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
     'Grandfather',
     'Aunt',
     'Uncle',
-    'Sister',
+    'Sister (above 18)',
     'Brother (above 18)',
     'Caregiver',
     'Guardian',
