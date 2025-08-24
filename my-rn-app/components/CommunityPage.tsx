@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
-import { ChildrenAchievements, Forums, Chats, Experts } from './index';
-import { useTranslation } from '../contexts/TranslationContext';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ImageBackground,
+} from "react-native";
+import { ChildrenAchievements, Forums, Chats, Experts } from "./index";
+import { useTranslation } from "../contexts/TranslationContext";
 
 const COLORS = {
   primary: "#006e34",
@@ -19,10 +26,14 @@ export default function CommunityPage() {
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   const tabs = [
-    { key: 'childrenAchievements', label: t.childrenAchievements, component: <ChildrenAchievements /> },
-    { key: 'forums', label: t.forums, component: <Forums /> },
-    { key: 'chats', label: t.chats, component: <Chats /> },
-    { key: 'experts', label: t.experts, component: <Experts /> }
+    {
+      key: "childrenAchievements",
+      label: t.childrenAchievements,
+      component: <ChildrenAchievements />,
+    },
+    { key: "forums", label: t.forums, component: <Forums /> },
+    { key: "chats", label: t.chats, component: <Chats /> },
+    { key: "experts", label: t.experts, component: <Experts /> },
   ];
 
   const renderContent = () => {
@@ -31,16 +42,16 @@ export default function CommunityPage() {
 
   return (
     <ImageBackground
-      source={require('..\\assets\\backdrop.jpg')}
+      source={require("../assets/backdrop.jpg")}
       style={styles.bg}
       resizeMode="cover"
     >
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>{t.community}</Text>
-        
+
         {/* Tab Navigation */}
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.tabScrollView}
           contentContainerStyle={styles.tabContainer}
@@ -68,7 +79,7 @@ export default function CommunityPage() {
 
         {/* Content */}
         {renderContent()}
-        
+
         <View style={styles.spacer} />
       </ScrollView>
     </ImageBackground>
@@ -81,11 +92,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(244,244,249,0.9)', // COLORS.light with opacity for readability
+    backgroundColor: "rgba(244,244,249,0.9)", // COLORS.light with opacity for readability
   },
   pageTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.primary,
     paddingHorizontal: 20,
     paddingTop: 20,
@@ -110,7 +121,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.textDark,
   },
   selectedTabText: {

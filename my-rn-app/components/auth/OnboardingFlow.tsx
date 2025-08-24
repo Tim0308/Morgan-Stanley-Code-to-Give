@@ -98,7 +98,7 @@ export default function OnboardingFlow({ onBackToLogin }: OnboardingFlowProps) {
         <PasswordScreen onNext={handlePasswordNext} onBack={() => setStep(2)} />
       );
     case 4:
-      return <LoadingScreen onComplete={handleLoadingComplete} />;
+      return <LoadingScreen onSignUpPress={() => {}} />;
     default:
       return (
         <WelcomeScreen

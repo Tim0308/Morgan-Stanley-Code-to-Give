@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,31 +11,34 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ImageBackground,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const COLORS = {
-  primary: '#006e34',
-  secondary: '#A6B84E',
-  accent: '#C83E0A',
-  light: '#F4F4F9',
-  textDark: '#222',
-  textLight: '#fff',
-  border: '#e5e7eb',
-  inputBg: '#F4F4F9',
+  primary: "#006e34",
+  secondary: "#A6B84E",
+  accent: "#C83E0A",
+  light: "#F4F4F9",
+  textDark: "#222",
+  textLight: "#fff",
+  border: "#e5e7eb",
+  inputBg: "#F4F4F9",
 };
 
 interface ContactMethodScreenProps {
-  onNext: (method: 'phone', contact: string) => void;
+  onNext: (method: "phone" | "email", contact: string) => void;
+  onBack?: () => void;
 }
 
-export default function ContactMethodScreen({ onNext, onBack }: ContactMethodScreenProps) {
-  const [contact, setContact] = useState('');
-
+export default function ContactMethodScreen({
+  onNext,
+  onBack,
+}: ContactMethodScreenProps) {
+  const [contact, setContact] = useState("");
 
   const handleNext = () => {
     if (contact.trim()) {
-      onNext('phone', contact.trim());
+      onNext("phone", contact.trim());
     }
   };
 
@@ -43,14 +46,14 @@ export default function ContactMethodScreen({ onNext, onBack }: ContactMethodScr
 
   return (
     <ImageBackground
-      source={require('..\\assets\\backdrop.jpg')}
+      source={require("../../assets/backdrop.jpg")}
       style={styles.container}
       resizeMode="cover"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={styles.keyboardAvoid}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
             style={styles.scrollContainer}
@@ -60,12 +63,17 @@ export default function ContactMethodScreen({ onNext, onBack }: ContactMethodScr
             <View style={styles.card}>
               {onBack && (
                 <TouchableOpacity style={styles.backButton} onPress={onBack}>
-                  <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
+                  <Ionicons
+                    name="arrow-back"
+                    size={24}
+                    color={COLORS.primary}
+                  />
                 </TouchableOpacity>
               )}
               <Text style={styles.title}>Contact Information</Text>
               <Text style={styles.subtitle}>
-                Your information is private and only used for account creation and teacher identification.
+                Your information is private and only used for account creation
+                and teacher identification.
               </Text>
               <View style={styles.phoneInputContainer}>
                 <Ionicons
@@ -86,10 +94,7 @@ export default function ContactMethodScreen({ onNext, onBack }: ContactMethodScr
                 />
               </View>
               <TouchableOpacity
-                style={[
-                  styles.nextButton,
-                  isValid && styles.activeButton,
-                ]}
+                style={[styles.nextButton, isValid && styles.activeButton]}
                 onPress={handleNext}
                 disabled={!isValid}
                 activeOpacity={0.85}
@@ -123,7 +128,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 40,
   },
@@ -132,40 +137,40 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: 32,
     paddingTop: 60,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
     elevation: 8,
     marginHorizontal: 4,
-    position: 'relative',
+    position: "relative",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.primary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 10,
     letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 15,
     color: COLORS.textDark,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
     marginBottom: 28,
     opacity: 0.8,
   },
   phoneInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.inputBg,
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: COLORS.secondary,
     marginBottom: 32,
-    width: '100%',
+    width: "100%",
     height: 52,
     paddingHorizontal: 12,
   },
@@ -176,14 +181,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     color: COLORS.primary,
-    height: '100%',
+    height: "100%",
   },
   nextButton: {
-    width: '100%',
+    width: "100%",
     height: 52,
     borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 8,
     backgroundColor: COLORS.secondary,
   },
@@ -196,7 +201,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textLight,
     letterSpacing: 0.5,
   },
@@ -204,15 +209,15 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   backButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     left: 16,
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: COLORS.inputBg,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 2,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },

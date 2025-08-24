@@ -26,7 +26,7 @@ export default function GamesPage() {
 
   return (
     <ImageBackground
-      source={require('..\\assets\\backdrop.jpg')}
+      source={require('../assets/backdrop.jpg')}
       style={styles.bg}
       resizeMode="cover"
     >
@@ -355,7 +355,6 @@ const styles = StyleSheet.create({
   spacer: {
     height: 20,
   },
-});
   tokenReward: {
     flexDirection: 'row',
     alignItems: 'center',

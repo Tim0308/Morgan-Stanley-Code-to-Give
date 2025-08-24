@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,18 +11,18 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ImageBackground,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const COLORS = {
-  primary: '#006e34',
-  secondary: '#A6B84E',
-  accent: '#C83E0A',
-  light: '#F4F4F9',
-  textDark: '#222',
-  textLight: '#fff',
-  border: '#e5e7eb',
-  inputBg: '#F4F4F9',
+  primary: "#006e34",
+  secondary: "#A6B84E",
+  accent: "#C83E0A",
+  light: "#F4F4F9",
+  textDark: "#222",
+  textLight: "#fff",
+  border: "#e5e7eb",
+  inputBg: "#F4F4F9",
 };
 
 interface NameInputScreenProps {
@@ -30,23 +30,26 @@ interface NameInputScreenProps {
   onBack?: () => void;
 }
 
-export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps) {
+export default function NameInputScreen({
+  onNext,
+  onBack,
+}: NameInputScreenProps) {
   const [step, setStep] = useState(1); // 1: name input, 2: relationship selection
-  const [name, setName] = useState('');
-  const [selectedRelationship, setSelectedRelationship] = useState('');
+  const [name, setName] = useState("");
+  const [selectedRelationship, setSelectedRelationship] = useState("");
 
   const relationships = [
-    'Father',
-    'Mother',
-    'Grandmother',
-    'Grandfather',
-    'Aunt',
-    'Uncle',
-    'Sister (above 18)',
-    'Brother (above 18)',
-    'Caregiver',
-    'Guardian',
-    'Other',
+    "Father",
+    "Mother",
+    "Grandmother",
+    "Grandfather",
+    "Aunt",
+    "Uncle",
+    "Sister (above 18)",
+    "Brother (above 18)",
+    "Caregiver",
+    "Guardian",
+    "Other",
   ];
 
   const handleNameNext = () => {
@@ -68,14 +71,14 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
     // Name Input Screen
     return (
       <ImageBackground
-        source={require('..\\assets\\backdrop.jpg')}
+        source={require("../../assets/backdrop.jpg")}
         style={styles.container}
         resizeMode="cover"
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <KeyboardAvoidingView
             style={styles.keyboardAvoid}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
           >
             <ScrollView
               style={styles.scrollContainer}
@@ -85,12 +88,17 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
               <View style={styles.card}>
                 {onBack && (
                   <TouchableOpacity style={styles.backButton} onPress={onBack}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
+                    <Ionicons
+                      name="arrow-back"
+                      size={24}
+                      color={COLORS.primary}
+                    />
                   </TouchableOpacity>
                 )}
                 <Text style={styles.title}>Input your name</Text>
                 <Text style={styles.subtitle}>
-                  You can write your real name, or your kids' name like "Kelly's mom"
+                  You can write your real name, or your kids' name like "Kelly's
+                  mom"
                 </Text>
                 <TextInput
                   style={styles.nameInput}
@@ -129,14 +137,14 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
   // Relationship Selection Screen
   return (
     <ImageBackground
-      source={require('..\\assets\\backdrop.jpg')} 
+      source={require("../../assets/backdrop.jpg")}
       style={styles.container}
       resizeMode="cover"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={styles.keyboardAvoid}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
             style={styles.scrollContainer}
@@ -147,22 +155,32 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
               <Text style={styles.title}>
                 Then type in the relationship you have with your kids
               </Text>
-              <TouchableOpacity
-                style={styles.dropdown}
-                activeOpacity={0.85}
-              >
-                <Text style={[styles.dropdownText, !selectedRelationship && styles.placeholderText]}>
-                  {selectedRelationship || 'Select relationship'}
+              <TouchableOpacity style={styles.dropdown} activeOpacity={0.85}>
+                <Text
+                  style={[
+                    styles.dropdownText,
+                    !selectedRelationship && styles.placeholderText,
+                  ]}
+                >
+                  {selectedRelationship || "Select relationship"}
                 </Text>
-                <Ionicons name="chevron-down" size={20} color={COLORS.primary} />
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={COLORS.primary}
+                />
               </TouchableOpacity>
-              <ScrollView style={styles.relationshipList} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={styles.relationshipList}
+                showsVerticalScrollIndicator={false}
+              >
                 {relationships.map((relationship) => (
                   <TouchableOpacity
                     key={relationship}
                     style={[
                       styles.relationshipItem,
-                      selectedRelationship === relationship && styles.selectedRelationship,
+                      selectedRelationship === relationship &&
+                        styles.selectedRelationship,
                     ]}
                     onPress={() => setSelectedRelationship(relationship)}
                     activeOpacity={0.85}
@@ -170,7 +188,8 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
                     <Text
                       style={[
                         styles.relationshipText,
-                        selectedRelationship === relationship && styles.selectedRelationshipText,
+                        selectedRelationship === relationship &&
+                          styles.selectedRelationshipText,
                       ]}
                     >
                       {relationship}
@@ -181,7 +200,9 @@ export default function NameInputScreen({ onNext, onBack }: NameInputScreenProps
               <TouchableOpacity
                 style={[
                   styles.nextButton,
-                  isRelationshipValid ? styles.activeButton : styles.disabledButton,
+                  isRelationshipValid
+                    ? styles.activeButton
+                    : styles.disabledButton,
                 ]}
                 onPress={handleRelationshipNext}
                 disabled={!isRelationshipValid}
@@ -212,33 +233,33 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: 32,
     paddingTop: 60,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
     elevation: 8,
     marginHorizontal: 4,
-    position: 'relative',
+    position: "relative",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.primary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 16,
     letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 16,
     color: COLORS.textDark,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
     marginBottom: 30,
     opacity: 0.8,
   },
   nameInput: {
-    width: '100%',
+    width: "100%",
     height: 52,
     borderWidth: 1.5,
     borderColor: COLORS.secondary,
@@ -250,16 +271,16 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   dropdown: {
-    width: '100%',
+    width: "100%",
     height: 52,
     borderWidth: 1.5,
     borderColor: COLORS.secondary,
     borderRadius: 14,
     paddingHorizontal: 16,
     backgroundColor: COLORS.inputBg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   dropdownText: {
@@ -267,14 +288,14 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   placeholderText: {
-    color: '#999',
+    color: "#999",
   },
   nextButton: {
-    width: '100%',
+    width: "100%",
     height: 52,
     borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 8,
   },
   activeButton: {
@@ -286,7 +307,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textLight,
     letterSpacing: 0.5,
   },
@@ -301,21 +322,21 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 40,
   },
   relationshipList: {
     maxHeight: 250,
     marginBottom: 20,
-    width: '100%',
+    width: "100%",
   },
   relationshipItem: {
     padding: 16,
     borderRadius: 14,
     marginBottom: 8,
     backgroundColor: COLORS.inputBg,
-    alignItems: 'center',
+    alignItems: "center",
   },
   selectedRelationship: {
     backgroundColor: COLORS.secondary,
@@ -323,22 +344,22 @@ const styles = StyleSheet.create({
   relationshipText: {
     fontSize: 16,
     color: COLORS.primary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   selectedRelationshipText: {
     color: COLORS.textLight,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   backButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     left: 16,
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: COLORS.inputBg,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 2,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },

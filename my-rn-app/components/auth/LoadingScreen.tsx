@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,19 +11,19 @@ import {
   Keyboard,
   ScrollView,
   ImageBackground,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
 const COLORS = {
-  primary: '#006e34',
-  secondary: '#A6B84E',
-  accent: '#C83E0A',
-  light: '#F4F4F9',
-  textDark: '#222',
-  textLight: '#fff',
-  border: '#e5e7eb',
-  inputBg: '#F4F4F9',
+  primary: "#006e34",
+  secondary: "#A6B84E",
+  accent: "#C83E0A",
+  light: "#F4F4F9",
+  textDark: "#222",
+  textLight: "#fff",
+  border: "#e5e7eb",
+  inputBg: "#F4F4F9",
 };
 
 interface LoginScreenProps {
@@ -31,9 +31,12 @@ interface LoginScreenProps {
   onLogin?: (email: string, password: string) => void;
 }
 
-export default function LoginScreen({ onSignUpPress, onLogin }: LoginScreenProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginScreen({
+  onSignUpPress,
+  onLogin,
+}: LoginScreenProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const isValid = email.trim().length > 0 && password.trim().length > 0;
 
@@ -45,14 +48,14 @@ export default function LoginScreen({ onSignUpPress, onLogin }: LoginScreenProps
 
   return (
     <ImageBackground
-          source={require('..\\assets\\backdrop.jpg')}
-          style={styles.container}
-          resizeMode="cover"
+      source={require("../../assets/backdrop.jpg")}
+      style={styles.container}
+      resizeMode="cover"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={styles.keyboardAvoid}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
             style={styles.scrollContainer}
@@ -61,12 +64,15 @@ export default function LoginScreen({ onSignUpPress, onLogin }: LoginScreenProps
           >
             <View style={styles.card}>
               <Text style={styles.title}>Welcome Back</Text>
-              <Text style={styles.subtitle}>
-                Please log in to your account
-              </Text>
+              <Text style={styles.subtitle}>Please log in to your account</Text>
 
               <View style={styles.inputGroup}>
-                <Ionicons name="mail" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                <Ionicons
+                  name="mail"
+                  size={20}
+                  color={COLORS.primary}
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Email"
@@ -80,7 +86,12 @@ export default function LoginScreen({ onSignUpPress, onLogin }: LoginScreenProps
               </View>
 
               <View style={styles.inputGroup}>
-                <Ionicons name="lock-closed" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                <Ionicons
+                  name="lock-closed"
+                  size={20}
+                  color={COLORS.primary}
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Password"
@@ -112,9 +123,12 @@ export default function LoginScreen({ onSignUpPress, onLogin }: LoginScreenProps
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.signUpLink} onPress={onSignUpPress}>
+              <TouchableOpacity
+                style={styles.signUpLink}
+                onPress={onSignUpPress}
+              >
                 <Text style={styles.signUpText}>
-                  Don't have an account?{' '}
+                  Don't have an account?{" "}
                   <Text style={styles.signUpTextAccent}>Sign Up</Text>
                 </Text>
               </TouchableOpacity>
@@ -138,7 +152,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 40,
   },
@@ -147,7 +161,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: 32,
     paddingTop: 40,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
@@ -157,29 +171,29 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.primary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 10,
     letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 15,
     color: COLORS.textDark,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
     marginBottom: 28,
     opacity: 0.8,
   },
   inputGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.inputBg,
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: COLORS.secondary,
     marginBottom: 18,
-    width: '100%',
+    width: "100%",
     height: 52,
     paddingHorizontal: 12,
   },
@@ -190,14 +204,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     color: COLORS.primary,
-    height: '100%',
+    height: "100%",
   },
   loginButton: {
-    width: '100%',
+    width: "100%",
     height: 52,
     borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 8,
   },
   activeButton: {
@@ -209,7 +223,7 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textLight,
     letterSpacing: 0.5,
   },
@@ -222,10 +236,10 @@ const styles = StyleSheet.create({
   signUpText: {
     color: COLORS.primary,
     fontSize: 15,
-    textAlign: 'center',
+    textAlign: "center",
   },
   signUpTextAccent: {
     color: COLORS.accent,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

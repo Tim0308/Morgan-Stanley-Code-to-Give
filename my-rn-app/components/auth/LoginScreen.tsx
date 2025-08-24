@@ -11,7 +11,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Alert,
-  ImageBackground
+  ImageBackground,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -60,9 +60,9 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
 
   return (
     <ImageBackground
-          source={require('..\\assets\\backdrop.jpg')}
-          style={styles.container}
-          resizeMode="cover"
+      source={require("../../assets/backdrop.jpg")}
+      style={styles.container}
+      resizeMode="cover"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
@@ -284,4 +284,4 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
     fontWeight: 600,
   },
-});    
+});
