@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   Alert,
   ImageBackground,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -74,6 +75,14 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
+            <View style={styles.logoContainer}>
+              <Image
+                source={require("../../assets/icon5.png")}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+            
             {/* Language Dropdown */}
             <View style={styles.languageContainer}>
               <LanguageDropdown showOnAuth={true} />
@@ -171,6 +180,15 @@ export default function LoginScreen({ onSignUpPress }: LoginScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+    logoContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+    marginTop: 32,
+  },
+  logo: {
+    width: 80,
+    height: 80,
   },
   keyboardAvoid: {
     flex: 1,
