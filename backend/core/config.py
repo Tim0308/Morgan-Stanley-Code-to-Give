@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     POSTHOG_KEY: str = ""
     EXPO_PUSH_KEY: str = ""
     
+
     # OpenAI Configuration
     OPENAI_API_KEY: str = "a97fe937957949079c02267ba32a86dd"
     

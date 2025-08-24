@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, ScrollView, View } from "react-native";
+import { StyleSheet, ScrollView, View, ActivityIndicator} from "react-native";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CacheProvider, useCache } from "./contexts/CacheContext";
 import { testConnection } from "./lib/api";
@@ -18,11 +18,14 @@ import CommunityPage from "./components/CommunityPage";
 import GamesPage from "./components/GamesPage";
 import AnalyticsPage from "./components/AnalyticsPage";
 import TokensPage from "./components/TokensPage";
+import PageWrapper from './components/PageWrapper';
+import ScreenshotTest from './components/ScreenshotTest';
 
 function MainApp() {
   const [currentPage, setCurrentPage] = useState("Home");
   const { user, loading } = useAuth();
   const { loadInitialData, isLoading: cacheLoading } = useCache();
+
 
   // Load initial cache data when user logs in
   useEffect(() => {
@@ -39,6 +42,16 @@ function MainApp() {
   // Show colorful loading ring while checking auth state or loading cache
   if (loading || cacheLoading) {
     return <SigningInRing text="Loading" />;
+  }
+
+  // Show test mode if enabled
+  if (testMode) {
+    return (
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <ScreenshotTest />
+      </View>
+    );
   }
 
   // Show auth navigator if user is not authenticated
