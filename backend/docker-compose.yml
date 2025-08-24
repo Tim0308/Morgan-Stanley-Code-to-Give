@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # API gateway / main backend
   api:
     build: .
     ports:
@@ -15,7 +16,114 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - supabase
-    
+      - cache
+
+  # Microservice stubs (for architecture/demo purposes)
+  auth:
+    build: ./services/auth
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    volumes:
+      - ./services/auth:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8001
+    depends_on:
+      - supabase
+
+  analytics:
+    build: ./services/analytics
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    volumes:
+      - ./services/analytics:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8002
+
+  community:
+    build: ./services/community
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
+    volumes:
+      - ./services/community:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8003
+    depends_on:
+      - supabase
+
+  content:
+    build: ./services/content
+    ports:
+      - "8004:8004"
+    env_file:
+      - .env
+    volumes:
+      - ./services/content:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8004
+
+  games:
+    build: ./services/games
+    ports:
+      - "8005:8005"
+    env_file:
+      - .env
+    volumes:
+      - ./services/games:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8005
+
+  notifications:
+    build: ./services/notifications
+    ports:
+      - "8006:8006"
+    env_file:
+      - .env
+    volumes:
+      - ./services/notifications:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8006
+
+  profiles:
+    build: ./services/profiles
+    ports:
+      - "8007:8007"
+    env_file:
+      - .env
+    volumes:
+      - ./services/profiles:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8007
+    depends_on:
+      - supabase
+
+  tokens:
+    build: ./services/tokens
+    ports:
+      - "8008:8008"
+    env_file:
+      - .env
+    volumes:
+      - ./services/tokens:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8008
+
+  cache:
+    build: ./services/cache
+    ports:
+      - "8010:8010"
+    env_file:
+      - .env
+    volumes:
+      - ./services/cache:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8010
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
   supabase:
     image: supabase/postgres:15.1.1.78
     ports:
@@ -29,4 +137,5 @@ services:
       - ./supabase/seed.sql:/docker-entrypoint-initdb.d/seed.sql
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  redis_data:

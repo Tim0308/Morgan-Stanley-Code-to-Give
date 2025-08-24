@@ -55,6 +55,7 @@ export default function GamesPage() {
               </View>
             </View>
 
+
             <Text style={styles.challengeDescription}>
               Read together for 30 minutes every day this week.{'\n'}
               Parent and child take turns reading paragraphs.
@@ -79,6 +80,7 @@ export default function GamesPage() {
                   <Ionicons name="time" size={16} color={COLORS.primary} />
                   <Text style={styles.statText}>3 days left</Text>
                 </View>
+
               </View>
               
               <TouchableOpacity 
@@ -113,7 +115,6 @@ export default function GamesPage() {
               <Ionicons name="play" size={20} color={COLORS.textLight} />
             </TouchableOpacity>
           </View>
-
           <View style={styles.gameCard}>
             <View style={styles.gameIcon}>
               <Text style={styles.gameEmoji}>🏃‍♂️</Text>
@@ -133,6 +134,7 @@ export default function GamesPage() {
             </TouchableOpacity>
           </View>
         </View>
+
 
         <View style={styles.spacer} />
         
@@ -354,3 +356,26 @@ const styles = StyleSheet.create({
     height: 20,
   },
 });
+  tokenReward: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF8DC',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FFD700',
+  },
+  tokenText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#B8860B',
+    marginLeft: 2,
+  },
+  gameNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+}); 
