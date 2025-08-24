@@ -358,6 +358,8 @@ const styles = StyleSheet.create({
   cameraContainer: {
     flex: 1,
     padding: 20,
+    marginTop: 50,
+    marginBottom: 20,
   },
   cameraTitle: {
     fontSize: 24,
