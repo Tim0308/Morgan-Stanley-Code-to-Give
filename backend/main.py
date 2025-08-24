@@ -28,6 +28,7 @@ from services.tokens.router import router as tokens_router
 from services.analytics.router import router as analytics_router
 from services.games.router import router as games_router
 from services.notifications.router import router as notifications_router
+from services.ai.router import router as ai_router
 
 # Import shared dependencies
 from core.config import settings
@@ -69,6 +70,7 @@ app.include_router(tokens_router, prefix=f"{API_V1_PREFIX}/tokens", tags=["Token
 app.include_router(analytics_router, prefix=f"{API_V1_PREFIX}/analytics", tags=["Analytics"])
 app.include_router(games_router, prefix=f"{API_V1_PREFIX}/games", tags=["Games"])
 app.include_router(notifications_router, prefix=f"{API_V1_PREFIX}/notifications", tags=["Notifications"])
+app.include_router(ai_router, prefix=f"{API_V1_PREFIX}", tags=["AI Services"])
 
 # Global exception handler
 @app.exception_handler(Exception)

@@ -631,4 +631,37 @@ export interface TokenTransaction {
   amount: number;
   type: 'earned' | 'spent' | 'gift';
   created_at: string;
-} 
+}
+
+// Explain screenshot with AI
+export const explainScreenshot = async (base64Image: string): Promise<string> => {
+  try {
+    const url = `${API_BASE_URL}/api/v1/ai/explain-screenshot`;
+    console.log('🌐 Sending screenshot to AI service:', url);
+    
+    const headers = await getAuthHeaders();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image_data: base64Image
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ AI API Error Response:', errorText);
+      throw new Error(`AI API Error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ AI explanation received');
+    return data.explanation || data.response || 'No explanation available';
+  } catch (error) {
+    console.error('💥 Error getting AI explanation:', error);
+    throw error;
+  }
+}; 

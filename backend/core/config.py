@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     POSTHOG_KEY: str = ""
     EXPO_PUSH_KEY: str = ""
     
+    # AI Services
+    HF_TOKEN: str = ""
+    
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:3000,exp://192.168.1.100:8081,https://your-app.vercel.app"
     

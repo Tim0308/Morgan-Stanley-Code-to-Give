@@ -16,10 +16,13 @@ import CommunityPage from './components/CommunityPage';
 import GamesPage from './components/GamesPage';
 import AnalyticsPage from './components/AnalyticsPage';
 import TokensPage from './components/TokensPage';
+import PageWrapper from './components/PageWrapper';
+import ScreenshotTest from './components/ScreenshotTest';
 
 function MainApp() {
   const [currentPage, setCurrentPage] = useState('Home');
   const { user, loading } = useAuth();
+  const [testMode, setTestMode] = useState(false); // Temporary test mode
 
   // Test backend connection on app start
   useEffect(() => {
@@ -40,6 +43,16 @@ function MainApp() {
     );
   }
 
+  // Show test mode if enabled
+  if (testMode) {
+    return (
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <ScreenshotTest />
+      </View>
+    );
+  }
+
   // Show auth navigator if user is not authenticated
   if (!user) {
     return <AuthNavigator />;
@@ -49,26 +62,48 @@ function MainApp() {
   const renderPage = () => {
     switch (currentPage) {
       case 'Learn':
-        return <LearnPage />;
+        return (
+          <PageWrapper>
+            <LearnPage />
+          </PageWrapper>
+        );
       case 'Community':
-        return <CommunityPage />;
+        return (
+          <PageWrapper>
+            <CommunityPage />
+          </PageWrapper>
+        );
       case 'Games':
-        return <GamesPage />;
+        return (
+          <PageWrapper>
+            <GamesPage />
+          </PageWrapper>
+        );
       case 'Analytics':
-        return <AnalyticsPage />;
+        return (
+          <PageWrapper>
+            <AnalyticsPage />
+          </PageWrapper>
+        );
       case 'Tokens':
-        return <TokensPage />;
+        return (
+          <PageWrapper>
+            <TokensPage />
+          </PageWrapper>
+        );
       case 'Home':
       default:
         return (
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            <TabToggle />
-            <WeeklyGoal />
-            <BookletProgress />
-            <PerformanceMetrics />
-            <CertificatesEarned />
-            <View style={styles.spacer} />
-          </ScrollView>
+          <PageWrapper>
+            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+              <TabToggle />
+              <WeeklyGoal />
+              <BookletProgress />
+              <PerformanceMetrics />
+              <CertificatesEarned />
+              <View style={styles.spacer} />
+            </ScrollView>
+          </PageWrapper>
         );
     }
   };
