@@ -8,56 +8,48 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  api,
-  TokenBalance,
-  ShopItem,
-  TokenTransaction,
-  UserProfile,
-} from "../lib/api";
+import { api, TokenBalance, ShopItem, TokenTransaction } from "../lib/api";
+import { useCache } from "../contexts/CacheContext";
 
 export default function TokensPage() {
   const [selectedTab, setSelectedTab] = useState("Shop");
-  const [tokenBalance, setTokenBalance] = useState<TokenBalance | null>(null);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [tokenHistory, setTokenHistory] = useState<TokenTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
+  // Use cache instead of local state for token balance and profile data
+  const { getChildren, getTokenAccount, isLoading, refreshData } = useCache();
+
+  // Get data from cache
+  const children = getChildren();
+  const tokenBalance = selectedChildId
+    ? getTokenAccount(selectedChildId)
+    : null;
+
+  // Set selected child on component mount
+  useEffect(() => {
+    if (children && children.length > 0 && !selectedChildId) {
+      setSelectedChildId(children[0].id);
+    }
+  }, [children, selectedChildId]);
+
   useEffect(() => {
     loadData();
-  }, []);
+  }, [selectedChildId]);
 
   const loadData = async () => {
+    if (!selectedChildId) return;
+
     try {
-      setLoading(true);
       setError(null);
 
-      // Get user profile to get children
-      const userProfile: UserProfile = await api.getUserProfile();
-
-      if (!userProfile.children || userProfile.children.length === 0) {
-        // No children found, show empty state
-        setTokenBalance({ balance: 0, weekly_earned: 0, total_earned: 0 });
-        setShopItems([]);
-        setTokenHistory([]);
-        setLoading(false);
-        return;
-      }
-
-      // Use first child for now
-      const firstChild = userProfile.children[0];
-      setSelectedChildId(firstChild.id);
-
-      // Load token data
-      const [balance, items, history] = await Promise.all([
-        api.getTokenBalance(firstChild.id),
+      // Load shop items and token history (not cached)
+      const [items, history] = await Promise.all([
         api.getShopItems(),
-        api.getTokenHistory(firstChild.id),
+        api.getTokenHistory(selectedChildId),
       ]);
 
-      setTokenBalance(balance);
       setShopItems(items);
       setTokenHistory(
         Array.isArray(history) ? history : history?.transactions || []
@@ -66,11 +58,19 @@ export default function TokensPage() {
       console.error("Error loading token data:", err);
       setError("Failed to load token data");
       // Show empty state on error
-      setTokenBalance({ balance: 0, weekly_earned: 0, total_earned: 0 });
       setShopItems([]);
       setTokenHistory([]);
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const refreshTokenData = async () => {
+    try {
+      setError(null);
+      await refreshData(); // Refresh cache data
+      await loadData(); // Refresh non-cached data
+    } catch (err) {
+      console.error("Error refreshing token data:", err);
+      setError("Failed to refresh data");
     }
   };
 
@@ -89,7 +89,7 @@ export default function TokensPage() {
     return `${Math.floor(diffInDays / 7)}w ago`;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <Text style={styles.pageTitle}>Tokens</Text>
@@ -108,11 +108,30 @@ export default function TokensPage() {
         <View style={styles.errorContainer}>
           <Ionicons name="warning-outline" size={48} color="#ef4444" />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadData}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={refreshTokenData}
+          >
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
       </View>
+    );
+  }
+
+  // Show empty state if no children
+  if (!children || children.length === 0) {
+    return (
+      <ScrollView style={styles.container}>
+        <Text style={styles.pageTitle}>Tokens</Text>
+        <View style={styles.emptyState}>
+          <Ionicons name="person-outline" size={48} color="#9ca3af" />
+          <Text style={styles.emptyStateText}>No children found</Text>
+          <Text style={styles.emptyStateSubtext}>
+            Add children to your profile to start earning tokens!
+          </Text>
+        </View>
+      </ScrollView>
     );
   }
 

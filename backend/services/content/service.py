@@ -6,6 +6,8 @@ Business logic for booklets, activities, and progress tracking
 from typing import List, Optional
 import logging
 from datetime import datetime, date
+import uuid
+import os
 
 from core.database import get_supabase_client
 from models.content import (
@@ -54,23 +56,33 @@ class ContentService:
                     
                     for activity_data in module_data.get('activities', []):
                         # Get progress for this activity if child_id is provided
-                        activity_status = 'not_started'
+                        progress_data = None
                         if child_id:
-                            progress_result = self.supabase.table("activity_progress").select("status").eq("child_id", child_id).eq("activity_id", activity_data['id']).execute()
+                            progress_result = self.supabase.table("activity_progress").select("*").eq("child_id", child_id).eq("activity_id", activity_data['id']).execute()
                             if progress_result.data:
-                                activity_status = progress_result.data[0]['status']
+                                progress_info = progress_result.data[0]
+                                progress_data = ActivityProgress(
+                                    id=progress_info['id'],
+                                    child_id=progress_info['child_id'],
+                                    activity_id=progress_info['activity_id'],
+                                    status=progress_info['status'],
+                                    proof_url=progress_info.get('proof_url'),
+                                    score=progress_info.get('score'),
+                                    notes=progress_info.get('notes'),
+                                    completed_at=progress_info.get('completed_at')
+                                )
                         
                         # Create ActivityWithProgress object
                         activity = ActivityWithProgress(
                             id=activity_data['id'],
                             module_id=module_data['id'],
                             type=activity_data['type'],
+                            title=activity_data.get('instructions', ''),  # Use instructions as title
                             points=activity_data.get('points', 10),
                             est_minutes=activity_data.get('est_minutes', 10),
                             instructions=activity_data.get('instructions', ''),
                             media=[],
-                            title=f"Activity {len(activities) + 1}",  # Generate title
-                            status=activity_status
+                            progress=progress_data
                         )
                         activities.append(activity)
                     
@@ -130,16 +142,111 @@ class ContentService:
             logger.error(f"Failed to get activity detail: {e}")
             raise
     
-    async def update_activity_progress(self, progress_data: ProgressUpdateRequest, user_id: str) -> ActivityProgress:
+    async def update_activity_progress_from_request(self, progress_data: ProgressUpdateRequest, user_id: str) -> ActivityProgress:
         """Update activity progress for a child"""
         try:
-            # TODO: Verify parent owns child
-            # TODO: Implement progress update logic
+            # Verify parent owns child
+            result = self.supabase.table("children").select("*").eq("id", progress_data.child_id).eq("parent_user_id", user_id).execute()
+            if not result.data:
+                raise ValueError("Child not found or access denied")
+            
+            # Check if progress record already exists
+            existing_progress = self.supabase.table("activity_progress").select("*").eq("child_id", progress_data.child_id).eq("activity_id", progress_data.activity_id).execute()
+            
+            progress_record = {
+                "child_id": progress_data.child_id,
+                "activity_id": progress_data.activity_id,
+                "status": progress_data.status.value,
+                "proof_url": progress_data.proof_url,
+                "score": progress_data.score,
+                "notes": progress_data.notes
+            }
+            
+            if existing_progress.data:
+                # Update existing record
+                progress_record["completed_at"] = datetime.now().isoformat() if progress_data.status.value == "completed" else None
+                result = self.supabase.table("activity_progress").update(progress_record).eq("id", existing_progress.data[0]["id"]).execute()
+                updated_progress = result.data[0]
+            else:
+                # Create new record
+                if progress_data.status.value == "completed":
+                    progress_record["completed_at"] = datetime.now().isoformat()
+                result = self.supabase.table("activity_progress").insert(progress_record).execute()
+                updated_progress = result.data[0]
+            
             # TODO: Award tokens on completion
-            raise NotImplementedError("Progress update not implemented yet")
+            
+            return ActivityProgress(**updated_progress)
             
         except Exception as e:
             logger.error(f"Failed to update progress: {e}")
+            raise
+    
+    async def update_activity_progress(self, activity_id: str, child_id: str, status: str, proof_url: Optional[str], user_id: str) -> ActivityProgress:
+        """Update activity progress with individual parameters"""
+        try:
+            # Verify parent owns child
+            result = self.supabase.table("children").select("*").eq("id", child_id).eq("parent_user_id", user_id).execute()
+            if not result.data:
+                raise ValueError("Child not found or access denied")
+            
+            # Check if progress record already exists
+            existing_progress = self.supabase.table("activity_progress").select("*").eq("child_id", child_id).eq("activity_id", activity_id).execute()
+            
+            progress_record = {
+                "child_id": child_id,
+                "activity_id": activity_id,
+                "status": status,
+                "proof_url": proof_url,
+                "completed_at": datetime.now().isoformat() if status == "completed" else None
+            }
+            
+            if existing_progress.data:
+                # Update existing record
+                result = self.supabase.table("activity_progress").update(progress_record).eq("id", existing_progress.data[0]["id"]).execute()
+                updated_progress = result.data[0]
+            else:
+                # Create new record
+                result = self.supabase.table("activity_progress").insert(progress_record).execute()
+                updated_progress = result.data[0]
+            
+            return ActivityProgress(**updated_progress)
+            
+        except Exception as e:
+            logger.error(f"Failed to update progress: {e}")
+            raise
+    
+    async def upload_proof_image(self, file, user_id: str) -> str:
+        """Upload proof image to Supabase Storage and return URL"""
+        try:
+            # Generate unique filename
+            file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+            unique_filename = f"{user_id}/{uuid.uuid4()}.{file_extension}"
+            
+            # Read file content
+            file_content = await file.read()
+            
+            # Upload to Supabase Storage
+            try:
+                storage_response = self.supabase.storage.from_("proof-images").upload(
+                    path=unique_filename,
+                    file=file_content,
+                    file_options={"content-type": file.content_type}
+                )
+                logger.info(f"Storage upload response: {storage_response}")
+                
+            except Exception as upload_error:
+                logger.error(f"Storage upload exception: {upload_error}")
+                raise Exception(f"Storage upload failed: {upload_error}")
+            
+            # Get public URL - this returns a string directly
+            public_url = self.supabase.storage.from_("proof-images").get_public_url(unique_filename)
+            
+            logger.info(f"Successfully uploaded proof image: {public_url}")
+            return public_url
+            
+        except Exception as e:
+            logger.error(f"Failed to upload proof image: {e}")
             raise
     
     async def update_bulk_progress(self, updates: List[ProgressUpdateRequest], user_id: str) -> List[ActivityProgress]:
@@ -254,4 +361,100 @@ class ContentService:
             
         except Exception as e:
             logger.error(f"Failed to get booklet progress: {e}")
-            raise 
+            raise
+    
+    async def save_proof_url(self, activity_id: str, child_id: str, proof_url: str, user_id: str) -> None:
+        """Save proof URL without changing activity status"""
+        try:
+            logger.info(f"Saving proof URL for activity {activity_id}, child {child_id}, user {user_id}")
+            
+            # Verify parent owns child
+            result = self.supabase.table("children").select("*").eq("id", child_id).eq("parent_user_id", user_id).execute()
+            if not result.data:
+                logger.error(f"Child verification failed: child {child_id} not found for user {user_id}")
+                raise ValueError("Child not found or access denied")
+            
+            logger.info(f"Child verification successful for child {child_id}")
+            
+            # Check if progress record already exists
+            existing_progress = self.supabase.table("activity_progress").select("*").eq("child_id", child_id).eq("activity_id", activity_id).execute()
+            
+            if existing_progress.data:
+                logger.info(f"Updating existing progress record: {existing_progress.data[0]['id']}")
+                # Update existing record with proof URL only
+                try:
+                    update_result = self.supabase.table("activity_progress").update({
+                        "proof_url": proof_url
+                    }).eq("id", existing_progress.data[0]["id"]).execute()
+                    logger.info("Progress updated successfully")
+                except Exception as update_error:
+                    logger.error(f"Update failed: {update_error}")
+                    raise Exception(f"Failed to update progress: {update_error}")
+            else:
+                logger.info("Creating new progress record")
+                # Create new record with proof URL but keep status as not_started
+                try:
+                    insert_result = self.supabase.table("activity_progress").insert({
+                        "child_id": child_id,
+                        "activity_id": activity_id,
+                        "status": "not_started",  # Don't change status just because proof is uploaded
+                        "proof_url": proof_url
+                    }).execute()
+                    logger.info("Progress record created successfully")
+                except Exception as insert_error:
+                    logger.error(f"Insert failed: {insert_error}")
+                    raise Exception(f"Failed to insert progress: {insert_error}")
+                
+        except Exception as e:
+            logger.error(f"Failed to save proof URL: {e}")
+            raise
+        
+    async def delete_proof_image(self, activity_id: str, child_id: str, user_id: str) -> None:
+        """Delete proof image and remove proof URL from activity progress"""
+        try:
+            logger.info(f"Deleting proof image for activity {activity_id}, child {child_id}, user {user_id}")
+            
+            # Verify parent owns child
+            result = self.supabase.table("children").select("*").eq("id", child_id).eq("parent_user_id", user_id).execute()
+            if not result.data:
+                logger.error(f"Child verification failed: child {child_id} not found for user {user_id}")
+                raise ValueError("Child not found or access denied")
+            
+            # Get existing progress record to get the proof URL
+            existing_progress = self.supabase.table("activity_progress").select("*").eq("child_id", child_id).eq("activity_id", activity_id).execute()
+            
+            if not existing_progress.data or not existing_progress.data[0].get("proof_url"):
+                logger.warning(f"No proof URL found for activity {activity_id}, child {child_id}")
+                return  # Nothing to delete
+            
+            proof_url = existing_progress.data[0]["proof_url"]
+            logger.info(f"Found proof URL to delete: {proof_url}")
+            
+            # Extract filename from URL for storage deletion
+            try:
+                # URL format: https://xxx.supabase.co/storage/v1/object/public/proof-images/user_id/filename.jpg
+                filename = proof_url.split('/proof-images/')[-1] if '/proof-images/' in proof_url else None
+                
+                if filename:
+                    logger.info(f"Attempting to delete file from storage: {filename}")
+                    # Delete from Supabase Storage
+                    storage_response = self.supabase.storage.from_("proof-images").remove([filename])
+                    logger.info(f"Storage delete response: {storage_response}")
+                
+            except Exception as storage_error:
+                logger.warning(f"Failed to delete from storage (continuing anyway): {storage_error}")
+                # Continue to remove from database even if storage deletion fails
+            
+            # Remove proof URL from database
+            try:
+                update_result = self.supabase.table("activity_progress").update({
+                    "proof_url": None
+                }).eq("id", existing_progress.data[0]["id"]).execute()
+                logger.info("Proof URL removed from database successfully")
+            except Exception as update_error:
+                logger.error(f"Failed to remove proof URL from database: {update_error}")
+                raise Exception(f"Failed to remove proof URL: {update_error}")
+                
+        except Exception as e:
+            logger.error(f"Failed to delete proof image: {e}")
+            raise

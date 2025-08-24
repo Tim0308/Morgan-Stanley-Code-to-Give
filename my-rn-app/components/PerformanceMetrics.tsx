@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { api } from '../lib/api';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useCache } from "../contexts/CacheContext";
 
 interface Metric {
   value: string;
@@ -12,100 +12,98 @@ interface Metric {
 
 export default function PerformanceMetrics() {
   const [metrics, setMetrics] = useState<Metric[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadPerformanceMetrics();
-  }, []);
+  // Use cache instead of direct API calls
+  const { getChildren, isLoading } = useCache();
 
-  const loadPerformanceMetrics = async () => {
+  // Get data from cache and memoize to prevent unnecessary re-renders
+  const children = getChildren();
+  const hasChildren = useMemo(
+    () => children && children.length > 0,
+    [children?.length]
+  );
+
+  const loadPerformanceMetrics = useCallback(async () => {
     try {
-      setLoading(true);
       setError(null);
 
-      // For now, since analytics endpoint is not implemented, 
-      // show empty state metrics until real data is available
+      // For now, since analytics endpoint is not implemented,
+      // show default metrics until real data is available
       const defaultMetrics: Metric[] = [
         {
-          value: '45',
-          label: 'Reading Speed',
-          unit: 'WPM',
-          color: '#3b82f6',
+          value: "45",
+          label: "Reading Speed",
+          unit: "WPM",
+          color: "#3b82f6",
         },
         {
-          value: '87',
-          label: 'Comprehension Accuracy',
-          unit: '',
-          color: '#22c55e',
+          value: "87",
+          label: "Comprehension Accuracy",
+          unit: "",
+          color: "#22c55e",
         },
         {
-          value: '8.5',
-          label: 'Weekly Engagement Time',
-          unit: '',
-          color: '#8b5cf6',
+          value: "8.5",
+          label: "Weekly Engagement Time",
+          unit: "",
+          color: "#8b5cf6",
         },
         {
-          value: '23',
-          label: 'Skill Progression',
-          unit: '',
-          color: '#f97316',
+          value: "23",
+          label: "Skill Progression",
+          unit: "",
+          color: "#f97316",
         },
       ];
 
-      // Try to get user profile to check if user has children
-      try {
-        const userProfile = await api.getUserProfile();
-        
-        if (!userProfile.children || userProfile.children.length === 0) {
-          // No children, keep N/A values
-          setMetrics(defaultMetrics);
-        } else {
-          // TODO: Once analytics endpoint is implemented, fetch real data here
-          // For now, show N/A for new users
-          setMetrics(defaultMetrics);
-        }
-      } catch (profileError) {
-        console.error('Error fetching user profile for metrics:', profileError);
+      // Check if user has children from cache
+      if (!hasChildren) {
+        // No children, keep N/A values
+        setMetrics(defaultMetrics);
+      } else {
+        // TODO: Once analytics endpoint is implemented, fetch real data here
+        // For now, show default values for users with children
         setMetrics(defaultMetrics);
       }
-
     } catch (err) {
-      console.error('Error loading performance metrics:', err);
-      setError('Failed to load performance metrics');
+      console.error("Error loading performance metrics:", err);
+      setError("Failed to load performance metrics");
       // Show N/A on error
       setMetrics([
         {
-          value: '45',
-          label: 'Reading Speed',
-          unit: 'WPM',
-          color: '#3b82f6',
+          value: "45",
+          label: "Reading Speed",
+          unit: "WPM",
+          color: "#3b82f6",
         },
         {
-          value: '87%',
-          label: 'Comprehension Accuracy',
-          unit: '',
-          color: '#22c55e',
+          value: "87%",
+          label: "Comprehension Accuracy",
+          unit: "",
+          color: "#22c55e",
         },
         {
-          value: '8.5h',
-          label: 'Weekly Engagement Time',
-          unit: '',
-          color: '#8b5cf6',
+          value: "8.5h",
+          label: "Weekly Engagement Time",
+          unit: "",
+          color: "#8b5cf6",
         },
         {
-          value: '23%',
-          label: 'Skill Progression',
-          unit: '',
-          color: '#f97316',
+          value: "23%",
+          label: "Skill Progression",
+          unit: "",
+          color: "#f97316",
         },
       ]);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [hasChildren]);
 
-  if (loading) {
+  useEffect(() => {
+    loadPerformanceMetrics();
+  }, [loadPerformanceMetrics]);
+
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <View style={styles.card}>
@@ -132,7 +130,7 @@ export default function PerformanceMetrics() {
             <Ionicons name="warning-outline" size={16} color="#ef4444" />
           )}
         </View>
-        
+
         <View style={styles.metricsGrid}>
           {metrics.map((metric, index) => (
             <View key={index} style={styles.metricItem}>
@@ -140,15 +138,15 @@ export default function PerformanceMetrics() {
                 {metric.value}
               </Text>
               <Text style={styles.metricLabel}>{metric.label}</Text>
-              {metric.unit && <Text style={styles.metricUnit}>{metric.unit}</Text>}
+              {metric.unit && (
+                <Text style={styles.metricUnit}>{metric.unit}</Text>
+              )}
             </View>
           ))}
         </View>
-        
+
         {error && (
-          <Text style={styles.errorText}>
-            Metrics unavailable - {error}
-          </Text>
+          <Text style={styles.errorText}>Metrics unavailable - {error}</Text>
         )}
       </View>
     </View>
@@ -161,65 +159,65 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: "#f0fdf4",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#dcfce7',
+    borderColor: "#dcfce7",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
   },
   title: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginLeft: 8,
     flex: 1,
   },
   metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   metricItem: {
-    width: '48%',
-    alignItems: 'center',
+    width: "48%",
+    alignItems: "center",
     marginBottom: 20,
   },
   metricValue: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
   },
   metricLabel: {
     fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     lineHeight: 16,
   },
   metricUnit: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginTop: 2,
   },
   loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 20,
   },
   loadingText: {
     marginLeft: 8,
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   errorText: {
     fontSize: 12,
-    color: '#ef4444',
-    textAlign: 'center',
+    color: "#ef4444",
+    textAlign: "center",
     marginTop: 8,
   },
-}); 
+});

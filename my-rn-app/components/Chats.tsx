@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { api, ChatThread } from '../lib/api';
 
 interface Chat {
   id: string;
@@ -13,59 +14,75 @@ interface Chat {
 }
 
 export default function Chats() {
-  const teachers: Chat[] = [
-    {
-      id: '1',
-      name: 'Teacher Kim',
-      initials: 'TK',
-      lastMessage: 'Remember homework is due tomorrow',
-      timeAgo: '3h ago',
-      unreadCount: 1,
-      isOnline: true,
-    },
-  ];
+  const [threads, setThreads] = useState<ChatThread[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const parents: Chat[] = [
-    {
-      id: '1',
-      name: 'Mr. Wong',
-      initials: 'MW',
-      lastMessage: 'How is your child doing with spelling?',
-      timeAgo: '1d ago',
-      unreadCount: 2,
-    },
-    {
-      id: '2',
-      name: 'Mrs. Chen',
-      initials: 'MC',
-      lastMessage: 'Thanks for the reading tips!',
-      timeAgo: '2h ago',
-      isOnline: true,
-    },
-  ];
+  useEffect(() => {
+    loadChatThreads();
+  }, []);
 
-  const renderChatItem = (chat: Chat) => (
-    <TouchableOpacity key={chat.id} style={styles.chatItem}>
+  const loadChatThreads = async () => {
+    try {
+      const response = await api.getChatThreads();
+      setThreads(response.threads);
+    } catch (error) {
+      console.error('Failed to load chat threads:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#8b5cf6" />
+      </View>
+    );
+  }
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const handleChatPress = (threadName: string) => {
+    Alert.alert(
+      'Open Chat',
+      `Open conversation with ${threadName}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Open', onPress: () => {
+          // TODO: Navigate to chat screen
+          console.log('Opening chat with', threadName);
+        }}
+      ]
+    );
+  };
+
+  const renderChatItem = (thread: ChatThread) => (
+    <TouchableOpacity 
+      key={thread.id} 
+      style={styles.chatItem}
+      onPress={() => handleChatPress(thread.name)}
+    >
       <View style={styles.avatarContainer}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{chat.initials}</Text>
+          <Text style={styles.avatarText}>{getInitials(thread.name)}</Text>
         </View>
-        {chat.isOnline && <View style={styles.onlineIndicator} />}
       </View>
       
       <View style={styles.chatContent}>
         <View style={styles.chatHeader}>
-          <Text style={styles.chatName}>{chat.name}</Text>
-          <Text style={styles.timeAgo}>{chat.timeAgo}</Text>
+          <Text style={styles.chatName}>{thread.name}</Text>
+          <Text style={styles.timeAgo}>{new Date(thread.last_message_at).toLocaleString()}</Text>
         </View>
         <Text style={styles.lastMessage} numberOfLines={1}>
-          {chat.lastMessage}
+          {thread.last_message}
         </Text>
       </View>
       
-      {chat.unreadCount && (
+      {thread.unread_count > 0 && (
         <View style={styles.unreadBadge}>
-          <Text style={styles.unreadCount}>{chat.unreadCount}</Text>
+          <Text style={styles.unreadCount}>{thread.unread_count}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -79,16 +96,10 @@ export default function Chats() {
         <Text style={styles.newChatText}>New Chat</Text>
       </TouchableOpacity>
 
-      {/* Teachers Section */}
+      {/* Chat Threads */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Teachers</Text>
-        {teachers.map(renderChatItem)}
-      </View>
-
-      {/* Parents Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Parents</Text>
-        {parents.map(renderChatItem)}
+        <Text style={styles.sectionTitle}>Conversations</Text>
+        {threads.map(renderChatItem)}
       </View>
     </View>
   );
