@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     
 
     # OpenAI Configuration
-    OPENAI_API_KEY: str = "a97fe937957949079c02267ba32a86dd"
+    OPENAI_API_KEY: str = ""
     
     # Hugging Face Configuration
     HF_TOKEN: str = ""
